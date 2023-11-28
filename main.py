@@ -2,7 +2,7 @@
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
+from checkRunner import SeqCheck
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
@@ -11,6 +11,9 @@ def print_hi(name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
+    seqCheck = SeqCheck("scanme.nmap.org", 22)
+    seqCheck.prepare_request()
+    seqCheck.send_request()
+    seqCheck.analyze_response()
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
