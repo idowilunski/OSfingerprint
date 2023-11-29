@@ -83,5 +83,7 @@ def main():
         print(vars(fingerprint))
 
 
+#main
+
 if __name__ == "__main__":
     main()
