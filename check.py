@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 import logging
-
+from scapy.all import *
+from TcpFlags import TCPFlags
+from scapy.layers.inet import IP, TCP
+from datetime import datetime
 
 # Check is an abstract base class representing the interface for a "check" in OS-detection
 # Usage of inheriting class is expected to be: prepare_packet, send_packet, and analyze_response.
@@ -12,15 +15,45 @@ class Check:
         self._response_packet = None
         self._target_ip = target_ip
         self._target_port = target_port
+        self._isn = None
+        self._send_timestamp = None
+
+    def is_response_packet_empty(self) -> bool:
+        return not self._response_packet
+
+    def get_isn(self):
+        return self._isn
+
+    def get_send_time(self):
+        return self._send_timestamp
 
     @abstractmethod
-    def prepare_packet(self):
+    def prepare_probe_packet(self):
         pass
 
-    @abstractmethod
     def send_packet(self):
-        pass
+        try:
+            self._send_timestamp = datetime.now()
+            self._response_packet = sr1(self._packet, verbose=0, timeout=10)
+        except Exception as e:
+            self.logger.error(f"Error sending request: {e}")
+            raise
 
-    @abstractmethod
     def analyze_response_packet(self):
-        pass
+        if not self._response_packet:
+            self.logger.error("Response packet is empty")
+            return
+            # This is not an error, according to documentation it's expected to sometimes happen and should
+            # be treated downstream
+        if not self._response_packet.haslayer(TCP):
+            self.logger.error("Response is not a TCP packet")
+            # TODO - what exception to raise?
+            raise
+        if TCPFlags.SYN | TCPFlags.ACK == self._response_packet[TCP].flags:
+            self._isn = self._response_packet[TCP].seq # ISN - Initial sequence number
+            # TODO - add verification seq number makes sense? 32-bit number?
+            self.logger.info(f"Port {self._target_port} is open, ISN is: {self._isn}")
+        #elif TCPFlags.RST | TCPFlags.ACK == self._response_packet[TCP].flags:
+            #self.logger.info(f"Port {self._target_port} is closed")
+        #else:
+        #    self.logger.error("Unexpected response")
