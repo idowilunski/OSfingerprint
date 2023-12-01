@@ -2,8 +2,8 @@ import logging
 from scapy.all import *
 from check import Check
 from TcpFlags import TCPFlags
-
 from scapy.layers.inet import IP, TCP
+
 
 class SeqCheck(Check):
     def __init__(self, target_ip, target_port):
