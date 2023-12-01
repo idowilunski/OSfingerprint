@@ -12,8 +12,8 @@ def print_hi(name):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     seqCheck = SeqCheck("scanme.nmap.org", 22)
-    seqCheck.prepare_request()
-    seqCheck.send_request()
-    seqCheck.analyze_response()
+    seqCheck.prepare_packet()
+    seqCheck.send_packet()
+    seqCheck.analyze_response_packet()
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 
