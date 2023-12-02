@@ -1,5 +1,7 @@
+# TCP flags, as documented in https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+# Under : "TCP flags (F)"
 class TCPFlags:
-    FIN = 0x01  # Finish
+    FIN = 0x01  # Final
     SYN = 0x02  # Synchronize
     RST = 0x04  # Reset
     PSH = 0x08  # Push

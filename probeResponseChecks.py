@@ -4,7 +4,8 @@ from math import gcd, sqrt, log2
 import logging
 
 
-class ProbeResponseChecker:
+# This class is used for running all the tests on received packets and storing the results in the class variables
+class ResponseChecker:
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
@@ -29,19 +30,25 @@ class ProbeResponseChecker:
 
         return result_gcd
 
+    # TODO maybe move this out?
     # runs the sequence (SEQ) check -
     # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
     # This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
-    def run_check(self, probe_sender):
-        # TODO - for II and CI it will be 2
-        min_responses_num = 3
+    def run_check(self, probe_sender, icmp_sender, tcp_sender):
         self.calculate_gcd(probe_sender)
         self.calculate_isr(probe_sender)
         self.calculate_sp(probe_sender)
-        self.calculate_ss()
         self.calculate_ts(probe_sender)
-        self.calculate_ti_ci_ii(probe_sender, min_responses_num)
+
+        min_responses_num_ti = 3
+        self.calculate_ti_ci_ii(probe_sender, min_responses_num_ti)
+        min_responses_num_ii = 2
+        self.calculate_ti_ci_ii(icmp_sender, min_responses_num_ii)
+        min_responses_num_ci = 2
+        self.calculate_ti_ci_ii(tcp_sender, min_responses_num_ci)
+
+        self.calculate_ss()
 
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
     # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
@@ -182,19 +189,32 @@ class ProbeResponseChecker:
         # If none of the previous steps identify the generation algorithm, the test is omitted from the fingerprint.
         return None
 
-    # TODO - write the same function for the ICMP packet and the TCP probes t5-t7
     # TODO - CI is from the responses to the three TCP probes sent to a closed port: T5, T6, and T7.
-    #  for CI, at least two responses are required; and for II, both ICMP responses must be received.
     #  II comes from the ICMP responses to the two IE ping probes
-
-
 
     # Calculate the SS - Shared IP ID sequence Boolean (SS)
     # According to the following documentation, under "Shared IP ID sequence Boolean (SS)" :
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    def calculate_ss(self):
-        pass
-        # TODO - can't implement this yet since I didn't implement the ICMP requests
+    def calculate_ss(self, probe_sender, icmp_sender):
+        # This Boolean value records whether the target shares its IP ID sequence between the TCP and ICMP protocols.
+        # This test is only included if II is RI, BI, or I and TI is the same. If SS is included,
+        # the result is S if the sequence is shared and O (other) if it is not.
+        # That determination is made by the following algorithm:
+        # Let avg be the final TCP sequence response IP ID minus the first TCP sequence response IP ID,
+        # divided by the difference in probe numbers.
+        # TODO add UT for avg: If probe #1 returns an IP ID of 10,000 and probe #6 returns 20,000,
+        #  avg would be (20,000 − 10,000) / (6 − 1), which equals 2,000.
+        probes_checks = probe_sender.get_checks_list()
+        icmp_checks = icmp_sender.get_checks_list()
+
+        avg = (probes_checks[-1].get_ip_id() - probes_checks[0].get_ip_id()) / (6-1)
+
+        # If the first ICMP echo response IP ID is less than the final TCP sequence response IP ID plus three times avg,
+        # the SS result is S. Otherwise it is O.
+        if icmp_checks[0].get_ip_id() < (probes_checks[-1].get_ip_id() + (3 * avg)):
+            self._ss = 'S'
+        else:
+            self._ss = '0'
 
     # Calculate the GCD (the greatest common divisor) from the 32-bit ISN
     # According to the following documentation, under "TCP ISN greatest common divisor (GCD)":
@@ -230,7 +250,7 @@ class ProbeResponseChecker:
         # environment from the requirements.txt
         # TODO make it work somehow either with 3.7 or download 3.9
         if len(self._diff1) > 0:
-            self._gcd_value = ProbeResponseChecker.find_gcd_of_list(self._diff1)
+            self._gcd_value = ResponseChecker.find_gcd_of_list(self._diff1)
             self.logger.info(f"GCD: {self._gcd_value}")
 
         # TODO add UT that does the following:
