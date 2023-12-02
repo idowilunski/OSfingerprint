@@ -32,12 +32,16 @@ class ProbeResponseChecker:
     # runs the sequence (SEQ) check -
     # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
+    # This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
     def run_check(self, probe_sender):
+        # TODO - for II and CI it will be 2
+        min_responses_num = 3
         self.calculate_gcd(probe_sender)
         self.calculate_isr(probe_sender)
         self.calculate_sp(probe_sender)
         self.calculate_ss()
         self.calculate_ts(probe_sender)
+        self.calculate_ti_ci_ii(probe_sender, min_responses_num)
 
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
     # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
@@ -89,15 +93,15 @@ class ProbeResponseChecker:
 
         # The following ranges get special treatment because they correspond to the 2 Hz, 100 Hz, and 200 Hz frequencies
         # If the average increments per second falls within the range 0-5, TS is set to 1.
-        if average_value >= 0 and average_value <= 5.66:
+        if 0 <= average_value <= 5.66:
             self._ts = 1
             self.logger.info(f"TS: {self._ts}")
             return
-        elif average_value >= 70 and average_value <= 150:
+        elif 70 <= average_value <= 150:
             self._ts = 7
             self.logger.info(f"TS: {self._ts}")
             return
-        elif average_value >= 150 and average_value <= 350:
+        elif 150 <= average_value <= 350:
             self._ts = 8
             self.logger.info(f"TS: {self._ts}")
             return
@@ -108,14 +112,19 @@ class ProbeResponseChecker:
         self._ts = round(binary_log)
         self.logger.info(f"TS: {self._ts}")
 
-
-    # Calculate the TI result
+    # Calculate the TI/CI/II results
     # According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    def calculate_ti(self, probe_sender):
-        #  at least three responses must be received for the test to be included
+    # TODO - Note that difference values assume that the counter can wrap.
+    #  So the difference between an IP ID of 65,100 followed by a value of 700 is 1,136.
+    #  The difference between 2,000 followed by 1,100 is 64,636. Here are the calculation details:
+    #  we still didn't treat this case in our code
+    def calculate_ti_ci_ii(self, probe_sender, min_responses_num):
         count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
-        if count_non_empty_responses < 3:
+
+        #  at least three responses must be received for the test to be included for TI,
+        # at least 2 for CI, and 2 for II
+        if count_non_empty_responses < min_responses_num:
             self.logger.info(f"Not enough responses were received: {count_non_empty_responses}")
             return
 
@@ -129,6 +138,7 @@ class ProbeResponseChecker:
             difference = abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i])
             max_difference = max(max_difference, difference)
 
+        # TODO - make sure for ii it can't be returned.
         if max_difference >= 20000:
             return 'RD' # Random
 
@@ -172,7 +182,7 @@ class ProbeResponseChecker:
         # If none of the previous steps identify the generation algorithm, the test is omitted from the fingerprint.
         return None
 
-    # TODO - write the same function for the ICMP packet and the TCP probes t5-t7 
+    # TODO - write the same function for the ICMP packet and the TCP probes t5-t7
     # TODO - CI is from the responses to the three TCP probes sent to a closed port: T5, T6, and T7.
     #  for CI, at least two responses are required; and for II, both ICMP responses must be received.
     #  II comes from the ICMP responses to the two IE ping probes
