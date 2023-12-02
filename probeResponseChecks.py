@@ -37,13 +37,6 @@ class ResponseChecker:
 
         # TODO here also IP initial time-to-live (T) and IP initial time-to-live guess (TG)
         self.calculate_congestion_notification(ecn_sender)
-        self.calculate_quirks(ecn_sender)
-
-    def calculate_quirks(self, ecn_sender):
-        # TODO - seems like Q is calculated for each TCP packet, change impl to multiple
-        ecn_check = ecn_sender.get_checks_list()[0]
-        ecn_check.is_response_reserved_bit_set()
-        # TODO finish test according to TCP miscellaneous quirks (Q)
 
     def calculate_congestion_notification(self, ecn_sender):
         ecn_check = ecn_sender.get_checks_list()[0]

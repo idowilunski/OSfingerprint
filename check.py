@@ -25,6 +25,10 @@ class Check:
         self._response_ece = None
         self._response_cwr = None
         self._response_is_reserved = False
+        self._response_is_urgent = False
+
+    def is_response_reserved_bit_set(self) -> bool:
+        return self._response_is_urgent
 
     def is_response_reserved_bit_set(self) -> bool:
         return self._response_is_reserved
@@ -112,6 +116,9 @@ class Check:
 
             # Read the reserved field from the TCP packet
             self._response_is_reserved = bool(self._response_packet[TCP].res)
+
+            # Read the urgent field from the TCP packet
+            self._response_is_urgent = bool(self._response_packet[TCP].urg)
 
         # TODO remove magic numbers here
 
