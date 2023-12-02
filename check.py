@@ -18,12 +18,16 @@ class Check:
         self._isn = None
         self._send_timestamp = None
         self._response_tsval = None
+        self._ip_id = None
 
     def get_response_tsval(self):
         return self._response_tsval
 
     def is_response_packet_empty(self) -> bool:
         return not self._response_packet
+
+    def get_ip_id(self):
+        return self._ip_id
 
     def get_isn(self):
         return self._isn
@@ -69,3 +73,7 @@ class Check:
         matching_tuple = next((option for option in self._response_packet[TCP].options if option[0] == "Timestamp"), None)
         if matching_tuple:
             self._response_tsval = matching_tuple[1][0]
+
+        self._ip_id = self._response_packet[IP].id
+        self.logger.info(f"IP ID: {self._ip_id}")
+

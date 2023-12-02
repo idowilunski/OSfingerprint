@@ -4,7 +4,7 @@ from math import gcd, sqrt, log2
 import logging
 
 
-class SequenceCheck:
+class ProbeResponseChecker:
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
@@ -109,6 +109,76 @@ class SequenceCheck:
         self.logger.info(f"TS: {self._ts}")
 
 
+    # Calculate the TI result
+    # According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
+    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    def calculate_ti(self, probe_sender):
+        #  at least three responses must be received for the test to be included
+        count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
+        if count_non_empty_responses < 3:
+            self.logger.info(f"Not enough responses were received: {count_non_empty_responses}")
+            return
+
+        all_zero_ids = all(check.get_ip_id() != 0 for check in probe_sender.get_checks_list())
+        if all_zero_ids:
+            return 'Z'
+
+        max_difference = 0
+
+        for i in range(len(probe_sender.get_checks_list()) - 1):
+            difference = abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i])
+            max_difference = max(max_difference, difference)
+
+        if max_difference >= 20000:
+            return 'RD' # Random
+
+        # If all of the IP IDs are identical, the test is set to that value in hex.
+        are_all_identical = all(x == probe_sender.get_checks_list()[0] for x in probe_sender.get_checks_list())
+        if are_all_identical:
+            return hex(probe_sender.get_checks_list()[0])
+
+        for i in range(len(probe_sender.get_checks_list()) - 1):
+            difference = abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i])
+
+            # If any of the differences between two consecutive IDs exceeds 1,000, and is not evenly divisible by 256,
+            # the test's value is RI (random positive increments)
+            if difference > 1000 and difference % 256 != 0:
+                return 'RI'
+            # If the difference is evenly divisible by 256, it must be at least 256,000 to cause this RI result.
+            elif difference % 256 == 0 and difference >= 256000:
+                return 'RI'
+
+            # TODO - how do we verify if documentation means consecutive differences here or not?
+
+        # If all of the differences are divisible by 256 and no greater than 5,120, the test is set to BI
+        # (broken increment).
+        # This happens on systems like Microsoft Windows where the IP ID is sent in host byte order rather
+        # than network byte order. It works fine and isn't any sort of RFC violation,
+        # though it does give away host architecture details which can be useful to attackers.
+        all_divisible_by_256 = all(
+            abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i]) % 256 == 0
+            for i in range(len(probe_sender.get_checks_list()) - 1))
+
+        if all_divisible_by_256 and max_difference < 5120:
+            return 'BI'
+
+        # If all of the differences are less than ten, the value is I (incremental). We allow difference up to ten here
+        # (rather than requiring sequential ordering) because traffic from other hosts can cause sequence gaps.
+        all_less_than_ten = all(abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i]) < 10
+                                for i in range(len(probe_sender.get_checks_list()) - 1))
+        if all_less_than_ten:
+            return 'I'
+
+        # If none of the previous steps identify the generation algorithm, the test is omitted from the fingerprint.
+        return None
+
+    # TODO - write the same function for the ICMP packet and the TCP probes t5-t7 
+    # TODO - CI is from the responses to the three TCP probes sent to a closed port: T5, T6, and T7.
+    #  for CI, at least two responses are required; and for II, both ICMP responses must be received.
+    #  II comes from the ICMP responses to the two IE ping probes
+
+
+
     # Calculate the SS - Shared IP ID sequence Boolean (SS)
     # According to the following documentation, under "Shared IP ID sequence Boolean (SS)" :
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
@@ -150,7 +220,7 @@ class SequenceCheck:
         # environment from the requirements.txt
         # TODO make it work somehow either with 3.7 or download 3.9
         if len(self._diff1) > 0:
-            self._gcd_value = SequenceCheck.find_gcd_of_list(self._diff1)
+            self._gcd_value = ProbeResponseChecker.find_gcd_of_list(self._diff1)
             self.logger.info(f"GCD: {self._gcd_value}")
 
         # TODO add UT that does the following:
@@ -202,10 +272,7 @@ class SequenceCheck:
     # estimates how difficult it would be to predict the next ISN from the
     # known sequence of six probe responses
     def calculate_sp(self, probeSender):
-        # TODO make it one-liner
-        count_non_empty_responses = 0
-        for i in range(len(probeSender.get_checks_list())):
-            count_non_empty_responses += not probeSender.get_checks_list()[i].is_response_packet_empty()
+        count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probeSender.get_checks_list())
 
         # This test is only performed if at least four responses were seen.
         if count_non_empty_responses < 4:

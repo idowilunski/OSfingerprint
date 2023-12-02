@@ -13,7 +13,7 @@ class EcnPacket(Check):
     def prepare_packet(self):
         # TCP options are WScale (10), NOP, MSS (1460), SACK permitted, NOP, NOP. The probe is sent to an open port.
         options = [
-            ('WScale ', 10),
+            ('WScale', 10),
             ('NOP', None),
             ('MSS', 1460),
             ('SAckOK', ''),  # SACK permitted

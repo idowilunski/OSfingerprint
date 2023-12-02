@@ -1,5 +1,5 @@
 from probesSender import ProbesSender
-from seqCheck import SequenceCheck
+from probeResponseChecks import ProbeResponseChecker
 from EchoSender import *
 from EcnSender import *
 
@@ -29,8 +29,8 @@ if __name__ == '__main__':
     probe_sender.parse_response_packets()
 
     # Calculates GCD, SP, ISR, TS
-    seqCheck = SequenceCheck()
-    seqCheck.run_check(probe_sender)
+    probe_response_checker = ProbeResponseChecker()
+    probe_response_checker.run_check(probe_sender)
     #TODO - calculate SS, II
 
 #    optChecks = OptionsChecks()
@@ -48,10 +48,7 @@ if __name__ == '__main__':
 
 
 
-#    seqCheck = Packet4("scanme.nmap.org", 22)
-#    seqCheck.prepare_packet()
-#    seqCheck.send_packet()
-#    seqCheck.analyze_response_packet()
+#    probe_response_checker = Packet4("scanme.nmap.org", 22)
 
 # TODO - The probes are sent exactly 100 milliseconds apart so the total time taken is 500 ms
 # TODO - if we'll do the sending in one thread it'll do it better than current that waits for the response?
@@ -61,6 +58,6 @@ if __name__ == '__main__':
 # TI, II, TS, and SS. The next line, OPS contains the TCP options received for each of the probes (the test names are O1 through 06). Similarly, the WIN line contains window sizes for the probe responses (named W1 through W6). The final line related to these probes, T1, contains various test values for packet #1. Those results are for the R, DF, T, TG, W, S, A, F, O, RD, and Q tests. These tests are only reported for the first probe since they are almost always the same for each probe.
 #    for i in range(1,9000):
 #        print(i)
-#        seqCheck = SeqCheck("127.0.0.1", 63342)
-# seqCheck = SeqCheck("scanme.nmap.org", 22)
-#        seqCheck.run_check()
+#        probe_response_checker = ProbeResponseChecker("127.0.0.1", 63342)
+# probe_response_checker = probeResponseChecker("scanme.nmap.org", 22)
+#        probe_response_checker.run_check()
