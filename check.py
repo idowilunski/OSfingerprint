@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import logging
 from scapy.all import *
 from TcpFlags import TCPFlags
-from scapy.layers.inet import IP, TCP, ICMP
+from scapy.layers.inet import IP, TCP, ICMP, RandNum
 from datetime import datetime
 
 
@@ -16,7 +16,8 @@ class Check:
         self._response_packet = None
         self._target_ip = target_ip
         self._target_port = target_port
-        self._isn = None
+        self._response_seq_number = None
+        self._packet_seq_number = RandNum(0, 5000)
         self._send_timestamp = None
         self._response_tsval = None
         self._ip_id = None
@@ -26,8 +27,14 @@ class Check:
         self._response_cwr = None
         self._response_is_reserved = False
         self._response_is_urgent = False
+        self._packet_ack_number = RandNum(0, 5000)
+        self._response_ack_number = None
+        self._tcp_flags = None
 
-    def is_response_reserved_bit_set(self) -> bool:
+    def get_tcp_flags(self):
+        return self._tcp_flags
+
+    def is_response_urgent_bit_set(self) -> bool:
         return self._response_is_urgent
 
     def is_response_reserved_bit_set(self) -> bool:
@@ -51,8 +58,17 @@ class Check:
     def get_ip_id(self):
         return self._ip_id
 
-    def get_isn(self):
-        return self._isn
+    def get_response_ack_number(self):
+        return self._response_ack_number
+
+    def get_probe_ack_number(self):
+        return self._packet_ack_number
+
+    def get_probe_sequence_number(self):
+        return self._packet_seq_number
+
+    def get_response_sequence_number(self):
+        return self._response_seq_number
 
     def get_received_window_size(self):
         return self._window_size
@@ -90,10 +106,11 @@ class Check:
             # TODO - what exception to raise?
             raise
         if self._response_packet.haslayer(TCP):
+            self._tcp_flags = self._response_packet[TCP].flags
             if TCPFlags.SYN | TCPFlags.ACK == self._response_packet[TCP].flags:
-                self._isn = self._response_packet[TCP].seq  # ISN - Initial sequence number
+                self._response_seq_number = self._response_packet[TCP].seq  # ISN - Initial sequence number
                 # TODO - add verification seq number makes sense? 32-bit number?
-                self.logger.info(f"Port {self._target_port} is open, ISN is: {self._isn}")
+                self.logger.info(f"Port {self._target_port} is open, ISN is: {self._response_seq_number}")
             elif TCPFlags.RST | TCPFlags.ACK == self._response_packet[TCP].flags:
                 self.logger.info(f"Port {self._target_port} is closed")
             else:
@@ -119,6 +136,8 @@ class Check:
 
             # Read the urgent field from the TCP packet
             self._response_is_urgent = bool(self._response_packet[TCP].urg)
+
+            self._response_ack_number = self._response_packet[TCP].ack
 
         # TODO remove magic numbers here
 

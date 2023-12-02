@@ -15,11 +15,13 @@ class ProbePacket6(Check):
         options = [
             ('MSS', 265),
             ('SAckOK', ''),  # SACK permitted
-            ('Timestamp', (0xFFFFFFFF, 0)), # TSVal- 0xFFFFFFFF, TSecr- 0
+            ('Timestamp', (0xFFFFFFFF, 0)),  # TSVal- 0xFFFFFFFF, TSecr- 0
         ]
         window_size = 512
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S", options=options)
+        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     options=options)
 
 
 class ProbePacket5(Check):
@@ -34,13 +36,15 @@ class ProbePacket5(Check):
         options = [
             ('MSS', 536),
             ('SAckOK', ''),  # SACK permitted
-            ('Timestamp', (0xFFFFFFFF, 0)), # TSVal- 0xFFFFFFFF, TSecr- 0
-            ('WScale', 10), # Window scale
+            ('Timestamp', (0xFFFFFFFF, 0)),  # TSVal- 0xFFFFFFFF, TSecr- 0
+            ('WScale', 10),  # Window scale
             ('EOL', '')
         ]
         window_size = 16
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S", options=options)
+        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     options=options)
 
 
 class ProbePacket4(Check):
@@ -54,13 +58,15 @@ class ProbePacket4(Check):
         # window scale (10), EOL. The window field is 4.
         options = [
             ('SAckOK', ''),  # SACK permitted
-            ('Timestamp', (0xFFFFFFFF, 0)), # TSVal- 0xFFFFFFFF, TSecr- 0
-            ('WScale', 10), # Window scale
+            ('Timestamp', (0xFFFFFFFF, 0)),  # TSVal- 0xFFFFFFFF, TSecr- 0
+            ('WScale', 10),  # Window scale
             ('EOL', '')
         ]
         window_size = 4
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S", options=options)
+        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     options=options)
 
 
 class ProbePacket3(Check):
@@ -73,16 +79,18 @@ class ProbePacket3(Check):
         # Reference: Packet 3:   Timestamp (TSval: 0xFFFFFFFF; TSecr: 0), NOP,
         # NOP, window scale (5), NOP, MSS (640). The window field is 4.
         options = [
-            ('Timestamp', (0xFFFFFFFF, 0)), # TSVal- 0xFFFFFFFF, TSecr- 0
+            ('Timestamp', (0xFFFFFFFF, 0)),  # TSVal- 0xFFFFFFFF, TSecr- 0
             ('NOP', None),
             ('NOP', None),
-            ('WScale', 5), # Window scale
+            ('WScale', 5),  # Window scale
             ('NOP', None),
             ('MSS', 640)
         ]
         window_size = 4
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S", options=options)
+        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     options=options)
 
 
 class ProbePacket2(Check):
@@ -96,14 +104,16 @@ class ProbePacket2(Check):
         # timestamp (TSval: 0xFFFFFFFF; TSecr: 0), EOL. The window field is 63.
         options = [
             ('MSS', 1400),
-            ('WScale', 0), # Window scale
+            ('WScale', 0),  # Window scale
             ('SAckOK', ''),  # SACK permitted
-            ('Timestamp', (0xFFFFFFFF, 0)), # TSVal- 0xFFFFFFFF, TSecr- 0
-            ('EOL', '') # End of options list
+            ('Timestamp', (0xFFFFFFFF, 0)),  # TSVal- 0xFFFFFFFF, TSecr- 0
+            ('EOL', '')  # End of options list
         ]
         window_size = 63
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S", options=options)
+        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     options=options)
 
 
 class ProbePacket1(Check):
@@ -116,13 +126,14 @@ class ProbePacket1(Check):
         # Reference: Packet 1: window scale (10), NOP, MSS (1460), timestamp (TSval: 0xFFFFFFFF; TSecr: 0),
         # SACK permitted. The window field is 1.
         options = [
-            ('WScale', 10), # Window scale
+            ('WScale', 10),  # Window scale
             ('NOP', None),
             ('MSS', 1460),
-            ('Timestamp', (0xFFFFFFFF, 0)), # TSVal- 0xFFFFFFFF, TSecr- 0
-            ('SAckOK', '') # SACK permitted
+            ('Timestamp', (0xFFFFFFFF, 0)),  # TSVal- 0xFFFFFFFF, TSecr- 0
+            ('SAckOK', '')  # SACK permitted
         ]
         window_size = 1
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S", options=options)
-
+        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     options=options)

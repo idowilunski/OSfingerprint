@@ -32,7 +32,6 @@ class ResponseChecker:
         self.calculate_ti_ci_ii(tcp_close_port_sender, min_responses_num_ci)
 
         self.calculate_responsiveness(probe_sender)
-        self.calculate_ip_dont_fragment(probe_sender)
         self.calculate_dont_fragment_icmp(probe_sender)
 
         # TODO here also IP initial time-to-live (T) and IP initial time-to-live guess (TG)
@@ -77,12 +76,6 @@ class ResponseChecker:
     def calculate_responsiveness(self, probe_sender):
         pass
     # TODO - impl and document according to Responsiveness (R)
-
-    def calculate_ip_dont_fragment(self, probe_sender):
-        # TODO need to change how I define stuff, it needs to be per line somehow...
-    # Checked in the DB - seems like it's documented per packet of the T1...T7 packets, same for icmp
-        pass
-    # TODO get is_dont_fragment_bit_set from the checks[0]...[-1]
 
     # Calculate the TI/CI/II results
     # According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
