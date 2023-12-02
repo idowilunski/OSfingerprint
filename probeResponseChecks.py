@@ -29,6 +29,9 @@ class ResponseChecker:
         self._w4 = None
         self._w5 = None
         self._w6 = None
+        self._dfi = None
+        self._cc = None
+        self._q = None
         # TODO - combine these values somehow with Ido's fingerprint class
 
     @staticmethod
@@ -48,7 +51,7 @@ class ResponseChecker:
     # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
     # This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
-    def run_check(self, probe_sender, icmp_sender, tcp_sender):
+    def run_check(self, probe_sender, icmp_sender, tcp_open_port_sender, tcp_close_port_sender, ecn_sender):
         self.calculate_gcd(probe_sender)
         self.calculate_isr(probe_sender)
         self.calculate_sp(probe_sender)
@@ -59,11 +62,70 @@ class ResponseChecker:
         min_responses_num_ii = 2
         self.calculate_ti_ci_ii(icmp_sender, min_responses_num_ii)
         min_responses_num_ci = 2
-        self.calculate_ti_ci_ii(tcp_sender, min_responses_num_ci)
+        self.calculate_ti_ci_ii(tcp_close_port_sender, min_responses_num_ci)
 
         self.calculate_ss(probe_sender, icmp_sender)
         self.calculate_o(probe_sender)
         self.calculate_w(probe_sender)
+        self.calculate_responsiveness(probe_sender)
+        self.calculate_ip_dont_fragment(probe_sender)
+        self.calculate_dont_fragment_icmp(probe_sender)
+
+        # TODO here also IP initial time-to-live (T) and IP initial time-to-live guess (TG)
+        self.calculate_congestion_notification(ecn_sender)
+        self.calculate_quirks(ecn_sender)
+
+    def calculate_quirks(self, ecn_sender):
+        # TODO - seems like Q is calculated for each TCP packet, change impl to multiple
+        ecn_check = ecn_sender.get_checks_list()[0]
+        ecn_check.is_response_reserved_bit_set()
+        # TODO finish test according to TCP miscellaneous quirks (Q)
+
+    def calculate_congestion_notification(self, ecn_sender):
+        ecn_check = ecn_sender.get_checks_list()[0]
+        is_ece = ecn_check.is_response_ece_set()
+        is_cwr = ecn_check.is_response_cwr_set()
+        # Only the ECE bit is set (not CWR). This host supports ECN.
+        if is_ece and not is_cwr:
+            self._cc = 'Y'
+            return
+        # Neither of these two bits is set. The target does not support ECN.
+        if not is_ece and not is_cwr:
+            self._cc = 'N'
+            return
+        # Both bits are set. The target does not support ECN, but it echoes back what it thinks is a reserved bit.
+        if is_ece and is_cwr:
+            self._cc = 'S'
+            return
+        # The one remaining combination of these two bits (other).
+        return 'O'
+
+
+    def calculate_dont_fragment_icmp(self, icmp_sender):
+        # This is simply a modified version of the DF test that is used for the special IE probes. It compares results of the don't fragment bit for the two ICMP echo request probes sent. It has four possible values
+        checks_list = icmp_sender.get_checks_list()
+        if not checks_list[0].is_dont_fragment_bit_set() and not checks_list[1].is_dont_fragment_bit_set():
+            self._dfi = 'N'
+            return
+        # TODO get the probe values and not only the response values and compare to test "	Both responses echo the DF value of the probe." and return 'S'
+        # 	Both of the response DF bits are set. - 'Y'
+        if checks_list[0].is_dont_fragment_bit_set() and checks_list[1].is_dont_fragment_bit_set():
+            self._dfi = 'Y'
+            return
+
+        # The one remaining other combination—both responses have the DF bit toggled.
+        self._dfi = 'O'
+        return
+
+    def calculate_responsiveness(self, probe_sender):
+        pass
+    # TODO - impl and document according to Responsiveness (R)
+
+    def calculate_ip_dont_fragment(self, probe_sender):
+        # TODO need to change how I define stuff, it needs to be per line somehow...
+    # Checked in the DB - seems like it's documented per packet of the T1...T7 packets, same for icmp
+        pass
+    # TODO get is_dont_fragment_bit_set from the checks[0]...[-1]
 
     @staticmethod
     def format_option(option):

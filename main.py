@@ -2,7 +2,8 @@ from probesSender import ProbesSender
 from probeResponseChecks import ResponseChecker
 from EchoSender import *
 from EcnSender import *
-from TcpSender import *
+from TcpOpenPortSender import *
+from TcpClosePortSender import *
 
 if __name__ == '__main__':
     # TODO add code documentation for all classes
@@ -21,24 +22,29 @@ if __name__ == '__main__':
     ecn_sender = EcnSender("127.0.0.1", 63342)
     ecn_sender.prepare_packets()
 
-    tcp_sender = TcpSender("127.0.0.1", 63342, 22)
-    tcp_sender.prepare_packets()
+    tcp_open_port_sender = TcpOpenPortSender("127.0.0.1", 63342)
+    tcp_open_port_sender.prepare_packets()
+
+    tcp_close_port_sender = TcpClosePortSender("127.0.0.1", 22)
+    tcp_close_port_sender.prepare_packets()
 
     probe_sender.send_packets()
     # These ICMP probes follow immediately after the TCP sequence probes to ensure valid results
     # of the shared IP ID sequence number test (see the section called “Shared IP ID sequence Boolean (SS)”).
     echo_sender.send_packets()
     ecn_sender.send_packets()
-    tcp_sender.send_packets()
+    tcp_open_port_sender.send_packets()
+    tcp_close_port_sender.send_packets()
 
     probe_sender.parse_response_packets()
-    tcp_sender.parse_response_packets()
+    tcp_open_port_sender.parse_response_packets()
+    tcp_close_port_sender.parse_response_packets()
     ecn_sender.parse_response_packets()
     echo_sender.parse_response_packets()
 
     # Calculates GCD, SP, ISR, TS
     probe_response_checker = ResponseChecker()
-    probe_response_checker.run_check(probe_sender, echo_sender, tcp_sender)
+    probe_response_checker.run_check(probe_sender, echo_sender, tcp_open_port_sender, tcp_close_port_sender)
     #TODO - calculate SS, II
 
 #    optChecks = OptionsChecks()
