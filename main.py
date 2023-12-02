@@ -1,10 +1,13 @@
 from probesSender import ProbesSender
 from seqCheck import SequenceCheck
-#from optionsCheck import OptionsCheck
 from EchoSender import *
 from EcnSender import *
 
 if __name__ == '__main__':
+    # TODO add code documentation for all classes
+    # TODO - go over documentation make sure we CTOR and prepare_packets for all
+    #  packets. consider even removing prepare_packets call from outside, and call it in the init, in RAII
+
     # runs the sequence (SEQ) check -
     # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
@@ -12,7 +15,7 @@ if __name__ == '__main__':
     probe_sender.prepare_packets()
 
     echo_sender = EchoSender("127.0.0.1", 63342)
-    echo_sender.prepares_packets()
+    echo_sender.prepare_packets()
 
     ecn_sender = EcnSender("127.0.0.1", 63342)
     ecn_sender.prepare_packets()

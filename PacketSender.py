@@ -10,7 +10,7 @@ class PacketSender:
     def parse_response_packets(self):
         _ = [check.parse_response_packet() for check in self._checks_list]
 
-    def prepares_packets(self):
+    def prepare_packets(self):
         _ = [check.prepare_packet() for check in self._checks_list]
 
     def send_packets(self):

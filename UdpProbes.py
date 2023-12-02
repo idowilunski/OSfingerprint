@@ -8,8 +8,8 @@ from scapy.layers.inet import IP, UDP
 # Prepares U1 packet according to the following documentation, under "UDP (U1)":
 # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 class UdpProbe(Check):
-    def __init__(self, target_ip, target_port):
-        super().__init__(target_ip, target_port)
+    def __init__(self, target_ip, target_close_port):
+        super().__init__(target_ip, target_close_port)
 
     def prepare_packet(self):
         # . The character ‘C’ (0x43) is repeated 300 times for the data field.

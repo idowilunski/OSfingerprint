@@ -23,16 +23,29 @@ class EcnPacket(Check):
 
         # sequence number is random, window size field is three
         window_size = 3
+        #self._packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S",
+        #                                             options=options,
+        #                                             window=window_size,
+        #                                             #  ACK number is zero
+        #                                             ack=0,
+        #                                             # reserved bit which immediately precedes the CWR bit is set.
+        #                                             reserved=1,
+        #                                             # ECN CWR and ECE congestion control flags set.
+        #                                             tcpflags="CE",
+        #                                             # For an unrelated (to ECN) test, the urgent field value of 0xF7F5
+        #                                             # is used even though the urgent flag is not set.
+        #                                             urgptr=0xF7F5  # Urgent field value
+        #                                             )
+
         self._packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S",
                                                      options=options,
                                                      window=window_size,
-                                                     #  ACK number is zero
                                                      ack=0,
-                                                     # reserved bit which immediately precedes the CWR bit is set.
                                                      reserved=1,
-                                                     # ECN CWR and ECE congestion control flags set.
-                                                     tcpflags="CE",
-                                                     # For an unrelated (to ECN) test, the urgent field value of 0xF7F5
-                                                     # is used even though the urgent flag is not set.
-                                                     urgptr=0xF7F5  # Urgent field value
+                                                     #tcpflags="CE",
+                                                     #urgptr=0xF7F5  # Urgent Pointer
                                                      )
+        # TODO - found a bug in settings CE flag (ECN CWR and ECE congestion control flags)
+        # Urgent field value
+        # TODO - need to check if this makes sense
+        self._packet.getlayer(TCP).flags = 0x20  # 32
