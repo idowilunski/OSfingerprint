@@ -2,6 +2,7 @@ import logging
 from check import Check
 from scapy.layers.inet import IP, UDP
 
+
 # TODO - That response is then subjected to the R, DF, T, TG, IPL, UN, RIPL, RID, RIPCK, RUCK, and RUD tests.
 # TODO make sure it's sent to a closed port
 # Prepares U1 packet according to the following documentation, under "UDP (U1)":
