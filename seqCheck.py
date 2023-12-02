@@ -32,26 +32,26 @@ class SequenceCheck:
     # runs the sequence (SEQ) check -
     # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
-    def run_check(self, probeSender):
-        self.calculate_gcd(probeSender)
-        self.calculate_isr(probeSender)
-        self.calculate_sp(probeSender)
-        self.calculate_ss(probeSender)
-        self.calculate_ts(probeSender)
+    def run_check(self, probe_sender):
+        self.calculate_gcd(probe_sender)
+        self.calculate_isr(probe_sender)
+        self.calculate_sp(probe_sender)
+        self.calculate_ss()
+        self.calculate_ts(probe_sender)
 
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
     # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    def calculate_ts(self, probeSender):
+    def calculate_ts(self, probe_sender):
         timestamp_increments_per_sec = []
         # This one looks at the TCP timestamp option (if any) in responses to the SEQ probes.
         # It examines the TSval (first four bytes of the option) rather than the echoed TSecr (last four bytes) value.
 
-        for i in range(len(probeSender.get_checks_list()) - 1):
-            first_timestamp = probeSender.get_checks_list()[i].get_send_time()
+        for i in range(len(probe_sender.get_checks_list()) - 1):
+            first_timestamp = probe_sender.get_checks_list()[i].get_send_time()
             if not first_timestamp:
                 raise
-            second_timestamp = probeSender.get_checks_list()[i + 1].get_send_time()
+            second_timestamp = probe_sender.get_checks_list()[i + 1].get_send_time()
             if not second_timestamp:
                 raise
 
@@ -59,8 +59,8 @@ class SequenceCheck:
             if not second_timestamp > first_timestamp:
                 raise
 
-            first_tsval = probeSender.get_checks_list()[i].get_response_tsval()
-            second_tsval = probeSender.get_checks_list()[i + 1].get_response_tsval()
+            first_tsval = probe_sender.get_checks_list()[i].get_response_tsval()
+            second_tsval = probe_sender.get_checks_list()[i + 1].get_response_tsval()
 
             # If any of the responses have no timestamp option, TS is set to U (unsupported).
             if not first_tsval or not second_tsval:
@@ -150,7 +150,7 @@ class SequenceCheck:
         # environment from the requirements.txt
         # TODO make it work somehow either with 3.7 or download 3.9
         if len(self._diff1) > 0:
-            self._gcd_value = SeqCheck.find_gcd_of_list(self._diff1)
+            self._gcd_value = SequenceCheck.find_gcd_of_list(self._diff1)
             self.logger.info(f"GCD: {self._gcd_value}")
 
         # TODO add UT that does the following:

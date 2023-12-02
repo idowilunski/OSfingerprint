@@ -32,7 +32,7 @@ class Check:
         return self._send_timestamp
 
     @abstractmethod
-    def prepare_probe_packet(self):
+    def prepare_packet(self):
         pass
 
     def send_packet(self):

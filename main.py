@@ -1,17 +1,32 @@
 from probesSender import ProbesSender
 from seqCheck import SequenceCheck
+#from optionsCheck import OptionsCheck
+from EchoSender import *
 
 if __name__ == '__main__':
     # runs the sequence (SEQ) check -
     # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
-    sender = ProbesSender("127.0.0.1", 63342)
-    sender.prepare_probes()
-    sender.send_probes()
-    sender.parse_response_packets()
+    probe_sender = ProbesSender("127.0.0.1", 63342)
+    probe_sender.prepare_packets()
 
+    echo_sender = EchoSender("127.0.0.1", 63342)
+    echo_sender.prepares_packets()
+
+    probe_sender.send_packets()
+    # These ICMP probes follow immediately after the TCP sequence probes to ensure valid results
+    # of the shared IP ID sequence number test (see the section called “Shared IP ID sequence Boolean (SS)”).
+    echo_sender.send_packets()
+
+    probe_sender.parse_response_packets()
+
+    # Calculates GCD, SP, ISR, TS
     seqCheck = SequenceCheck()
-    seqCheck.run_check(sender)
+    seqCheck.run_check(probe_sender)
+    #TODO - calculate SS, II
+
+#    optChecks = OptionsChecks()
+#    optChecks.run_check(sender)
 
 
 
@@ -23,7 +38,7 @@ if __name__ == '__main__':
 
 
 #    seqCheck = Packet4("scanme.nmap.org", 22)
-#    seqCheck.prepare_probe_packet()
+#    seqCheck.prepare_packet()
 #    seqCheck.send_packet()
 #    seqCheck.analyze_response_packet()
 

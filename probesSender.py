@@ -1,7 +1,7 @@
 import logging
-from seqProbes import *
+from probePackets import *
 
-
+# TODO - remove code duplication between probes sender and echo sender
 # Generates 6 TCP probes, sends them and parses the response
 class ProbesSender:
     def __init__(self, target_ip, target_open_port):
@@ -17,20 +17,16 @@ class ProbesSender:
                              ProbePacket5(target_ip, target_open_port),
                              ProbePacket6(target_ip, target_open_port)]
 
-    # TODO make it one liners
     def parse_response_packets(self):
-        for check in self._checks_list:
-            check.parse_response_packet()
+            _ = [check.parse_response_packet() for check in self._checks_list]
 
-    def prepare_probes(self):
-        for check in self._checks_list:
-            check.prepare_probe_packet()
+    def prepare_packets(self):
+            _ = [check.prepare_packet() for check in self._checks_list]
 
-    def send_probes(self):
+    def send_packets(self):
         start_time = time.time()
 
-        for check in self._checks_list:
-            check.send_packet()
+        _ = [check.send_packet() for check in self._checks_list]
 
         end_time = time.time()
         total_time_taken = (end_time - start_time) * 1000  # Convert to milliseconds
