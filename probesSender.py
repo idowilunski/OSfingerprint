@@ -7,9 +7,6 @@ class ProbesSender:
     def __init__(self, target_ip, target_open_port):
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        self._target_ip = target_ip
-        self._target_open_port = target_open_port
-
         self._checks_list = [ProbePacket1(target_ip, target_open_port),
                              ProbePacket2(target_ip, target_open_port),
                              ProbePacket3(target_ip, target_open_port),
