@@ -1,32 +1,21 @@
 import math
-
-from seqProbes import ProbePacket1, ProbePacket2, ProbePacket3, ProbePacket4, ProbePacket5, ProbePacket6
+from probesSender import *
 from math import gcd, sqrt, log2
 import logging
 
-# TODO - impl also ICMP probes and TCP requests 1-7 sent to a close port and the response analysis
-#  in general, implement the entire section : IP ID sequence generation algorithm (TI, CI, II)
-# also this Shared IP ID sequence Boolean (SS)
 
-class SeqCheck:
-    def __init__(self, target_ip, target_port):
+class SequenceCheck:
+    def __init__(self):
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        self._target_ip = target_ip
-        self._target_port = target_port
-        self._packet1 = ProbePacket1(target_ip, target_port)
-        self._packet2 = ProbePacket2(target_ip, target_port)
-        self._packet3 = ProbePacket3(target_ip, target_port)
-        self._packet4 = ProbePacket4(target_ip, target_port)
-        self._packet5 = ProbePacket5(target_ip, target_port)
-        self._packet6 = ProbePacket6(target_ip, target_port)
 
-        self._checks_list = [self._packet1, self._packet2, self._packet3, self._packet4, self._packet5, self._packet6]
         self._gcd_value = 0
         self._seq_rates = []
         self._diff1 = [] # Differences list, diff1 is the name in the nmap documentation reference
         self._isr = None
         self._sp = None
+        self._ss = None
+        self._ts = None
 
     @staticmethod
     def find_gcd_of_list(num_list):
@@ -43,28 +32,101 @@ class SeqCheck:
     # runs the sequence (SEQ) check -
     # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
-    def run_check(self):
-        # Iterate over checks set, and for each - prepare a test probe, send it and analyze the output
-        for check in self._checks_list:
-            check.prepare_probe_packet()
-            check.send_packet()
-            check.analyze_response_packet()
+    def run_check(self, probeSender):
+        self.calculate_gcd(probeSender)
+        self.calculate_isr(probeSender)
+        self.calculate_sp(probeSender)
+        self.calculate_ss(probeSender)
+        self.calculate_ts(probeSender)
 
-        self.calculate_gcd()
-        self.calculate_isr()
-        self.calculate_sp()
+    # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
+    # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
+    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    def calculate_ts(self, probeSender):
+        timestamp_increments_per_sec = []
+        # This one looks at the TCP timestamp option (if any) in responses to the SEQ probes.
+        # It examines the TSval (first four bytes of the option) rather than the echoed TSecr (last four bytes) value.
+
+        for i in range(len(probeSender.get_checks_list()) - 1):
+            first_timestamp = probeSender.get_checks_list()[i].get_send_time()
+            if not first_timestamp:
+                raise
+            second_timestamp = probeSender.get_checks_list()[i + 1].get_send_time()
+            if not second_timestamp:
+                raise
+
+            # Since we're going by order, second send time is always after the first
+            if not second_timestamp > first_timestamp:
+                raise
+
+            first_tsval = probeSender.get_checks_list()[i].get_response_tsval()
+            second_tsval = probeSender.get_checks_list()[i + 1].get_response_tsval()
+
+            # If any of the responses have no timestamp option, TS is set to U (unsupported).
+            if not first_tsval or not second_tsval:
+                self._ts = "U"
+                self.logger.info(f"TS: {self._ts}")
+                return
+
+            # If any of the timestamp values are zero, TS is set to 0.
+            if first_tsval == 0 or second_tsval == 0:
+                self._ts = 0
+                self.logger.info(f"TS: {self._ts}")
+                return
+
+
+            # TODO - this is code duplication from isr calc, consider adding timestamp sending diff list in "self"
+            time_difference = (second_timestamp - first_timestamp).total_seconds()
+            tsval_difference = (second_tsval - first_tsval)
+
+            # It takes the difference between each consecutive TSval and divides that by the amount
+            # of time elapsed between Nmap sending the two probes which generated those responses
+            timestamp_increments_per_sec.append(tsval_difference / float(time_difference))
+
+        # The resultant value gives a rate of timestamp increments per second,
+        # Nmap computes the average increments per second over all consecutive probes
+        average_value = sum(timestamp_increments_per_sec) / len(timestamp_increments_per_sec)
+
+        # The following ranges get special treatment because they correspond to the 2 Hz, 100 Hz, and 200 Hz frequencies
+        # If the average increments per second falls within the range 0-5, TS is set to 1.
+        if average_value >= 0 and average_value <= 5.66:
+            self._ts = 1
+            self.logger.info(f"TS: {self._ts}")
+            return
+        elif average_value >= 70 and average_value <= 150:
+            self._ts = 7
+            self.logger.info(f"TS: {self._ts}")
+            return
+        elif average_value >= 150 and average_value <= 350:
+            self._ts = 8
+            self.logger.info(f"TS: {self._ts}")
+            return
+
+        # In all other cases, Nmap records the binary logarithm of the average increments per second,
+        # rounded to the nearest integer. Since most hosts use 1,000 Hz frequencies, A is a common result.
+        binary_log = math.log2(average_value)
+        self._ts = round(binary_log)
+        self.logger.info(f"TS: {self._ts}")
+
+
+    # Calculate the SS - Shared IP ID sequence Boolean (SS)
+    # According to the following documentation, under "Shared IP ID sequence Boolean (SS)" :
+    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    def calculate_ss(self):
+        pass
+        # TODO - can't implement this yet since I didn't implement the ICMP requests
 
     # Calculate the GCD (the greatest common divisor) from the 32-bit ISN
     # According to the following documentation, under "TCP ISN greatest common divisor (GCD)":
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # This test attempts to determine the smallest number by which the target host increments these values.
-    def calculate_gcd(self):
+    def calculate_gcd(self, probeSender):
         # TODO - make sure we've received here a non-empty response, and only if so, add it in the calculation?
-        for i in range(len(self._checks_list) - 1):
-            first_isn = self._checks_list[i].get_isn()
+        for i in range(len(probeSender.get_checks_list()) - 1):
+            first_isn = probeSender.get_checks_list()[i].get_isn()
             if not first_isn:
                 raise
-            second_isn = self._checks_list[i + 1].get_isn()
+            second_isn = probeSender.get_checks_list()[i + 1].get_isn()
             if not second_isn:
                 raise
 
@@ -101,12 +163,12 @@ class SeqCheck:
     # # According to the following documentation, under "TCP ISN counter rate (ISR)":
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # This value reports the average rate of increase for the returned TCP initial sequence number.
-    def calculate_isr(self):
-        for i in range(len(self._checks_list) - 1):
-            first_timestamp = self._checks_list[i].get_send_time()
+    def calculate_isr(self, probeSender):
+        for i in range(len(probeSender.get_checks_list()) - 1):
+            first_timestamp = probeSender.get_checks_list()[i].get_send_time()
             if not first_timestamp:
                 raise
-            second_timestamp = self._checks_list[i + 1].get_send_time()
+            second_timestamp = probeSender.get_checks_list()[i + 1].get_send_time()
             if not second_timestamp:
                 raise
 
@@ -139,11 +201,11 @@ class SeqCheck:
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # estimates how difficult it would be to predict the next ISN from the
     # known sequence of six probe responses
-    def calculate_sp(self):
+    def calculate_sp(self, probeSender):
         # TODO make it one-liner
         count_non_empty_responses = 0
-        for i in range(len(self._checks_list)):
-            count_non_empty_responses += not self._checks_list[i].is_response_packet_empty()
+        for i in range(len(probeSender.get_checks_list())):
+            count_non_empty_responses += not probeSender.get_checks_list()[i].is_response_packet_empty()
 
         # This test is only performed if at least four responses were seen.
         if count_non_empty_responses < 4:

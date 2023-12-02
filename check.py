@@ -17,6 +17,10 @@ class Check:
         self._target_port = target_port
         self._isn = None
         self._send_timestamp = None
+        self._response_tsval = None
+
+    def get_response_tsval(self):
+        return self._response_tsval
 
     def is_response_packet_empty(self) -> bool:
         return not self._response_packet
@@ -39,7 +43,7 @@ class Check:
             self.logger.error(f"Error sending request: {e}")
             raise
 
-    def analyze_response_packet(self):
+    def parse_response_packet(self):
         if not self._response_packet:
             self.logger.error("Response packet is empty")
             return
@@ -53,7 +57,15 @@ class Check:
             self._isn = self._response_packet[TCP].seq # ISN - Initial sequence number
             # TODO - add verification seq number makes sense? 32-bit number?
             self.logger.info(f"Port {self._target_port} is open, ISN is: {self._isn}")
-        #elif TCPFlags.RST | TCPFlags.ACK == self._response_packet[TCP].flags:
-            #self.logger.info(f"Port {self._target_port} is closed")
-        #else:
-        #    self.logger.error("Unexpected response")
+        elif TCPFlags.RST | TCPFlags.ACK == self._response_packet[TCP].flags:
+            self.logger.info(f"Port {self._target_port} is closed")
+        else:
+                self.logger.error("Unexpected response")
+
+        # TODO remove magic numbers here
+        # Check if the TCP layer has the Timestamp option (8)
+        # TODO - wasn't tested since I
+
+        matching_tuple = next((option for option in self._response_packet[TCP].options if option[0] == "Timestamp"), None)
+        if matching_tuple:
+            self._response_tsval = matching_tuple[1][0]
