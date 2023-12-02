@@ -2,6 +2,7 @@ from probesSender import ProbesSender
 from seqCheck import SequenceCheck
 #from optionsCheck import OptionsCheck
 from EchoSender import *
+from EcnSender import *
 
 if __name__ == '__main__':
     # runs the sequence (SEQ) check -
@@ -13,10 +14,14 @@ if __name__ == '__main__':
     echo_sender = EchoSender("127.0.0.1", 63342)
     echo_sender.prepares_packets()
 
+    ecn_sender = EcnSender("127.0.0.1", 63342)
+    ecn_sender.prepare_packets()
+
     probe_sender.send_packets()
     # These ICMP probes follow immediately after the TCP sequence probes to ensure valid results
     # of the shared IP ID sequence number test (see the section called “Shared IP ID sequence Boolean (SS)”).
     echo_sender.send_packets()
+    ecn_sender.send_packets()
 
     probe_sender.parse_response_packets()
 
@@ -27,6 +32,9 @@ if __name__ == '__main__':
 
 #    optChecks = OptionsChecks()
 #    optChecks.run_check(sender)
+
+# TODO - if response is received for ecn, run tests:
+#  If a response is received, the R, DF, T, TG, W, O, CC, and Q tests are performed and recorded.
 
 
 
