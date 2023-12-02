@@ -5,6 +5,7 @@ from TcpFlags import TCPFlags
 from scapy.layers.inet import IP, TCP
 from datetime import datetime
 
+
 # Check is an abstract base class representing the interface for a "check" in OS-detection
 # Usage of inheriting class is expected to be: prepare_packet, send_packet, and analyze_response.
 class Check:
@@ -19,6 +20,7 @@ class Check:
         self._send_timestamp = None
         self._response_tsval = None
         self._ip_id = None
+        self._window_size = None
 
     def get_response_tsval(self):
         return self._response_tsval
@@ -31,6 +33,16 @@ class Check:
 
     def get_isn(self):
         return self._isn
+
+    def get_received_window_size(self):
+        return self._window_size
+
+    def get_received_tcp_options(self):
+        try:
+            return self._response_packet[TCP].options
+        except Exception:
+            self.logger.error("This is not a TCP packet, cannot extract options!")
+            return None
 
     def get_send_time(self):
         return self._send_timestamp
@@ -58,22 +70,25 @@ class Check:
             # TODO - what exception to raise?
             raise
         if TCPFlags.SYN | TCPFlags.ACK == self._response_packet[TCP].flags:
-            self._isn = self._response_packet[TCP].seq # ISN - Initial sequence number
+            self._isn = self._response_packet[TCP].seq  # ISN - Initial sequence number
             # TODO - add verification seq number makes sense? 32-bit number?
             self.logger.info(f"Port {self._target_port} is open, ISN is: {self._isn}")
         elif TCPFlags.RST | TCPFlags.ACK == self._response_packet[TCP].flags:
             self.logger.info(f"Port {self._target_port} is closed")
         else:
-                self.logger.error("Unexpected response")
+            self.logger.error("Unexpected response")
 
         # TODO remove magic numbers here
         # Check if the TCP layer has the Timestamp option (8)
         # TODO - wasn't tested since I
 
-        matching_tuple = next((option for option in self._response_packet[TCP].options if option[0] == "Timestamp"), None)
+        matching_tuple = next((option for option in self._response_packet[TCP].options if option[0] == "Timestamp"),
+                              None)
         if matching_tuple:
             self._response_tsval = matching_tuple[1][0]
 
         self._ip_id = self._response_packet[IP].id
         self.logger.info(f"IP ID: {self._ip_id}")
+        self._window_size = packet[TCP].window
+        self.logger.info(f"Window size: {self._window_size}")
 

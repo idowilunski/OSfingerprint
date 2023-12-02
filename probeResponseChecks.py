@@ -17,6 +17,19 @@ class ResponseChecker:
         self._sp = None
         self._ss = None
         self._ts = None
+        self._o1 = None
+        self._o2 = None
+        self._o3 = None
+        self._o4 = None
+        self._o5 = None
+        self._o6 = None
+        self._w1 = None
+        self._w2 = None
+        self._w3 = None
+        self._w4 = None
+        self._w5 = None
+        self._w6 = None
+        # TODO - combine these values somehow with Ido's fingerprint class
 
     @staticmethod
     def find_gcd_of_list(num_list):
@@ -48,7 +61,70 @@ class ResponseChecker:
         min_responses_num_ci = 2
         self.calculate_ti_ci_ii(tcp_sender, min_responses_num_ci)
 
-        self.calculate_ss()
+        self.calculate_ss(probe_sender, icmp_sender)
+        self.calculate_o(probe_sender)
+        self.calculate_w(probe_sender)
+
+    @staticmethod
+    def format_option(option):
+        option_type, option_value = option
+        if option_type == "EOL":
+            return "L"
+        elif option_type == "NOP":
+            return "N"
+        elif option_type == "MSS":
+            return f"M{option_value:04X}"
+        elif option_type == "WS":
+            return f"W{option_value}"
+        elif option_type == "TS":
+            ts_val, ts_ecr = option_value
+            return f"T{int(ts_val != 0)}{int(ts_ecr != 0)}"
+        elif option_type == "SACK":
+            return "S"
+        else:
+            return f"Unknown Option - Type: {option_type}, Value: {option_value}"
+
+    # According to the following documentation, under "TCP initial window size (W, W1–W6)":
+    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    def calculate_w(self, probe_sender):
+        #  This test simply records the 16-bit TCP window size of the received packet
+        # While this test is generally named W, the six probes sent for sequence generation purposes are a special case.
+        # Those are inserted into a special WIN test line and take the names W1 through W6. The window size is recorded
+        # for all the sequence number probes because they differ in TCP MSS option values,
+        # which causes some operating systems to advertise a different window size.
+        # Despite the different names, each test is processed exactly the same way.
+        checks_list = probe_sender.get_checks_list()
+        self._w1 = checks_list[0].get_received_window_size()
+        self._w2 = checks_list[1].get_received_window_size()
+        self._w3 = checks_list[2].get_received_window_size()
+        self._w4 = checks_list[3].get_received_window_size()
+        self._w5 = checks_list[4].get_received_window_size()
+        self._w6 = checks_list[5].get_received_window_size()
+
+    # According to the following documentation, under "TCP options (O, O1–O6)":
+    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    def calculate_o(self, probe_sender):
+        #  If there are no TCP options in a response, the test will exist but the value string will be empty.
+        #  If no probe was returned, the test is omitted.
+        checks_list = probe_sender.get_checks_list()
+        if not checks_list[0].is_response_packet_empty():
+            self._o1 = ''.join(
+                [ResponseChecker.format_option(opt) for opt in checks_list[0].get_received_tcp_options()])
+        if not checks_list[1].is_response_packet_empty():
+            self._o2 = ''.join(
+                [ResponseChecker.format_option(opt) for opt in checks_list[1].get_received_tcp_options()])
+        if not checks_list[2].is_response_packet_empty():
+            self._o3 = ''.join(
+                [ResponseChecker.format_option(opt) for opt in checks_list[2].get_received_tcp_options()])
+        if not checks_list[3].is_response_packet_empty():
+            self._o4 = ''.join(
+                [ResponseChecker.format_option(opt) for opt in checks_list[3].get_received_tcp_options()])
+        if not checks_list[4].is_response_packet_empty():
+            self._o5 = ''.join(
+                [ResponseChecker.format_option(opt) for opt in checks_list[4].get_received_tcp_options()])
+        if not checks_list[5].is_response_packet_empty():
+            self._o6 = ''.join(
+                [ResponseChecker.format_option(opt) for opt in checks_list[5].get_received_tcp_options()])
 
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
     # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
