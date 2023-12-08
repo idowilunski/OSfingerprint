@@ -13,8 +13,16 @@ class U1:
         self._ripl = None #TODO
         self._rid = None #TODO
         self._ripck = None # TODO
-        self._ruck = None # TODO
+        self._ruck = self.calculate_ruck(u1_check)
         self._rud = self.calculate_rud(u1_check)
+
+    @staticmethod
+    def calculate_ruck(u1_check):
+        request_chksm = u1_check.get_request_checksum()
+        response_chksm = u1_check.get_response_checksum()
+        if request_chksm == response_chksm:
+            return 'G'
+        return response_chksm
 
     @staticmethod
     def calculate_rud(u1_check):

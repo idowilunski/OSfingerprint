@@ -31,6 +31,14 @@ class Check:
         self._packet_ack_number = RandNum(0, 5000)
         self._response_ack_number = None
         self._tcp_flags = None
+        self._response_checksum = None
+        self._request_checksum = None
+
+    def get_request_checksum(self):
+        return self._request_checksum
+
+    def get_response_checksum(self):
+        return self._response_checksum
 
     def is_icmp_response_code_zero(self):
         return self.icmp_response_code == 0
@@ -91,9 +99,17 @@ class Check:
     def prepare_packet(self):
         pass
 
+    # TODO - not sure if this func makes sense
+    @staticmethod
+    def calculate_udp_checksum(packet):
+        packet[UDP].chksum = 0
+        return UDP(packet[UDP]).chksum
+
     def send_packet(self):
         try:
             self._send_timestamp = datetime.now()
+            if self._packet.haslayer(UDP):
+                self._request_checksum = self.calculate_udp_checksum(self._packet)
             self._response_packet = sr1(self._packet, verbose=0, timeout=10)
         except Exception as e:
             self.logger.error(f"Error sending request: {e}")
@@ -113,6 +129,9 @@ class Check:
             self.logger.error("Response is not a TCP, UDP or ICMP packet")
             # TODO - what exception to raise?
             raise
+
+        if self._response_packet.haslayer(UDP):
+            self._response_checksum = self._response_packet[UDP].chksum
 
         if self._response_packet.haslayer(TCP):
             self._tcp_flags = self._response_packet[TCP].flags
