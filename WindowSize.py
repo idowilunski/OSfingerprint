@@ -31,7 +31,3 @@ class WindowSize:
         self._w4 = checks_list[3].get_received_window_size()
         self._w5 = checks_list[4].get_received_window_size()
         self._w6 = checks_list[5].get_received_window_size()
-
-    def format(self):
-        pass
-    #TODO impl format to WIN(W1=832C%W2=8340%W3=8200%W4=81D0%W5=81D0%W6=805C)

@@ -52,7 +52,3 @@ class Options:
             return "S"
         else:
             return f"Unknown Option - Type: {option_type}, Value: {option_value}"
-
-    def format(self):
-        pass
-    # TODO impl format to OPS(O1=M5B4NW0NNT00NNS%O2=M5B4NW0NNT00NNS%O3=M5B4NW0NNT00%O4=M5B4NW0NNT00NNS%O5=M5B4NW0NNT00NNS%O6=M5B4NNT00NNS)

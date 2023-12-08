@@ -1,27 +1,52 @@
+from CommonTests import *
+
+
 # TODO - somehow implement the same for t2, t3, ...t7 ?
 # TODO - ECN looks the same but
 class T1:
+    # TODO - move optiosn, t1, etc to one folder and packets and sender to other folder
+    # TODO - also add CTOR with values you can just add in, that way it'll come together with Ido's code of the db parsing
     def __init__(self, t1_check):
-        self._r = None #TODO impl responsiveness test
-        self._df = self.calculate_dont_fragment(t1_check)
-        self._w = None # TODO 
-        self._t = None # TODO impl IP initial time-to-live (T)
+        self._r = self.calculate_responsiveness(t1_check)
+        self._df = CommonTests.calculate_dont_fragment(t1_check)
+        self._w = None # TODO
+        self._t = self.calculate_initial_ttl(t1_check)
         self._tg = None # TODO impl IP initial time-to-live guess (TG)
         self._s = self.calculate_sequence_number(t1_check)
         self._a = self.calculate_ack_number(t1_check)
         self._f = self.calculate_tcp_flags(t1_check)
-        self._rd = None # TODO impl TCP RST data checksum (RD)
+        self._rd = CommonTests.calculate_rd(t1_check)
         self._q = self.calculate_quirks(t1_check)
+
+    @staticmethod
+    # TODO add calc that if responsiveness is 'N' don't compare the rest...?
+    def calculate_responsiveness(t1_check):
+        # TODO impl
+        if t1_check.is_response_packet_empty():
+            return 'N'
+        return 'Y'
+    # TODO somehow consider the following:
+    # To reduce this problem, reference fingerprints generally omit the R=Y test from the IE and U1 probes,
+    # which are the ones most likely to be dropped. In addition, if Nmap is missing a closed TCP port for a target,
+    # it will not set R=N for the T5, T6, or T7 tests even if the port it tries is non-responsive.
+    # After all, the lack of a closed port may be because they are all filtered.
+
+    # Calculate IP initial time-to-live (T)
+    # in documentation: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+    # Nmap determines how many hops away it is from the target by examining the ICMP port unreachable response to the U1 probe.
+    # That response includes the original IP packet, including the already-decremented TTL field, received by the target. By subtracting that value from our as-sent TTL, we learn how many hops away the machine is. Nmap then adds that hop distance to the probe response TTL to determine what the initial TTL was when that ICMP probe response packet was sent. That initial TTL value is stored in the fingerprint as the T result.
+    #
+    # Even though an eight-bit field like TTL can never hold values greater than 0xFF, this test occasionally results in values of 0x100 or higher. This occurs when a system (could be the source, a target, or a system in between) corrupts or otherwise fails to correctly decrement the TTL. It can also occur due to asymmetric routes.
+    #
+    # Nmap can also learn from the system interface and routing tables when the hop distance is zero (localhost scan) or one (on the same network segment). This value is used when Nmap prints the hop distance for the user, but it is not used for T result computation.
+    # TODO impl
+    @staticmethod
+    def calculate_initial_ttl(t1_check):
+        return ""
 
     @staticmethod
     def calculate_tcp_flags(t1_check):
         return t1_check.get_tcp_flags()
-
-    # TODO impl
-    @staticmethod
-    def calculate_ip_dont_fragment(t1_check):
-        pass
-    # TODO get is_dont_fragment_bit_set from the checks[0]...[-1]
 
     @staticmethod
     # Tested according to TCP acknowledgment number (A)

@@ -1,10 +1,12 @@
 import math
 from math import gcd, sqrt, log2
 import logging
+from probeResponseChecks import *
+from CommonTests import *
 
 
 class Sequence:
-    def __init__(self, probe_sender, icmp_sender):
+    def __init__(self, probe_sender, icmp_sender, close_ports_sender):
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
@@ -13,19 +15,16 @@ class Sequence:
         self._sp = self.calculate_sp(probe_sender)
         self._gcd = self.calculate_gcd(probe_sender)
         self._isr = self.calculate_isr(probe_sender)
-#        self._ti = calculate_ti()
-#        self._ii = calculate_ii()
-        #TODO make it somehow more generic so we can call it here?
+        self._ti = ResponseChecker.calculate_ti_ci_ii(probe_sender, 3)
+        self._rd = CommonTests.calculate_rd(probe_sender)
+        self._ci = ResponseChecker.calculate_ti_ci_ii(close_ports_sender, 2)
+        self._ii = ResponseChecker.calculate_ti_ci_ii(icmp_sender, 2)
         self._ss = self.calculate_ss(probe_sender, icmp_sender)
         self._ts = self.calculate_ts(probe_sender)
 
-    def format(self):
-        # TODO add here formatting func to format it like this: SEQ(SP=75-9B%GCD=1-6%ISR=92-9C%TI=I%II=I%SS=S%TS=0)
-        pass
-
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
     # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
-    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    # https://nmap.org/book/osdetect-methods.html#osdetect-p    robes-seq
     def calculate_ts(self, probe_sender):
         timestamp_increments_per_sec = []
         # This one looks at the TCP timestamp option (if any) in responses to the SEQ probes.

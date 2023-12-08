@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import logging
 from scapy.all import *
 from TcpFlags import TCPFlags
-from scapy.layers.inet import IP, TCP, ICMP, RandNum
+from scapy.layers.inet import IP, TCP, ICMP, UDP, RandNum
 from datetime import datetime
 
 
@@ -22,6 +22,7 @@ class Check:
         self._response_tsval = None
         self._ip_id = None
         self._window_size = None
+        self.icmp_response_code = None
         self.is_dont_fragment_bit_set = None
         self._response_ece = None
         self._response_cwr = None
@@ -30,6 +31,9 @@ class Check:
         self._packet_ack_number = RandNum(0, 5000)
         self._response_ack_number = None
         self._tcp_flags = None
+
+    def is_icmp_response_code_zero(self):
+        return self.icmp_response_code == 0
 
     def get_tcp_flags(self):
         return self._tcp_flags
@@ -95,16 +99,21 @@ class Check:
             self.logger.error(f"Error sending request: {e}")
             raise
 
+    # TODO missing UDP tests
     def parse_response_packet(self):
         if not self._response_packet:
             self.logger.error("Response packet is empty")
             return
             # This is not an error, according to documentation it's expected to sometimes happen and should
             # be treated downstream
-        if not self._response_packet.haslayer(TCP) and not self._response_packet.haslayer(ICMP):
-            self.logger.error("Response is not a TCP or ICMP packet")
+
+        if not self._response_packet.haslayer(TCP) \
+                and not self._response_packet.haslayer(ICMP) \
+                and not self._response_packet.haslayer(UDP):
+            self.logger.error("Response is not a TCP, UDP or ICMP packet")
             # TODO - what exception to raise?
             raise
+
         if self._response_packet.haslayer(TCP):
             self._tcp_flags = self._response_packet[TCP].flags
             if TCPFlags.SYN | TCPFlags.ACK == self._response_packet[TCP].flags:
@@ -121,11 +130,8 @@ class Check:
             if matching_tuple:
                 self._response_tsval = matching_tuple[1][0]
 
-            self._window_size = packet[TCP].window
+            self._window_size = self._response_packet[TCP].window
             self.logger.info(f"Window size: {self._window_size}")
-
-            self.is_dont_fragment_bit_set = bool(self._response_packet[IP].flags.DF)
-            self.logger.info(f"Dont fragment bit: {self.is_dont_fragment_bit_set}")
 
             # Read the CWR and ECE flags from the TCP packet
             self._response_cwr = bool(self._response_packet[TCP].flags & 0x80)  # 0x80 is the CWR flag
@@ -139,13 +145,17 @@ class Check:
 
             self._response_ack_number = self._response_packet[TCP].ack
 
-        # TODO remove magic numbers here
+        if self._response_packet.haslayer(IP):
+            self.is_dont_fragment_bit_set = bool(self._response_packet[IP].flags.DF)
+            self._ip_id = self._response_packet[IP].id
 
+            self.logger.info(f"Dont fragment bit: {self.is_dont_fragment_bit_set}")
+            self.logger.info(f"IP ID: {self._ip_id}")
+
+        # TODO remove magic numbers here
         fragmentation_needed = 3
         if self._response_packet.haslayer(ICMP):
             self.is_dont_fragment_bit_set = bool(self._response_packet[ICMP].type == fragmentation_needed)
+            self.icmp_response_code = self._response_packet[ICMP].type
 
-        # Common for both ICMP and TCP:
-        self._ip_id = self._response_packet[IP].id
-        self.logger.info(f"IP ID: {self._ip_id}")
 

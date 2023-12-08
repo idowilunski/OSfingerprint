@@ -24,15 +24,10 @@ class ResponseChecker:
     # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
     # This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
     def run_check(self, probe_sender, icmp_sender, tcp_open_port_sender, tcp_close_port_sender, ecn_sender):
-        min_responses_num_ti = 3
-        self.calculate_ti_ci_ii(probe_sender, min_responses_num_ti)
-        min_responses_num_ii = 2
-        self.calculate_ti_ci_ii(icmp_sender, min_responses_num_ii)
         min_responses_num_ci = 2
         self.calculate_ti_ci_ii(tcp_close_port_sender, min_responses_num_ci)
 
         self.calculate_responsiveness(probe_sender)
-        self.calculate_dont_fragment_icmp(probe_sender)
 
         # TODO here also IP initial time-to-live (T) and IP initial time-to-live guess (TG)
         self.calculate_congestion_notification(ecn_sender)
@@ -56,27 +51,11 @@ class ResponseChecker:
         # The one remaining combination of these two bits (other).
         return 'O'
 
-
-    def calculate_dont_fragment_icmp(self, icmp_sender):
-        # This is simply a modified version of the DF test that is used for the special IE probes. It compares results of the don't fragment bit for the two ICMP echo request probes sent. It has four possible values
-        checks_list = icmp_sender.get_checks_list()
-        if not checks_list[0].is_dont_fragment_bit_set() and not checks_list[1].is_dont_fragment_bit_set():
-            self._dfi = 'N'
-            return
-        # TODO get the probe values and not only the response values and compare to test "	Both responses echo the DF value of the probe." and return 'S'
-        # 	Both of the response DF bits are set. - 'Y'
-        if checks_list[0].is_dont_fragment_bit_set() and checks_list[1].is_dont_fragment_bit_set():
-            self._dfi = 'Y'
-            return
-
-        # The one remaining other combination—both responses have the DF bit toggled.
-        self._dfi = 'O'
-        return
-
     def calculate_responsiveness(self, probe_sender):
         pass
     # TODO - impl and document according to Responsiveness (R)
 
+    @staticmethod
     # Calculate the TI/CI/II results
     # According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
@@ -84,14 +63,13 @@ class ResponseChecker:
     #  So the difference between an IP ID of 65,100 followed by a value of 700 is 1,136.
     #  The difference between 2,000 followed by 1,100 is 64,636. Here are the calculation details:
     #  we still didn't treat this case in our code
-    def calculate_ti_ci_ii(self, probe_sender, min_responses_num):
+    def calculate_ti_ci_ii(probe_sender, min_responses_num):
         count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
 
         #  at least three responses must be received for the test to be included for TI,
         # at least 2 for CI, and 2 for II
         if count_non_empty_responses < min_responses_num:
-            self.logger.info(f"Not enough responses were received: {count_non_empty_responses}")
-            return
+            raise f"Not enough responses were received: {count_non_empty_responses}"
 
         all_zero_ids = all(check.get_ip_id() != 0 for check in probe_sender.get_checks_list())
         if all_zero_ids:
