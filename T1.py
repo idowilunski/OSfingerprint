@@ -11,7 +11,7 @@ class T1:
         self._df = CommonTests.calculate_dont_fragment(t1_check)
         self._t = self.calculate_initial_ttl(t1_check)
         self._tg = None # TODO impl IP initial time-to-live guess (TG)
-        self._w = None # TODO
+        self._w = CommonTests.calculate_window_size(t1_check)
         self._s = self.calculate_sequence_number(t1_check)
         self._a = self.calculate_ack_number(t1_check)
         self._f = self.calculate_tcp_flags(t1_check)

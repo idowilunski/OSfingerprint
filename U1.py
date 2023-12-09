@@ -18,7 +18,8 @@ class U1:
         self._rud = self.calculate_rud(u1_check)
 
     @staticmethod
-    def calculate_
+    def calculate_ripl(u1_check):
+        return u1_check.get_response_ip_len()
 
     # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # Integrity of returned probe UDP checksum (RUCK)

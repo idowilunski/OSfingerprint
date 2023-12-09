@@ -20,43 +20,59 @@ class Check:
         self._packet_seq_number = RandNum(0, 5000)
         self._send_timestamp = None
         self._response_tsval = None
-        self._ip_id = None
-        self._window_size = None
-        self.icmp_response_code = None
-        self.is_dont_fragment_bit_set = None
-        self._response_ece = None
-        self._response_cwr = None
-        self._response_is_reserved = False
-        self._response_is_urgent = False
         self._packet_ack_number = RandNum(0, 5000)
-        self._response_ack_number = None
-        self._tcp_flags = None
-        self._response_checksum = None
-        self._request_checksum = None
+
+    def get_response_ip_len(self):
+        if not self._response_packet.haslayer[IP]:
+            raise
+        return self._response_packet[IP].len
 
     def get_request_checksum(self):
-        return self._request_checksum
+        return self.calculate_udp_checksum(self._packet)
 
     def get_response_checksum(self):
-        return self._response_checksum
+        if not self._response_packet.haslayer(UDP):
+            raise "This function was incorrectly called on a non UDP packet"
+
+        return self._response_packet[UDP].chksum
 
     def is_icmp_response_code_zero(self):
-        return self.icmp_response_code == 0
+        if not self._response_packet.haslayer[ICMP]:
+            raise "This function was incorrectly called on a non ICMP packet"
+
+        return self._response_packet[ICMP].type == 0
 
     def get_tcp_flags(self):
-        return self._tcp_flags
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+
+        return self._response_packet[TCP].flags
 
     def is_response_urgent_bit_set(self) -> bool:
-        return self._response_is_urgent
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+
+        # Read the urgent field from the TCP packet
+        return bool(self._response_packet[TCP].urg)
 
     def is_response_reserved_bit_set(self) -> bool:
-        return self._response_is_reserved
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+
+        # Read the reserved field from the TCP packet
+        return bool(self._response_packet[TCP].res)
 
     def is_response_ece_set(self):
-        return self._response_ece
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+
+        return bool(self._response_packet[TCP].flags & 0x40) # 0x40 is the ECE flag
 
     def is_response_cwr_set(self):
-        return self._response_cwr
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+
+        return bool(self._response_packet[TCP].flags & 0x80) # 0x80 is the CWR flag
 
     def get_response_tsval(self):
         return self._response_tsval
@@ -65,13 +81,27 @@ class Check:
         return not self._response_packet
 
     def is_dont_fragment_bit_set(self):
-        return self.is_dont_fragment_bit_set
+        if not self._response_packet.haslayer(ICMP) and not self._response_packet.haslayer[IP]:
+            raise "This function was incorrectly called on a non IP, and non ICMP packet"
+
+        # TODO remove magic numbers here
+        fragmentation_needed = 3
+        if self._response_packet.haslayer(ICMP):
+            return bool(self._response_packet[ICMP].type == fragmentation_needed)
+
+        if self._response_packet.haslayer(IP):
+            return bool(self._response_packet[IP].flags.DF)
 
     def get_ip_id(self):
-        return self._ip_id
+        if not self._response_packet.haslayer(IP):
+            raise "This function was incorrectly called on a non IP packet"
+
+        return self._response_packet[IP].id
 
     def get_response_ack_number(self):
-        return self._response_ack_number
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+        return self._response_packet[TCP].ack
 
     def get_probe_ack_number(self):
         return self._packet_ack_number
@@ -83,7 +113,10 @@ class Check:
         return self._response_seq_number
 
     def get_received_window_size(self):
-        return self._window_size
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+
+        return self._response_packet[TCP].window
 
     def get_received_tcp_options(self):
         try:
@@ -109,7 +142,6 @@ class Check:
         try:
             self._send_timestamp = datetime.now()
             if self._packet.haslayer(UDP):
-                self._request_checksum = self.calculate_udp_checksum(self._packet)
             self._response_packet = sr1(self._packet, verbose=0, timeout=10)
         except Exception as e:
             self.logger.error(f"Error sending request: {e}")
@@ -130,11 +162,7 @@ class Check:
             # TODO - what exception to raise?
             raise
 
-        if self._response_packet.haslayer(UDP):
-            self._response_checksum = self._response_packet[UDP].chksum
-
         if self._response_packet.haslayer(TCP):
-            self._tcp_flags = self._response_packet[TCP].flags
             if TCPFlags.SYN | TCPFlags.ACK == self._response_packet[TCP].flags:
                 self._response_seq_number = self._response_packet[TCP].seq  # ISN - Initial sequence number
                 # TODO - add verification seq number makes sense? 32-bit number?
@@ -148,33 +176,5 @@ class Check:
                                   None)
             if matching_tuple:
                 self._response_tsval = matching_tuple[1][0]
-
-            self._window_size = self._response_packet[TCP].window
-            self.logger.info(f"Window size: {self._window_size}")
-
-            # Read the CWR and ECE flags from the TCP packet
-            self._response_cwr = bool(self._response_packet[TCP].flags & 0x80)  # 0x80 is the CWR flag
-            self._response_ece = bool(self._response_packet[TCP].flags & 0x40)  # 0x40 is the ECE flag
-
-            # Read the reserved field from the TCP packet
-            self._response_is_reserved = bool(self._response_packet[TCP].res)
-
-            # Read the urgent field from the TCP packet
-            self._response_is_urgent = bool(self._response_packet[TCP].urg)
-
-            self._response_ack_number = self._response_packet[TCP].ack
-
-        if self._response_packet.haslayer(IP):
-            self.is_dont_fragment_bit_set = bool(self._response_packet[IP].flags.DF)
-            self._ip_id = self._response_packet[IP].id
-
-            self.logger.info(f"Dont fragment bit: {self.is_dont_fragment_bit_set}")
-            self.logger.info(f"IP ID: {self._ip_id}")
-
-        # TODO remove magic numbers here
-        fragmentation_needed = 3
-        if self._response_packet.haslayer(ICMP):
-            self.is_dont_fragment_bit_set = bool(self._response_packet[ICMP].type == fragmentation_needed)
-            self.icmp_response_code = self._response_packet[ICMP].type
 
 

@@ -3,6 +3,10 @@ import binascii
 
 class CommonTests:
     @staticmethod
+    def calculate_window_size(check):
+        return check.get_received_window_size()
+
+    @staticmethod
     # TODO add calc that if responsiveness is 'N' don't compare the rest...?
     def calculate_responsiveness(check):
         if check.is_response_packet_empty():
