@@ -22,8 +22,15 @@ class Check:
 
     def get_response_ip_len(self):
         if not self._response_packet.haslayer[IP]:
-            raise
+            raise "This function was incorrectly called on a non IP packet"
+
         return self._response_packet[IP].len
+
+    def get_response_ip_id(self):
+        if not self._response_packet.haslayer[IP]:
+            raise "This function was incorrectly called on a non IP packet"
+
+        return self._response_packet[IP].id
 
     def get_request_checksum(self):
         return self.calculate_udp_checksum(self._packet)

@@ -5,17 +5,31 @@ from CommonTests import *
 # U1 probe is expected to receive in response an ICMP "port unreachable" message
 class U1:
     def __init__(self, u1_check):
-        # TODO add tst R
+        self._r = CommonTests.calculate_responsiveness(u1_check)
         self._df = CommonTests.calculate_dont_fragment(u1_check)
         self._t = None # TODO impl IP initial time-to-live (T)
         self._tg = None # TODO impl IP initial time-to-live guess (TG)
         self._ipl = self.calculate_ipl(u1_check)
         self._un = self.calculate_un(u1_check)
         self._ripl = self.calculate_ripl(u1_check)
-        self._rid = None #TODO
+        self._rid = self.calculate_rid(u1_check)
         self._ripck = self.calculate_ripck(u1_check)
         self._ruck = self.calculate_ruck(u1_check)
         self._rud = self.calculate_rud(u1_check)
+
+
+    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+    # Returned probe IP ID value (RID)
+    # The U1 probe has a static IP ID value of 0x1042. If that value is returned in the port unreachable message,
+    # the value G is stored for this test. Otherwise, the exact value returned is stored.
+    @staticmethod
+    def calculate_rid(u1_check):
+        response_id = u1_check.get_response_ip_id()
+        # TODO remove magic numbers
+        if response_id == 0x1042:
+            return 'G'
+
+        return response_id
 
     # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # Integrity of returned probe IP checksum value (RIPCK)

@@ -15,4 +15,5 @@ class UdpProbe(Check):
         # If the port is truly closed and there is no firewall in place,
         # Nmap expects to receive an ICMP port unreachable message in return.
         data_field = b'\x43' * 300
-        self._packet = IP(dst=self._target_ip) / UDP(dport=self._target_port) / data_field
+        ip_identification = 0x1042
+        self._packet = IP(dst=self._target_ip, id=ip_identification) / UDP(dport=self._target_port) / data_field
