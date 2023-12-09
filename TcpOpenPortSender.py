@@ -1,4 +1,3 @@
-import logging
 from TcpOpenPortPackets import *
 from PacketSender import *
 

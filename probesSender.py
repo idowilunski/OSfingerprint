@@ -1,4 +1,3 @@
-import logging
 from probePackets import *
 from PacketSender import *
 

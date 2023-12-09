@@ -1,9 +1,7 @@
-import logging
 from check import Check
 from scapy.layers.inet import IP, TCP
 
 
-# TODO - make sure the 7 lines are added to result : In each of these cases, a line is added to the fingerprint with results for the R, DF, T, TG, W, S, A, F, O, RD, and Q tests.
 # Prepares T2-T4 packets according to the following documentation, under "TCP (T2–T7)":
 # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 class TcpPacket2(Check):

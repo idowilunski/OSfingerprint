@@ -1,4 +1,3 @@
-import logging
 from UdpProbes import *
 from PacketSender import *
 

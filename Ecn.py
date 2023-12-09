@@ -1,3 +1,4 @@
+import CommonTests
 from CommonTests import *
 
 
@@ -8,6 +9,24 @@ class Ecn:
         self._t = None # TODO
         self._tg = None #TODO impl
         self._w = CommonTests.calculate_window_size(ecn_sender)
-        self._o = None # TODO
-        self._cc =None # TODO
-        self._q = None # TOOD
+        self._o = CommonTests.calculate_o(ecn_sender.get_checks_list()[0])
+        self._cc = self.calculate_congestion_notification(ecn_sender)
+        self._q = CommonTests.calculate_quirks(ecn_sender.get_checks_list()[0])
+
+    @staticmethod
+    def calculate_congestion_notification(ecn_sender):
+        ecn_check = ecn_sender.get_checks_list()[0]
+        is_ece = ecn_check.is_response_ece_set()
+        is_cwr = ecn_check.is_response_cwr_set()
+        # Only the ECE bit is set (not CWR). This host supports ECN.
+        if is_ece and not is_cwr:
+            return 'Y'
+        # Neither of these two bits is set. The target does not support ECN.
+        if not is_ece and not is_cwr:
+            return 'N'
+        # Both bits are set. The target does not support ECN, but it echoes back what it thinks is a reserved bit.
+        if is_ece and is_cwr:
+            return 'S'
+        # The one remaining combination of these two bits (other).
+        return 'O'
+

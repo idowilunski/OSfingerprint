@@ -1,4 +1,3 @@
-import logging
 from check import Check
 from scapy.layers.inet import IP, UDP
 

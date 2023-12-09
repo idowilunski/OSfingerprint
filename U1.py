@@ -1,4 +1,4 @@
-from scapy.layers.inet import IP, UDP, ICMP, RandNum
+from scapy.layers.inet import IP, UDP, ICMP
 from CommonTests import *
 
 
@@ -16,7 +16,6 @@ class U1:
         self._ripck = self.calculate_ripck(u1_check)
         self._ruck = self.calculate_ruck(u1_check)
         self._rud = self.calculate_rud(u1_check)
-
 
     # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # Returned probe IP ID value (RID)
@@ -47,7 +46,6 @@ class U1:
             return 'Z'
         #  Otherwise the result is I (invalid).
         return 'I'
-
 
     @staticmethod
     def calculate_ripl(u1_check):

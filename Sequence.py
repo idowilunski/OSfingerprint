@@ -1,10 +1,11 @@
-import math
-from math import gcd, sqrt, log2
-import logging
 from probeResponseChecks import *
 from CommonTests import *
 
 
+# runs the sequence (SEQ) check -
+# According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+# The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
+# This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
 class Sequence:
     def __init__(self, probe_sender, icmp_sender, close_ports_sender):
         logging.basicConfig(level=logging.INFO)
@@ -15,17 +16,18 @@ class Sequence:
         self._sp = self.calculate_sp(probe_sender)
         self._gcd = self.calculate_gcd(probe_sender)
         self._isr = self.calculate_isr(probe_sender)
-        self._ti = ResponseChecker.calculate_ti_ci_ii(probe_sender, 3)
+        self._ti = self.calculate_ti_ci_ii(probe_sender, 3)
         self._rd = CommonTests.calculate_rd(probe_sender)
-        self._ci = ResponseChecker.calculate_ti_ci_ii(close_ports_sender, 2)
-        self._ii = ResponseChecker.calculate_ti_ci_ii(icmp_sender, 2)
+        self._ci = self.calculate_ti_ci_ii(close_ports_sender, 2)
+        self._ii = self.calculate_ti_ci_ii(icmp_sender, 2)
         self._ss = self.calculate_ss(probe_sender, icmp_sender)
         self._ts = self.calculate_ts(probe_sender)
 
+    @staticmethod
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
     # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
     # https://nmap.org/book/osdetect-methods.html#osdetect-p    robes-seq
-    def calculate_ts(self, probe_sender):
+    def calculate_ts(probe_sender):
         timestamp_increments_per_sec = []
         # This one looks at the TCP timestamp option (if any) in responses to the SEQ probes.
         # It examines the TSval (first four bytes of the option) rather than the echoed TSecr (last four bytes) value.
@@ -79,10 +81,11 @@ class Sequence:
         binary_log = math.log2(average_value)
         return round(binary_log)
 
+    @staticmethod
     # Calculate the SS - Shared IP ID sequence Boolean (SS)
     # According to the following documentation, under "Shared IP ID sequence Boolean (SS)" :
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    def calculate_ss(self, probe_sender, icmp_sender):
+    def calculate_ss(probe_sender, icmp_sender):
         # This Boolean value records whether the target shares its IP ID sequence between the TCP and ICMP protocols.
         # This test is only included if II is RI, BI, or I and TI is the same. If SS is included,
         # the result is S if the sequence is shared and O (other) if it is not.
@@ -184,8 +187,7 @@ class Sequence:
         # environment from the requirements.txt
         # TODO make it work somehow either with 3.7 or download 3.9
         if len(self._diff1) > 0:
-            self._gcd_value = Sequence.find_gcd_of_list(self._diff1)
-            self.logger.info(f"GCD: {self._gcd_value}")
+            return Sequence.find_gcd_of_list(self._diff1)
 
         # TODO add UT that does the following:
         #  So the difference between 0x20000 followed by 0x15000 is 0xB000.
@@ -193,18 +195,89 @@ class Sequence:
         #  This test value then records
         #  the greatest common divisor of all those elements. This GCD is also used for calculating the SP result.
 
+    @staticmethod
+    # Calculate the TI/CI/II results
+    # According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
+    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    # TODO - Note that difference values assume that the counter can wrap.
+    #  So the difference between an IP ID of 65,100 followed by a value of 700 is 1,136.
+    #  The difference between 2,000 followed by 1,100 is 64,636. Here are the calculation details:
+    #  we still didn't treat this case in our code
+    def calculate_ti_ci_ii(probe_sender, min_responses_num):
+        count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
 
+        #  at least three responses must be received for the test to be included for TI,
+        # at least 2 for CI, and 2 for II
+        if count_non_empty_responses < min_responses_num:
+            raise f"Not enough responses were received: {count_non_empty_responses}"
+
+        all_zero_ids = all(check.get_ip_id() != 0 for check in probe_sender.get_checks_list())
+        if all_zero_ids:
+            return 'Z'
+
+        max_difference = 0
+
+        for i in range(len(probe_sender.get_checks_list()) - 1):
+            difference = abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i])
+            max_difference = max(max_difference, difference)
+
+        # TODO - make sure for ii it can't be returned.
+        if max_difference >= 20000:
+            return 'RD' # Random
+
+        # If all of the IP IDs are identical, the test is set to that value in hex.
+        are_all_identical = all(x == probe_sender.get_checks_list()[0] for x in probe_sender.get_checks_list())
+        if are_all_identical:
+            return hex(probe_sender.get_checks_list()[0])
+
+        for i in range(len(probe_sender.get_checks_list()) - 1):
+            difference = abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i])
+
+            # If any of the differences between two consecutive IDs exceeds 1,000, and is not evenly divisible by 256,
+            # the test's value is RI (random positive increments)
+            if difference > 1000 and difference % 256 != 0:
+                return 'RI'
+            # If the difference is evenly divisible by 256, it must be at least 256,000 to cause this RI result.
+            elif difference % 256 == 0 and difference >= 256000:
+                return 'RI'
+
+            # TODO - how do we verify if documentation means consecutive differences here or not?
+
+        # If all of the differences are divisible by 256 and no greater than 5,120, the test is set to BI
+        # (broken increment).
+        # This happens on systems like Microsoft Windows where the IP ID is sent in host byte order rather
+        # than network byte order. It works fine and isn't any sort of RFC violation,
+        # though it does give away host architecture details which can be useful to attackers.
+        all_divisible_by_256 = all(
+            abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i]) % 256 == 0
+            for i in range(len(probe_sender.get_checks_list()) - 1))
+
+        if all_divisible_by_256 and max_difference < 5120:
+            return 'BI'
+
+        # If all of the differences are less than ten, the value is I (incremental). We allow difference up to ten here
+        # (rather than requiring sequential ordering) because traffic from other hosts can cause sequence gaps.
+        all_less_than_ten = all(abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i]) < 10
+                                for i in range(len(probe_sender.get_checks_list()) - 1))
+        if all_less_than_ten:
+            return 'I'
+
+        # If none of the previous steps identify the generation algorithm, the test is omitted from the fingerprint.
+        return None
+
+    # TODO - CI is from the responses to the three TCP probes sent to a closed port: T5, T6, and T7.
+    #  II comes from the ICMP responses to the two IE ping probes
 
     # Calculate ISR (ISN counter rate)
     # # According to the following documentation, under "TCP ISN counter rate (ISR)":
     # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     # This value reports the average rate of increase for the returned TCP initial sequence number.
-    def calculate_isr(self, probeSender):
-        for i in range(len(probeSender.get_checks_list()) - 1):
-            first_timestamp = probeSender.get_checks_list()[i].get_send_time()
+    def calculate_isr(self, probe_sender):
+        for i in range(len(probe_sender.get_checks_list()) - 1):
+            first_timestamp = probe_sender.get_checks_list()[i].get_send_time()
             if not first_timestamp:
                 raise
-            second_timestamp = probeSender.get_checks_list()[i + 1].get_send_time()
+            second_timestamp = probe_sender.get_checks_list()[i + 1].get_send_time()
             if not second_timestamp:
                 raise
 

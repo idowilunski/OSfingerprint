@@ -16,9 +16,13 @@ class WindowSize:
         self.logger = logging.getLogger(__name__)
 
         checks_list = probe_sender.get_checks_list()
-        self._w1 = checks_list[0].get_received_window_size()
-        self._w2 = checks_list[1].get_received_window_size()
-        self._w3 = checks_list[2].get_received_window_size()
-        self._w4 = checks_list[3].get_received_window_size()
-        self._w5 = checks_list[4].get_received_window_size()
-        self._w6 = checks_list[5].get_received_window_size()
+        self._w1 = self.calculate_w(checks_list[0])
+        self._w2 = self.calculate_w(checks_list[1])
+        self._w3 = self.calculate_w(checks_list[2])
+        self._w4 = self.calculate_w(checks_list[3])
+        self._w5 = self.calculate_w(checks_list[4])
+        self._w6 = self.calculate_w(checks_list[5])
+
+    @staticmethod
+    def calculate_w(check):
+        return check.get_received_window_size()
