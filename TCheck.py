@@ -1,20 +1,20 @@
 from CommonTests import *
 
 
-# TODO - TODO impl t2...t7 as well
-class T1:
-    def __init__(self, t1_check):
-        self._r = CommonTests.calculate_responsiveness(t1_check)
-        self._df = CommonTests.calculate_dont_fragment(t1_check)
-        self._t = self.calculate_initial_ttl(t1_check)
+
+class TCheck:
+    def __init__(self, t_check):
+        self._r = CommonTests.calculate_responsiveness(t_check)
+        self._df = CommonTests.calculate_dont_fragment(t_check)
+        self._t = self.calculate_initial_ttl(t_check)
         self._tg = None # TODO impl IP initial time-to-live guess (TG)
-        self._w = CommonTests.calculate_window_size(t1_check)
-        self._s = self.calculate_sequence_number(t1_check)
-        self._a = self.calculate_ack_number(t1_check)
-        self._f = self.calculate_tcp_flags(t1_check)
-        self._o = CommonTests.calculate_o(t1_check)
-        self._rd = CommonTests.calculate_rd(t1_check)
-        self._q = CommonTests.calculate_quirks(t1_check)
+        self._w = CommonTests.calculate_window_size(t_check)
+        self._s = self.calculate_sequence_number(t_check)
+        self._a = self.calculate_ack_number(t_check)
+        self._f = self.calculate_tcp_flags(t_check)
+        self._o = CommonTests.calculate_o(t_check)
+        self._rd = CommonTests.calculate_rd(t_check)
+        self._q = CommonTests.calculate_quirks(t_check)
 
     # TODO somehow consider the following:
     # To reduce this problem, reference fingerprints generally omit the R=Y test from the IE and U1 probes,
@@ -38,21 +38,21 @@ class T1:
     # but it is not used for T result computation.
     # TODO impl
     @staticmethod
-    def calculate_initial_ttl(t1_check):
+    def calculate_initial_ttl(t_check):
         return ""
 
     @staticmethod
-    def calculate_tcp_flags(t1_check):
-        return t1_check.get_tcp_flags()
+    def calculate_tcp_flags(t_check):
+        return t_check.get_tcp_flags()
 
     @staticmethod
     # Tested according to TCP acknowledgment number (A)
     # in documentation: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # This test is the same as S except that it tests how the acknowledgment number in the response compared
     # to the sequence number in the respective probe.
-    def calculate_ack_number(t1_check):
-        response_ack_num = t1_check.get_response_ack_number()
-        probe_seq_num = t1_check.get_probe_sequence_number()
+    def calculate_ack_number(t_check):
+        response_ack_num = t_check.get_response_ack_number()
+        probe_seq_num = t_check.get_probe_sequence_number()
 
         # Acknowledgment number is zero.
         if response_ack_num == 0:
@@ -72,9 +72,9 @@ class T1:
     # This test examines the 32-bit sequence number field in the TCP header.
     # Rather than record the field value as some other tests do,
     # this one examines how it compares to the TCP acknowledgment number from the probe that elicited the response.
-    def calculate_sequence_number(t1_check):
-        probe_ack_num = t1_check.get_probe_ack_number()
-        response_seq_num = t1_check.get_response_sequence_number()
+    def calculate_sequence_number(t_check):
+        probe_ack_num = t_check.get_probe_ack_number()
+        response_seq_num = t_check.get_response_sequence_number()
 
         # Sequence number is zero.
         if response_seq_num == 0:

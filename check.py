@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import logging
 from scapy.all import *
 from TcpFlags import TCPFlags
 from scapy.layers.inet import IP, TCP, ICMP, UDP, RandNum
@@ -165,7 +164,6 @@ class Check:
             self.logger.error(f"Error sending request: {e}")
             raise
 
-    # TODO missing UDP tests
     def parse_response_packet(self):
         if not self._response_packet:
             self.logger.error("Response packet is empty")
@@ -176,9 +174,7 @@ class Check:
         if not self._response_packet.haslayer(TCP) \
                 and not self._response_packet.haslayer(ICMP) \
                 and not self._response_packet.haslayer(UDP):
-            self.logger.error("Response is not a TCP, UDP or ICMP packet")
-            # TODO - what exception to raise?
-            raise
+            raise "Response is not a TCP, UDP or ICMP packet"
 
         if self._response_packet.haslayer(TCP):
             if TCPFlags.SYN | TCPFlags.ACK == self._response_packet[TCP].flags:
@@ -186,7 +182,7 @@ class Check:
             elif TCPFlags.RST | TCPFlags.ACK == self._response_packet[TCP].flags:
                 self.logger.info(f"Port {self._target_port} is closed")
             else:
-                self.logger.error("Unexpected response")
+                raise "Unexpected response to TCP packet"
 
 
 
