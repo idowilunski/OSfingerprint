@@ -11,11 +11,29 @@ class U1:
         self._tg = None # TODO impl IP initial time-to-live guess (TG)
         self._ipl = self.calculate_ipl(u1_check)
         self._un = self.calculate_un(u1_check)
-        self._ripl = None #TODO
+        self._ripl = self.calculate_ripl(u1_check)
         self._rid = None #TODO
-        self._ripck = None # TODO
+        self._ripck = self.calculate_ripck(u1_check)
         self._ruck = self.calculate_ruck(u1_check)
         self._rud = self.calculate_rud(u1_check)
+
+    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+    # Integrity of returned probe IP checksum value (RIPCK)
+    # The IP checksum is one value that we don't expect to remain the same when returned in a port unreachable message
+    @staticmethod
+    def calculate_ripck(u1_check):
+        request_chksm = u1_check.get_request_checksum()
+        response_chksm = u1_check.get_response_checksum()
+        #  The checksum we receive should match the enclosing IP packet.
+        #  If it does, the value G (good) is stored for this test.
+        if request_chksm == response_chksm:
+            return 'G'
+        #  If the returned value is zero, then Z is stored.
+        if response_chksm == 0:
+            return 'Z'
+        #  Otherwise the result is I (invalid).
+        return 'I'
+
 
     @staticmethod
     def calculate_ripl(u1_check):

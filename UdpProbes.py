@@ -3,8 +3,6 @@ from check import Check
 from scapy.layers.inet import IP, UDP
 
 
-# TODO - That response is then subjected to the R, DF, T, TG, IPL, UN, RIPL, RID, RIPCK, RUCK, and RUD tests.
-# TODO make sure it's sent to a closed port
 # Prepares U1 packet according to the following documentation, under "UDP (U1)":
 # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 class UdpProbe(Check):
@@ -12,7 +10,7 @@ class UdpProbe(Check):
         super().__init__(target_ip, target_close_port)
 
     def prepare_packet(self):
-        # . The character ‘C’ (0x43) is repeated 300 times for the data field.
+        # The character ‘C’ (0x43) is repeated 300 times for the data field.
         # The IP ID value is set to 0x1042 for operating systems which allow us to set this.
         # If the port is truly closed and there is no firewall in place,
         # Nmap expects to receive an ICMP port unreachable message in return.
