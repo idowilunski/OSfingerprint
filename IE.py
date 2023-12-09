@@ -1,10 +1,10 @@
-# TODO impl
-
+from CommonTests import *
 
 class IE:
     def __init__(self, icmp_sender):
-        self._cd = self.calculate_cd(icmp_sender)
+        self._r = CommonTests.calculate_responsiveness(icmp_sender)
         self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
+        self._cd = self.calculate_cd(icmp_sender)
         self.t = None #TODO impl
         self._tg = None  # TODO impl IP initial time-to-live guess (TG)
 

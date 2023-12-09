@@ -3,6 +3,13 @@ import binascii
 
 class CommonTests:
     @staticmethod
+    # TODO add calc that if responsiveness is 'N' don't compare the rest...?
+    def calculate_responsiveness(check):
+        if check.is_response_packet_empty():
+            return 'N'
+        return 'Y'
+
+    @staticmethod
     # TODO - I'm not sure when we encounter RST packets ? what's the probe sender here, the closed ports?
     # Calculate te RD - TCP RST data checksum (RD)
     # According to the following documentation, under "TCP RST data checksum (RD)" :

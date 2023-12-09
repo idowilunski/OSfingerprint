@@ -27,8 +27,6 @@ class ResponseChecker:
         min_responses_num_ci = 2
         self.calculate_ti_ci_ii(tcp_close_port_sender, min_responses_num_ci)
 
-        self.calculate_responsiveness(probe_sender)
-
         # TODO here also IP initial time-to-live (T) and IP initial time-to-live guess (TG)
         self.calculate_congestion_notification(ecn_sender)
 

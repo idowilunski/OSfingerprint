@@ -5,11 +5,12 @@ from CommonTests import *
 # U1 probe is expected to receive in response an ICMP "port unreachable" message
 class U1:
     def __init__(self, u1_check):
+        # TODO add tst R
         self._df = CommonTests.calculate_dont_fragment(u1_check)
         self._t = None # TODO impl IP initial time-to-live (T)
         self._tg = None # TODO impl IP initial time-to-live guess (TG)
         self._ipl = self.calculate_ipl(u1_check)
-        self._un = self.calculate_un(u1_check) # TODO
+        self._un = self.calculate_un(u1_check)
         self._ripl = None #TODO
         self._rid = None #TODO
         self._ripck = None # TODO
@@ -17,12 +18,17 @@ class U1:
         self._rud = self.calculate_rud(u1_check)
 
     @staticmethod
+    def calculate_
+
+    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+    # Integrity of returned probe UDP checksum (RUCK)
+    @staticmethod
     def calculate_ruck(u1_check):
         request_chksm = u1_check.get_request_checksum()
         response_chksm = u1_check.get_response_checksum()
-        if request_chksm == response_chksm:
-            return 'G'
-        return response_chksm
+        # The UDP header checksum value should be returned exactly as it was sent. If it is, G is recorded for this
+        # test. Otherwise, the value actually returned is recorded.
+        return 'G' if request_chksm == response_chksm else response_chksm
 
     @staticmethod
     def calculate_rud(u1_check):

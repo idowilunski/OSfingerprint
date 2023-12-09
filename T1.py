@@ -7,24 +7,18 @@ class T1:
     # TODO - move optiosn, t1, etc to one folder and packets and sender to other folder
     # TODO - also add CTOR with values you can just add in, that way it'll come together with Ido's code of the db parsing
     def __init__(self, t1_check):
-        self._r = self.calculate_responsiveness(t1_check)
+        self._r = CommonTests.calculate_responsiveness(t1_check)
         self._df = CommonTests.calculate_dont_fragment(t1_check)
-        self._w = None # TODO
         self._t = self.calculate_initial_ttl(t1_check)
         self._tg = None # TODO impl IP initial time-to-live guess (TG)
+        self._w = None # TODO
         self._s = self.calculate_sequence_number(t1_check)
         self._a = self.calculate_ack_number(t1_check)
         self._f = self.calculate_tcp_flags(t1_check)
+        self._o = None # TODO
         self._rd = CommonTests.calculate_rd(t1_check)
         self._q = self.calculate_quirks(t1_check)
 
-    @staticmethod
-    # TODO add calc that if responsiveness is 'N' don't compare the rest...?
-    def calculate_responsiveness(t1_check):
-        # TODO impl
-        if t1_check.is_response_packet_empty():
-            return 'N'
-        return 'Y'
     # TODO somehow consider the following:
     # To reduce this problem, reference fingerprints generally omit the R=Y test from the IE and U1 probes,
     # which are the ones most likely to be dropped. In addition, if Nmap is missing a closed TCP port for a target,
