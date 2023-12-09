@@ -16,10 +16,8 @@ class Check:
         self._response_packet = None
         self._target_ip = target_ip
         self._target_port = target_port
-        self._response_seq_number = None
         self._packet_seq_number = RandNum(0, 5000)
         self._send_timestamp = None
-        self._response_tsval = None
         self._packet_ack_number = RandNum(0, 5000)
 
     def get_response_ip_len(self):
@@ -75,7 +73,13 @@ class Check:
         return bool(self._response_packet[TCP].flags & 0x80) # 0x80 is the CWR flag
 
     def get_response_tsval(self):
-        return self._response_tsval
+        if not self._response_packet.haslayer[TCP]:
+            raise "This function was incorrectly called on a non TCP packet"
+
+        matching_tuple = next((option for option in self._response_packet[TCP].options if option[0] == "Timestamp"),
+                              None)
+        if matching_tuple:
+            return matching_tuple[1][0]
 
     def is_response_packet_empty(self) -> bool:
         return not self._response_packet
@@ -110,7 +114,14 @@ class Check:
         return self._packet_seq_number
 
     def get_response_sequence_number(self):
-        return self._response_seq_number
+        # TODO - add verification seq number makes sense? 32-bit number?
+        if not self._response_packet.haslayer(TCP):
+            raise "This function was incorrectly called on a non TCP packet"
+
+        if TCPFlags.SYN | TCPFlags.ACK != self._response_packet[TCP].flags:
+            raise "This function was incorrectly called on a TCP packet returned to a non-open port"
+
+        return self._response_packet[TCP].seq  # ISN - Initial sequence number
 
     def get_received_window_size(self):
         if not self._response_packet.haslayer[TCP]:
@@ -164,17 +175,11 @@ class Check:
 
         if self._response_packet.haslayer(TCP):
             if TCPFlags.SYN | TCPFlags.ACK == self._response_packet[TCP].flags:
-                self._response_seq_number = self._response_packet[TCP].seq  # ISN - Initial sequence number
-                # TODO - add verification seq number makes sense? 32-bit number?
-                self.logger.info(f"Port {self._target_port} is open, ISN is: {self._response_seq_number}")
+                self.logger.info(f"Port {self._target_port} is open")
             elif TCPFlags.RST | TCPFlags.ACK == self._response_packet[TCP].flags:
                 self.logger.info(f"Port {self._target_port} is closed")
             else:
                 self.logger.error("Unexpected response")
 
-            matching_tuple = next((option for option in self._response_packet[TCP].options if option[0] == "Timestamp"),
-                                  None)
-            if matching_tuple:
-                self._response_tsval = matching_tuple[1][0]
 
 
