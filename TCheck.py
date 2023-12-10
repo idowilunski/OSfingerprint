@@ -1,20 +1,45 @@
 from CommonTests import *
 
 
-
 class TCheck:
-    def __init__(self, t_check):
-        self._r = CommonTests.calculate_responsiveness(t_check)
-        self._df = CommonTests.calculate_dont_fragment(t_check)
-        self._t = self.calculate_initial_ttl(t_check)
-        self._tg = None # TODO impl IP initial time-to-live guess (TG)
-        self._w = CommonTests.calculate_window_size(t_check)
-        self._s = self.calculate_sequence_number(t_check)
-        self._a = self.calculate_ack_number(t_check)
-        self._f = self.calculate_tcp_flags(t_check)
-        self._o = CommonTests.calculate_o(t_check)
-        self._rd = CommonTests.calculate_rd(t_check)
-        self._q = CommonTests.calculate_quirks(t_check)
+    def __init__(self):
+        self.r = None
+        self.df = None
+        self.t = None
+        self.tg = None # TODO impl IP initial time-to-live guess (TG)
+        self.w = None
+        self.s = None
+        self.a = None
+        self.f = None
+        self.o = None
+        self.rd = None
+        self.q = None
+
+    def init_from_response(self, t_check):
+        self.r = CommonTests.calculate_responsiveness(t_check)
+        self.df = CommonTests.calculate_dont_fragment(t_check)
+        self.t = self.calculate_initial_ttl(t_check)
+        self.tg = None  # TODO impl IP initial time-to-live guess (TG)
+        self.w = CommonTests.calculate_window_size(t_check)
+        self.s = self.calculate_sequence_number(t_check)
+        self.a = self.calculate_ack_number(t_check)
+        self.f = self.calculate_tcp_flags(t_check)
+        self.o = CommonTests.calculate_o(t_check)
+        self.rd = CommonTests.calculate_rd(t_check)
+        self.q = CommonTests.calculate_quirks(t_check)
+
+    def init_from_db(self, tests: dict):
+        self.r = tests.get('R', '')
+        self.df = tests.get('DF', '')
+        self.t = tests.get('T', '')
+        self.tg = tests.get('TG', '')
+        self.w = tests.get('W', '')
+        self.s = tests.get('S', '')
+        self.a = tests.get('A', '')
+        self.f = tests.get('F', '')
+        self.o = tests.get('O', '')
+        self.rd = tests.get('RD', '')
+        self.q = tests.get('Q', '')
 
     # TODO somehow consider the following:
     # To reduce this problem, reference fingerprints generally omit the R=Y test from the IE and U1 probes,
