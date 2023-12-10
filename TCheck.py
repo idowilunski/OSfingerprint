@@ -15,6 +15,31 @@ class TCheck:
         self.rd = None
         self.q = None
 
+    def __eq__(self, other):
+        if self.r != other.r:
+            return False
+        if self.df != other.df:
+            return False
+        if self.t != other.t:
+            return False
+        if self.tg != other.tg:
+            return False
+        if self.w != other.w:
+            return False
+        if self.s != other.s:
+            return False
+        if self.a != other.a:
+            return False
+        if self.f != other.f:
+            return False
+        if self.o != other.o:
+            return False
+        if self.rd != other.rd:
+            return False
+        if self.q != other.q:
+            return False
+        return True
+
     def init_from_response(self, t_check):
         self.r = CommonTests.calculate_responsiveness(t_check)
         self.df = CommonTests.calculate_dont_fragment(t_check)
