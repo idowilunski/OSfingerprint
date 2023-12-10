@@ -29,8 +29,10 @@ if __name__ == '__main__':
     response_ecn = Result.Ecn.Ecn()
     response_ecn.init_from_response(ecn_sender)
 
-    for ecn in list_of_ecns:
-        if response_ecn == ecn:
+    for ecn_dict in list_of_ecns:
+        curr_ecn = Result.Ecn.Ecn()
+        curr_ecn.init_from_db(ecn_dict)
+        if response_ecn == curr_ecn:
             print("YAY")
 
     print("DONE")
