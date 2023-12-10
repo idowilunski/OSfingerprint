@@ -13,6 +13,25 @@ class Ecn:
         self.cc = None
         self.q = None
 
+    def __eq__(self, other):
+        if self.r != other.r:
+            return False
+        if self.df != other.df:
+            return False
+        if self.t != other.t:
+            return False
+        if self.tg != other.tg:
+            return False
+        if self.w != other.w:
+            return False
+        if self.o != other.o:
+            return False
+        if self.cc != other.cc:
+            return False
+        if self.q != other.q:
+            return False
+        return True
+
     def init_from_response(self, ecn_sender):
         self.r = CommonTests.calculate_responsiveness(ecn_sender)
         self.df = CommonTests.calculate_dont_fragment(ecn_sender)
