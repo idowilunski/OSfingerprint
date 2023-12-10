@@ -23,7 +23,7 @@ class Options:
             return False
         if self.o6 != other.o6:
             return False
-        
+
         return True
 
     def init_from_response(self, probe_sender):

@@ -4,14 +4,34 @@ from CommonTests import *
 
 class Ecn:
     def __init__(self, ecn_sender):
-        self._r = CommonTests.calculate_responsiveness(ecn_sender)
-        self._df = CommonTests.calculate_dont_fragment(ecn_sender)
-        self._t = None # TODO
-        self._tg = None #TODO impl
-        self._w = CommonTests.calculate_window_size(ecn_sender)
-        self._o = CommonTests.calculate_o(ecn_sender.get_checks_list()[0])
-        self._cc = self.calculate_congestion_notification(ecn_sender)
-        self._q = CommonTests.calculate_quirks(ecn_sender.get_checks_list()[0])
+        self.r = None
+        self.df = None
+        self.t = None # TODO
+        self.tg = None #TODO impl
+        self.w = None
+        self.o = None
+        self.cc = None
+        self.q = None
+
+    def init_from_response(self, ecn_sender):
+        self.r = CommonTests.calculate_responsiveness(ecn_sender)
+        self.df = CommonTests.calculate_dont_fragment(ecn_sender)
+        self.t = None  # TODO
+        self.tg = None  # TODO impl
+        self.w = CommonTests.calculate_window_size(ecn_sender)
+        self.o = CommonTests.calculate_o(ecn_sender.get_checks_list()[0])
+        self.cc = self.calculate_congestion_notification(ecn_sender)
+        self.q = CommonTests.calculate_quirks(ecn_sender.get_checks_list()[0])
+
+    def init_from_db(self, tests : dict):
+        self.r = tests.get('R', '')
+        self.df = tests.get('DF', '')
+        self.t = tests.get('T', '')
+        self.tg = tests.get('TG', '')
+        self.w = tests.get('W', '')
+        self.o = tests.get('O', '')
+        self.cc = tests.get('CC', '')
+        self.q = tests.get('Q', '')
 
     @staticmethod
     def calculate_congestion_notification(ecn_sender):
