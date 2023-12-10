@@ -1,10 +1,50 @@
+import logging
+
 from scapy.layers.inet import IP, UDP, ICMP
 from CommonTests import *
 
 
 # U1 probe is expected to receive in response an ICMP "port unreachable" message
 class U1:
-    def __init__(self, u1_check):
+    def __init__(self):
+        self.r = None
+        self.df = None
+        self.t = None # TODO impl IP initial time-to-live (T)
+        self.tg = None # TODO impl IP initial time-to-live guess (TG)
+        self.ipl = None
+        self.un = None
+        self.ripl = None
+        self.rid = None
+        self.ripck = None
+        self.ruck = None
+        self.rud = None
+
+    # TODO - implement more complex logic here, ranges etc.
+    def __eq__(self, other):
+        if self.r != other.r:
+            return False
+        if self.df != other.df:
+            return False
+        if self.tg != other.tg:
+            return False
+        if self.ipl != other.ipl:
+            return False
+        if self.un != other.un:
+            return False
+        if self.ripl != other.ripl:
+            return False
+        if self.rid != other.rid:
+            return False
+        if self.ripck != other.ripck:
+            return False
+        if self.ruck != other.ruck:
+            return False
+        if self.rud != other.rud:
+            return False
+
+        return True
+
+    def init_from_response(self, u1_check):
         self._r = CommonTests.calculate_responsiveness(u1_check)
         self._df = CommonTests.calculate_dont_fragment(u1_check)
         self._t = None # TODO impl IP initial time-to-live (T)
@@ -16,6 +56,19 @@ class U1:
         self._ripck = self.calculate_ripck(u1_check)
         self._ruck = self.calculate_ruck(u1_check)
         self._rud = self.calculate_rud(u1_check)
+
+    def init_from_db(self, tests: dict):
+        self._r = tests.get('R', '')
+        self._df = tests.get('DF', '')
+        self._t = tests.get('T', '')
+        self._tg = tests.get('TG', '')
+        self._ipl = tests.get('IPL', '')
+        self._un = tests.get('UN', '')
+        self._ripl = tests.get('RIPL', '')
+        self._rid = tests.get('RID', '')
+        self._ripck = tests.get('RIPCK', '')
+        self._ruck = tests.get('RUCK', '')
+        self._rud = tests.get('RUD', '')
 
     # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # Returned probe IP ID value (RID)
@@ -93,6 +146,3 @@ class U1:
         # The value of those last four bytes is recorded in this field.
         raw_icmp_header = bytes(u1_check.get_response_packet()[ICMP])
         return raw_icmp_header[-4:]
-
-
-
