@@ -11,17 +11,50 @@ import logging
 # which causes some operating systems to advertise a different window size.
 # Despite the different names, each test is processed exactly the same way."
 class WindowSize:
-    def __init__(self, probe_sender):
+    def __init__(self):
+
+        self.w1 = None
+        self.w2 = None
+        self.w3 = None
+        self.w4 = None
+        self.w5 = None
+        self.w6 = None
+
+    def __eq__(self, other):
+        if self.w1 != other.w1:
+            return False
+        if self.w2 != other.w2:
+            return False
+        if self.w3 != other.w3:
+            return False
+        if self.w4 != other.w4:
+            return False
+        if self.w5 != other.w5:
+            return False
+        if self.w6 != other.w6:
+            return False
+
+        return True
+
+    def init_from_response(self, probe_sender):
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
         checks_list = probe_sender.get_checks_list()
-        self._w1 = self.calculate_w(checks_list[0])
-        self._w2 = self.calculate_w(checks_list[1])
-        self._w3 = self.calculate_w(checks_list[2])
-        self._w4 = self.calculate_w(checks_list[3])
-        self._w5 = self.calculate_w(checks_list[4])
-        self._w6 = self.calculate_w(checks_list[5])
+        self.w1 = self.calculate_w(checks_list[0])
+        self.w2 = self.calculate_w(checks_list[1])
+        self.w3 = self.calculate_w(checks_list[2])
+        self.w4 = self.calculate_w(checks_list[3])
+        self.w5 = self.calculate_w(checks_list[4])
+        self.w6 = self.calculate_w(checks_list[5])
+
+    def init_from_db(self, tests: dict):
+        self.w1 = tests.get('W1', None)
+        self.w2 = tests.get('W2', None)
+        self.w3 = tests.get('W3', None)
+        self.w4 = tests.get('W4', None)
+        self.w5 = tests.get('W5', None)
+        self.w6 = tests.get('W6', None)
 
     @staticmethod
     def calculate_w(check):

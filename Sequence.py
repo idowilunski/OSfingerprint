@@ -7,21 +7,65 @@ from CommonTests import *
 # The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
 # This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
 class Sequence:
-    def __init__(self, probe_sender, icmp_sender, close_ports_sender):
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+    def __init__(self):
+        self.sp = None
+        self.gcd = None
+        self.isr = None
+        self.ti = None
+        self.rd = None
+        self.ci = None
+        self.ii = None
+        self.ss = None
+        self.ts = None
 
-        self._seq_rates = []
-        self._diff1 = [] # Differences list, diff1 is the name in the nmap documentation reference
-        self._sp = self.calculate_sp(probe_sender)
-        self._gcd = self.calculate_gcd(probe_sender)
-        self._isr = self.calculate_isr(probe_sender)
-        self._ti = self.calculate_ti_ci_ii(probe_sender, 3)
-        self._rd = CommonTests.calculate_rd(probe_sender)
-        self._ci = self.calculate_ti_ci_ii(close_ports_sender, 2)
-        self._ii = self.calculate_ti_ci_ii(icmp_sender, 2)
-        self._ss = self.calculate_ss(probe_sender, icmp_sender)
-        self._ts = self.calculate_ts(probe_sender)
+
+    def __eq__(self, other):
+        if self.sp != other.sp:
+            return False
+        if self.gcd != other.gcd:
+            return False
+        if self.isr != other.isr:
+            return False
+        if self.ti != other.ti:
+            return False
+        if self.rd != other.rd:
+            return False
+        if self.ci != other.ci:
+            return False
+        if self.ii != other.ii:
+            return False
+        if self.ss != other.ss:
+            return False
+        if self.ts != other.ts:
+            return False
+
+        return True
+
+    def init_from_response(self, probe_sender):
+        self.seq_rates = None
+        self.diff1 = None  # Differences list, diff1 is the name in the nmap documentation reference
+        self.sp = self.calculate_sp(probe_sender)
+        self.gcd = self.calculate_gcd(probe_sender)
+        self.isr = self.calculate_isr(probe_sender)
+        self.ti = self.calculate_ti_ci_ii(probe_sender, 3)
+        self.rd = CommonTests.calculate_rd(probe_sender)
+        self.ci = self.calculate_ti_ci_ii(close_ports_sender, 2)
+        self.ii = self.calculate_ti_ci_ii(icmp_sender, 2)
+        self.ss = self.calculate_ss(probe_sender, icmp_sender)
+        self.ts = self.calculate_ts(probe_sender)
+
+    def init_from_db(self, tests: dict):
+        self.r = tests.get('R', None)
+        self.df = tests.get('DF', None)
+        self.t = tests.get('T', None)
+        self.tg = tests.get('TG', None)
+        self.ipl = tests.get('IPL', None)
+        self.un = tests.get('UN', None)
+        self.ripl = tests.get('RIPL', None)
+        self.rid = tests.get('RID', None)
+        self.ripck = tests.get('RIPCK', None)
+        self.ruck = tests.get('RUCK', None)
+        self.rud = tests.get('RUD', None)
 
     @staticmethod
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
