@@ -1,12 +1,39 @@
 from CommonTests import *
 
 class IE:
-    def __init__(self, icmp_sender):
-        self._r = CommonTests.calculate_responsiveness(icmp_sender)
-        self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
-        self._cd = self.calculate_cd(icmp_sender)
+    def __init__(self):
+        self.r = None
+        self.dfi = None
+        self.cd = None
         self.t = None #TODO impl
-        self._tg = None  # TODO impl IP initial time-to-live guess (TG)
+        self.tg = None  # TODO impl IP initial time-to-live guess (TG)
+
+    def __eq__(self, other):
+        if self.r != other.r:
+            return False
+        if self.dfi != other.dfi:
+            return False
+        if self.cd != other.cd:
+            return False
+        if self.t != other.t:
+            return False
+        if self.tg != other.tg:
+            return False
+        return True
+
+    def init_from_response(self, icmp_sender):
+        self.r = CommonTests.calculate_responsiveness(icmp_sender)
+        self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
+        self.cd = self.calculate_cd(icmp_sender)
+        self.t = None #TODO impl
+        self.tg = None  # TODO impl IP initial time-to-live guess (TG)
+
+    def init_from_db(self, tests : dict):
+        self.r = tests.get('R', '')
+        self.dfi = tests.get('DFI', '')
+        self.cd = tests.get('CD', '')
+        self.t = tests.get('T', '')
+        self.tg = tests.get('TG', '')
 
     @staticmethod
     def calculate_cd(icmp_sender):

@@ -3,7 +3,7 @@ from CommonTests import *
 
 
 class Ecn:
-    def __init__(self, ecn_sender):
+    def __init__(self):
         self.r = None
         self.df = None
         self.t = None # TODO
