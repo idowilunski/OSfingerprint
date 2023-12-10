@@ -18,7 +18,7 @@ class CommonTests:
         # Check for nonzero urgent pointer field value when the URG flag is not set.
         # This is also particularly likely to be seen in response to the ECN probe, which sets a non-zero urgent field.
         # A “U” is appended to the Q string when this is seen.
-        if t1_check.is_urgent_bit_set():
+        if t1_check.is_response_urgent_bit_set():
             q_result += "U"
 
         return q_result

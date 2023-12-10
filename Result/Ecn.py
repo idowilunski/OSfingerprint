@@ -14,6 +14,9 @@ class Ecn:
         self.q = None
 
     def __eq__(self, other):
+        if not isinstance(other, Ecn):
+            return False
+
         if self.r != other.r:
             return False
         if self.df != other.df:
@@ -33,14 +36,15 @@ class Ecn:
         return True
 
     def init_from_response(self, ecn_sender):
-        self.r = CommonTests.calculate_responsiveness(ecn_sender)
-        self.df = CommonTests.calculate_dont_fragment(ecn_sender)
+        ecn_check = ecn_sender.get_checks_list()[0]
+        self.r = CommonTests.calculate_responsiveness(ecn_check)
+        self.df = CommonTests.calculate_dont_fragment(ecn_check)
         self.t = None  # TODO
         self.tg = None  # TODO impl
-        self.w = CommonTests.calculate_window_size(ecn_sender)
-        self.o = CommonTests.calculate_o(ecn_sender.get_checks_list()[0])
-        self.cc = self.calculate_congestion_notification(ecn_sender)
-        self.q = CommonTests.calculate_quirks(ecn_sender.get_checks_list()[0])
+        self.w = CommonTests.calculate_window_size(ecn_check)
+        self.o = CommonTests.calculate_o(ecn_check)
+        self.cc = self.calculate_congestion_notification(ecn_check)
+        self.q = CommonTests.calculate_quirks(ecn_check)
 
     def init_from_db(self, tests : dict):
         self.r = tests.get('R', '')
@@ -53,10 +57,9 @@ class Ecn:
         self.q = tests.get('Q', '')
 
     @staticmethod
-    def calculate_congestion_notification(ecn_sender):
-        ecn_check = ecn_sender.get_checks_list()[0]
-        is_ece = ecn_check.is_response_ece_set()
-        is_cwr = ecn_check.is_response_cwr_set()
+    def calculate_congestion_notification(ecn_packet):
+        is_ece = ecn_packet.is_response_ece_set()
+        is_cwr = ecn_packet.is_response_cwr_set()
         # Only the ECE bit is set (not CWR). This host supports ECN.
         if is_ece and not is_cwr:
             return 'Y'
