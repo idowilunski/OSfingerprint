@@ -159,7 +159,7 @@ class Check:
         try:
             self._send_timestamp = datetime.now()
             if self._packet.haslayer(UDP):
-            self._response_packet = sr1(self._packet, verbose=0, timeout=10)
+                self._response_packet = sr1(self._packet, verbose=0, timeout=10)
         except Exception as e:
             self.logger.error(f"Error sending request: {e}")
             raise
