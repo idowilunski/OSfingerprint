@@ -9,6 +9,8 @@ import PacketSenders.EcnSender
 import Result.Ecn
 from databaseParser import *
 
+# my computer result by nmap is : Microsoft Windows 10 1809 - 2004
+# ECN(R=Y%DF=Y%T=7B-85%TG=80%W=FFFF%O=MFFD7NW8NNS%CC=N%Q=)
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 

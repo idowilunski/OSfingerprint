@@ -96,11 +96,12 @@ class Check:
 
         # TODO remove magic numbers here
         fragmentation_needed = 3
+
         if self._response_packet.haslayer(ICMP):
-            return bool(self._response_packet[ICMP].type == fragmentation_needed)
+            return 'Y' if self._response_packet[ICMP].type == fragmentation_needed else 'N'
 
         if self._response_packet.haslayer(IP):
-            return bool(self._response_packet[IP].flags.DF)
+            return 'Y' if self._response_packet[IP].flags.DF else 'N'
 
     def get_ip_id(self):
         if not self._response_packet.haslayer(IP):

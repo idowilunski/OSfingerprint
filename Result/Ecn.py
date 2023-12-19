@@ -21,10 +21,11 @@ class Ecn:
             return False
         if self.df != other.df:
             return False
-        if self.t != other.t:
-            return False
-        if self.tg != other.tg:
-            return False
+        # TODO impl this test
+        #if self.t != other.t:
+        #    return False
+        #if self.tg != other.tg:
+        #    return False
         if self.w != other.w:
             return False
         if self.o != other.o:
@@ -51,7 +52,7 @@ class Ecn:
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
-        self.w = tests.get('W', '')
+        self.w = int(tests.get('W', ''))
         self.o = tests.get('O', '')
         self.cc = tests.get('CC', '')
         self.q = tests.get('Q', '')

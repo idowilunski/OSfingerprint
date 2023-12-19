@@ -58,7 +58,7 @@ class TCheck:
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
-        self.w = tests.get('W', '')
+        self.w = int(tests.get('W', ''))
         self.s = tests.get('S', '')
         self.a = tests.get('A', '')
         self.f = tests.get('F', '')
