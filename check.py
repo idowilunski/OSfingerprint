@@ -91,6 +91,8 @@ class Check:
         return not self._response_packet
 
     def is_dont_fragment_bit_set(self):
+        if not self._response_packet:
+            raise "No response packet received"
         if not self._response_packet.haslayer(ICMP) and not self._response_packet.haslayer(IP):
             raise "This function was incorrectly called on a non IP, and non ICMP packet"
 

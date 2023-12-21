@@ -5,8 +5,8 @@
 import PacketSenders
 from Result import Ecn
 from PacketSenders import *
-import PacketSenders.EcnSender
-import Result.Ecn
+import PacketSenders.EcnSender, PacketSenders.EchoSender
+import Result.Ecn, Result.IE
 from databaseParser import *
 
 # my computer result by nmap is : Microsoft Windows 10 1809 - 2004
@@ -19,23 +19,40 @@ if __name__ == '__main__':
     parser = DatabaseParser(db_path)
     #parser.read_database()
 
-    list_of_ecns = parser.read_database_and_get_all_ecns()
+    list_of_ie = parser.read_database_and_get_all_ie()
 
     # TODO - go over each port and detect / get it from commandline
-    ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", 63342)
+    # nmap result -
+#Discovered open port 445/tcp on 127.0.0.1
+#Discovered open port 135/tcp on 127.0.0.1
+#Discovered open port 902/tcp on 127.0.0.1
+#Discovered open port 912/tcp on 127.0.0.1
+#Discovered open port 49160/tcp on 127.0.0.1
+#Discovered open port 4001/tcp on 127.0.0.1
+#Discovered open port 6881/tcp on 127.0.0.1
 
-    ecn_sender.prepare_packets()
-    ecn_sender.send_packets()
-    ecn_sender.parse_response_packets()
+    #ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", 445)
+# port 19575 is also open and 19576 and 19577
+    for port in range(1, 2):
+            # tested until 13704
+            ie_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", 19576)
+        # Call the function or perform any other actions here
+        # For example, ecn_sender.some_function()
 
-    response_ecn = Result.Ecn.Ecn()
-    response_ecn.init_from_response(ecn_sender)
+        # Print the port number and any relevant information
+            print(f"Trying port {port}...")
+            ie_sender.prepare_packets()
+            ie_sender.send_packets()
+            ie_sender.parse_response_packets()
 
-    for ecn_dict in list_of_ecns:
-        curr_ecn = Result.Ecn.Ecn()
-        curr_ecn.init_from_db(ecn_dict)
-        if response_ecn == curr_ecn:
-            print("YAY")
+            response_ie = Result.IE.IE()
+            response_ie.init_from_response(ie_sender)
+
+            for ie_dict in list_of_ie:
+                curr_ie = Result.IE.IE()
+                curr_ie.init_from_db(ie_dict)
+                if response_ie == curr_ie:
+                    print("YAY")
 
     print("DONE")
 

@@ -8,7 +8,10 @@ class PacketSender:
         self._checks_list = None
 
     def parse_response_packets(self):
-        _ = [check.parse_response_packet() for check in self._checks_list]
+        try:
+            _ = [check.parse_response_packet() for check in self._checks_list]
+        except:
+            pass
 
     def prepare_packets(self):
         _ = [check.prepare_packet() for check in self._checks_list]

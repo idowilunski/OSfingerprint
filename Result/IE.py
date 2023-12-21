@@ -1,5 +1,6 @@
 from CommonTests import *
 
+
 class IE:
     def __init__(self):
         self.r = None
@@ -11,6 +12,11 @@ class IE:
     def __eq__(self, other):
         if self.r != other.r:
             return False
+
+        # If responsiveness test returned "no", then all values will be empty
+        if self.r == 'N':
+            return True
+
         if self.dfi != other.dfi:
             return False
         if self.cd != other.cd:
@@ -22,14 +28,22 @@ class IE:
         return True
 
     def init_from_response(self, icmp_sender):
-        self.r = CommonTests.calculate_responsiveness(icmp_sender)
+        icmp_check = icmp_sender.get_checks_list()[0]
+        self.r = CommonTests.calculate_responsiveness(icmp_check)
+
+        # If responsiveness test returned "no", no bother calculating, all values will be empty
+        if self.r == 'N':
+            return
+
         self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
         self.cd = self.calculate_cd(icmp_sender)
         self.t = None #TODO impl
         self.tg = None  # TODO impl IP initial time-to-live guess (TG)
 
     def init_from_db(self, tests : dict):
-        self.r = tests.get('R', '')
+        # If responsiveness result doesn't exist, it means responsiveness = Y
+        self.r = tests.get('R', 'Y')
+
         self.dfi = tests.get('DFI', '')
         self.cd = tests.get('CD', '')
         self.t = tests.get('T', '')
@@ -38,7 +52,8 @@ class IE:
     @staticmethod
     def calculate_cd(icmp_sender):
         # Both code values are zero.
-        if icmp_sender[0].is_icmp_response_code_zero() && icmp_sender[1].is_icmp_response_code_zero():
+        icmp_checks_list = icmp_sender.get_checks_list()
+        if icmp_checks_list[0].is_icmp_response_code_zero() and icmp_checks_list[1].is_icmp_response_code_zero():
             return 'Z'
         # TODO check 	Both code values are the same as in the corresponding probe. and return 'S'
         # TODO check When they both use the same non-zero number, it is shown here. <NN>

@@ -39,7 +39,7 @@ class DatabaseParser:
         return result_dict
 
     # TODO - remove this once we finish debugging
-    def read_database_and_get_all_ecns(self):
+    def read_database_and_get_all_ie(self):
         list_of_ecns = []
         with open(self.db_path, 'r', encoding='utf-8', errors='ignore') as file:
             count = 0
@@ -50,7 +50,7 @@ class DatabaseParser:
                     continue
 
                 entry_data = self.parse_entry(entry)
-                list_of_ecns.append(entry_data.get('ECN'))
+                list_of_ecns.append(entry_data.get('IE'))
 
         return list_of_ecns
 

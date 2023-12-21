@@ -1,6 +1,6 @@
 import logging
 from  Packets.icmpPackets import *
-from PacketSender import *
+from PacketSenders.PacketSender import *
 
 
 class EchoSender(PacketSender):

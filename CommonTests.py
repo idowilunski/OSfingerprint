@@ -42,12 +42,12 @@ class CommonTests:
             return "N"
         elif option_type == "MSS":
             return f"M{option_value:04X}"
-        elif option_type == "WS":
+        elif option_type == "WScale":
             return f"W{option_value}"
         elif option_type == "TS":
             ts_val, ts_ecr = option_value
             return f"T{int(ts_val != 0)}{int(ts_ecr != 0)}"
-        elif option_type == "SACK":
+        elif option_type == "SAckOK":
             return "S"
         else:
             return f"Unknown Option - Type: {option_type}, Value: {option_value}"
