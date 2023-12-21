@@ -10,7 +10,7 @@ class U1:
         self.r = None
         self.df = None
         self.t = None # TODO impl IP initial time-to-live (T)
-        self.tg = None # TODO impl IP initial time-to-live guess (TG)
+        self.tg = None # TODO impl IP initial time-to-live guess (TG) - check if it's the same as IE
         self.ipl = None
         self.un = None
         self.ripl = None
@@ -44,31 +44,32 @@ class U1:
 
         return True
 
-    def init_from_response(self, u1_check):
-        self._r = CommonTests.calculate_responsiveness(u1_check)
-        self._df = CommonTests.calculate_dont_fragment(u1_check)
-        self._t = None # TODO impl IP initial time-to-live (T)
-        self._tg = None # TODO impl IP initial time-to-live guess (TG)
-        self._ipl = self.calculate_ipl(u1_check)
-        self._un = self.calculate_un(u1_check)
-        self._ripl = self.calculate_ripl(u1_check)
-        self._rid = self.calculate_rid(u1_check)
-        self._ripck = self.calculate_ripck(u1_check)
-        self._ruck = self.calculate_ruck(u1_check)
-        self._rud = self.calculate_rud(u1_check)
+    def init_from_response(self, udp_sender):
+        u1_check = udp_sender.get_checks_list()[0]
+        self.r = CommonTests.calculate_responsiveness(u1_check)
+        self.df = CommonTests.calculate_dont_fragment(u1_check)
+        self.t = None # TODO impl IP initial time-to-live (T)
+        self.tg = None # TODO impl IP initial time-to-live guess (TG)
+        self.ipl = self.calculate_ipl(u1_check)
+        self.un = self.calculate_un(u1_check)
+        self.ripl = self.calculate_ripl(u1_check)
+        self.rid = self.calculate_rid(u1_check)
+        self.ripck = self.calculate_ripck(u1_check)
+        self.ruck = self.calculate_ruck(u1_check)
+        self.rud = self.calculate_rud(u1_check)
 
     def init_from_db(self, tests: dict):
-        self._r = tests.get('R', '')
-        self._df = tests.get('DF', '')
-        self._t = tests.get('T', '')
-        self._tg = tests.get('TG', '')
-        self._ipl = tests.get('IPL', '')
-        self._un = tests.get('UN', '')
-        self._ripl = tests.get('RIPL', '')
-        self._rid = tests.get('RID', '')
-        self._ripck = tests.get('RIPCK', '')
-        self._ruck = tests.get('RUCK', '')
-        self._rud = tests.get('RUD', '')
+        self.r = tests.get('R', '')
+        self.df = tests.get('DF', '')
+        self.t = tests.get('T', '')
+        self.tg = tests.get('TG', '')
+        self.ipl = tests.get('IPL', '')
+        self.un = tests.get('UN', '')
+        self.ripl = tests.get('RIPL', '')
+        self.rid = tests.get('RID', '')
+        self.ripck = tests.get('RIPCK', '')
+        self.ruck = tests.get('RUCK', '')
+        self.rud = tests.get('RUD', '')
 
     # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # Returned probe IP ID value (RID)
@@ -118,7 +119,7 @@ class U1:
     def calculate_rud(u1_check):
         response = u1_check.get_response_packet()
         # Check the response
-        if response and response.has_layer[UDP]:
+        if response and response.haslayer(UDP):
             payload = response[UDP].load
             # G is recorded if all payload bytes are 'C' or payload is truncated to zero length
             if not payload or all(byte == ord('C') for byte in payload):

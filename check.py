@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from scapy.all import *
 from TcpFlags import TCPFlags
-from scapy.layers.inet import IP, TCP, ICMP, UDP, RandNum
+from scapy.layers.inet import IP, TCP, ICMP, UDP, RandNum, UDPerror, in4_chksum
 from datetime import datetime
-
 
 # Check is an abstract base class representing the interface for a "check" in OS-detection
 # Usage of inheriting class is expected to be: prepare_packet, send_packet, and analyze_response.
@@ -19,6 +18,9 @@ class Check:
         self._send_timestamp = None
         self._packet_ack_number = RandNum(0, 5000)
 
+    def get_response_packet(self):
+        return self._response_packet
+
     def get_response_ip_len(self):
         if not self._response_packet.haslayer(IP):
             raise "This function was incorrectly called on a non IP packet"
@@ -31,14 +33,18 @@ class Check:
 
         return self._response_packet[IP].id
 
-    def get_request_checksum(self):
-        return self.calculate_udp_checksum(self._packet)
-
     def get_response_checksum(self):
-        if not self._response_packet.haslayer(UDP):
-            raise "This function was incorrectly called on a non UDP packet"
+        return self.get_ip_checksum(self._response_packet)
 
-        return self._response_packet[UDP].chksum
+    def get_request_checksum(self):
+        return self.get_ip_checksum(self._packet)
+
+    @staticmethod
+    def get_ip_checksum(packet_to_calc):
+        if not packet_to_calc.haslayer(IP):
+            raise "This function was incorrectly called on a non IP packet"
+
+        return in4_chksum(socket.IPPROTO_IP, packet_to_calc[IP], bytes(packet_to_calc[IP]))
 
     def is_icmp_response_code_zero(self):
         if not self._response_packet.haslayer(ICMP):
@@ -155,15 +161,10 @@ class Check:
     def prepare_packet(self):
         pass
 
-    # TODO - not sure if this func makes sense
-    @staticmethod
-    def calculate_udp_checksum(packet):
-        packet[UDP].chksum = 0
-        return UDP(packet[UDP]).chksum
-
     def send_packet(self):
         try:
             self._send_timestamp = datetime.now()
+
             self._response_packet = sr1(self._packet, verbose=0, timeout=10)
         except Exception as e:
             self.logger.error(f"Error sending request: {e}")

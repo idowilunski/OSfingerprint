@@ -5,8 +5,8 @@
 import PacketSenders
 from Result import Ecn
 from PacketSenders import *
-import PacketSenders.EcnSender, PacketSenders.EchoSender
-import Result.Ecn, Result.IE
+import PacketSenders.EcnSender, PacketSenders.EchoSender, PacketSenders.UdpSender
+import Result.Ecn, Result.IE, Result.U1
 from databaseParser import *
 
 # my computer result by nmap is : Microsoft Windows 10 1809 - 2004
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     parser = DatabaseParser(db_path)
     #parser.read_database()
 
-    list_of_ie = parser.read_database_and_get_all_ie()
+    list_of_u1s = parser.read_database_and_get_all_u1()
 
     # TODO - go over each port and detect / get it from commandline
     # nmap result -
@@ -35,23 +35,23 @@ if __name__ == '__main__':
 # port 19575 is also open and 19576 and 19577
     for port in range(1, 2):
             # tested until 13704
-            ie_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", 19576)
+            udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 19576)
         # Call the function or perform any other actions here
         # For example, ecn_sender.some_function()
 
         # Print the port number and any relevant information
             print(f"Trying port {port}...")
-            ie_sender.prepare_packets()
-            ie_sender.send_packets()
-            ie_sender.parse_response_packets()
+            udp_sender.prepare_packets()
+            udp_sender.send_packets()
+            udp_sender.parse_response_packets()
 
-            response_ie = Result.IE.IE()
-            response_ie.init_from_response(ie_sender)
+            response_u1 = Result.U1.U1()
+            response_u1.init_from_response(udp_sender)
 
-            for ie_dict in list_of_ie:
-                curr_ie = Result.IE.IE()
-                curr_ie.init_from_db(ie_dict)
-                if response_ie == curr_ie:
+            for u1_dict in list_of_u1s:
+                curr_u1 = Result.U1.U1()
+                curr_u1.init_from_db(u1_dict)
+                if response_u1 == curr_u1:
                     print("YAY")
 
     print("DONE")

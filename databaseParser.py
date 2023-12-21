@@ -39,8 +39,8 @@ class DatabaseParser:
         return result_dict
 
     # TODO - remove this once we finish debugging
-    def read_database_and_get_all_ie(self):
-        list_of_ecns = []
+    def read_database_and_get_all_u1(self):
+        list_of_u1s = []
         with open(self.db_path, 'r', encoding='utf-8', errors='ignore') as file:
             count = 0
             entries = file.read().split('\n\n')
@@ -50,9 +50,9 @@ class DatabaseParser:
                     continue
 
                 entry_data = self.parse_entry(entry)
-                list_of_ecns.append(entry_data.get('IE'))
+                list_of_u1s.append(entry_data.get('U1'))
 
-        return list_of_ecns
+        return list_of_u1s
 
     def read_database(self):
         with open(self.db_path, 'r', encoding='utf-8', errors='ignore') as file:
