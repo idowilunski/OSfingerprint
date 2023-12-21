@@ -6,8 +6,8 @@ class IE:
         self.r = None
         self.dfi = None
         self.cd = None
-        self.t = None #TODO impl
-        self.tg = None  # TODO impl IP initial time-to-live guess (TG)
+        self.t = None
+        self.tg = None
 
     def __eq__(self, other):
         if self.r != other.r:
@@ -21,8 +21,17 @@ class IE:
             return False
         if self.cd != other.cd:
             return False
-        if self.t > other.t[1] or self.t < other.t[0]:
-            return False
+
+        # T can either be a range, or value to compare
+        if isinstance(self.t, tuple):
+            # Check if it's a tuple, compare using the tuple values
+            if self.t[1] > other.t[1] or self.t[0] < other.t[0]:
+                return False
+        else:
+            # If it's not a tuple, perform a normal comparison
+            if self.t != other.t:
+                return False
+
         if self.tg != other.tg:
             return False
         return True
@@ -38,8 +47,25 @@ class IE:
         self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
         self.cd = self.calculate_cd(icmp_sender)
         self.t = self.calculate_ttl_diff(icmp_sender)
-        self.tg = None  # TODO impl IP initial time-to-live guess (TG)
+        self.tg = self.calculate_ttl_guess(icmp_sender)
 
+    @staticmethod
+    def calculate_ttl_guess(icmp_sender):
+        icmp_checks_list = icmp_sender.get_checks_list()
+        ttl = 0XFF - icmp_checks_list[0].get_response_ttl()
+        return IE.round_up_to_nearest(ttl)
+
+    @staticmethod
+    def round_up_to_nearest(value):
+        # List of possible values
+        possible_values = [32, 64, 128, 255]
+
+        # Find the next highest value
+        next_highest_value = min(possible_values, key=lambda x: (x - value) if x >= value else float('inf'))
+
+        return next_highest_value
+
+    # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
     @staticmethod
     def calculate_ttl_diff(icmp_sender):
         icmp_checks_list = icmp_sender.get_checks_list()
@@ -56,17 +82,19 @@ class IE:
         self.cd = tests.get('CD', '')
 
         # T value is a hexadecimal range so we need to parse it, and create a tuple
-        t_range = tests.get('T', '')
-        t_values = t_range.split('-')
+        t_value = tests.get('T', '')
 
-        # Convert hexadecimal strings to integers
-        start_value = int(t_values[0], 16)
-        end_value = int(t_values[1], 16)
+        if '-' in t_value:
+            t_range = t_value.split('-')
+            # Convert hexadecimal strings to integers and create a tuple
+            self.t = (int(t_range[0], 16), int(t_range[1], 16))
+        else:
+            self.t = t_value
 
-        # Create a tuple of start and end values
-        self.t = (start_value, end_value)
-        self.tg = tests.get('TG', '')
+        # Convert hexadecimal string to integer
+        self.tg = int(tests.get('TG', ''), 16)
 
+    # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
     @staticmethod
     def calculate_cd(icmp_sender):
         # Both code values are zero.
@@ -87,7 +115,8 @@ class IE:
         df_value_1 = checks_list[1].get_dont_fragment_bit_value()
         if df_value_0 == 'N' and df_value_1 == 'N':
             return 'N'
-        # TODO get the probe values and not only the response values and compare to test "	Both responses echo the DF value of the probe." and return 'S'
+        # TODO get the probe values and not only the response values and compare to test "
+        #  Both responses echo the DF value of the probe." and return 'S'
         # 	Both of the response DF bits are set. - 'Y'
         if df_value_0 == 'Y' and df_value_1 == 'Y':
             return 'Y'
