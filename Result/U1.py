@@ -9,7 +9,7 @@ class U1:
     def __init__(self):
         self.r = None
         self.df = None
-        self.t = None # TODO impl IP initial time-to-live (T)
+        self.t = None
         self.tg = None # TODO impl IP initial time-to-live guess (TG) - check if it's the same as IE
         self.ipl = None
         self.un = None
@@ -18,6 +18,13 @@ class U1:
         self.ripck = None
         self.ruck = None
         self.rud = None
+
+    # TODO consider combining it in the commonTests together with the IE func
+    # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
+    @staticmethod
+    def calculate_ttl_diff(u1_sender):
+        u1_checks_list = u1_sender.get_checks_list()
+        return 0XFF - u1_checks_list[0].get_response_ttl()
 
     def __eq__(self, other):
         if self.r != other.r:
@@ -29,6 +36,16 @@ class U1:
 
         if self.df != other.df:
             return False
+        # T can either be a range, or value to compare
+        if isinstance(self.t, tuple):
+            # Check if it's a tuple, compare using the tuple values
+            if self.t[1] > other.t[1] or self.t[0] < other.t[0]:
+                return False
+        else:
+            # If it's not a tuple, perform a normal comparison
+            if self.t != other.t:
+                return False
+
         if self.tg != other.tg:
             return False
         if self.ipl != other.ipl:
@@ -52,7 +69,7 @@ class U1:
         u1_check = udp_sender.get_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(u1_check)
         self.df = CommonTests.calculate_dont_fragment(u1_check)
-        self.t = None # TODO impl IP initial time-to-live (T)
+        self.t = self.calculate_ttl_diff(udp_sender)
         self.tg = None # TODO impl IP initial time-to-live guess (TG)
         self.ipl = self.calculate_ipl(u1_check)
         self.un = self.calculate_un(u1_check)
@@ -70,9 +87,19 @@ class U1:
             return
 
         self.df = tests.get('DF', '')
-        self.t = tests.get('T', '')
-        self.tg = tests.get('TG', '')
-        self.ipl = tests.get('IPL', '')
+
+        t_value = tests.get('T', '')
+
+        if '-' in t_value:
+            t_range = t_value.split('-')
+            # Convert hexadecimal strings to integers and create a tuple
+            self.t = (int(t_range[0], 16), int(t_range[1], 16))
+        else:
+            self.t = t_value
+
+        # Convert hexadecimal string to integer
+        self.tg = int(tests.get('TG', ''), 16)
+        self.ipl = int(tests.get('IPL', ''), 16)
         self.un = tests.get('UN', '')
         self.ripl = tests.get('RIPL', '')
         self.rid = tests.get('RID', '')
@@ -142,7 +169,7 @@ class U1:
     @staticmethod
     def calculate_ipl(u1_check):
         # This test records the total length (in octets) of an IP packet
-        return oct(len(u1_check.get_response_packet()))
+        return len(u1_check.get_response_packet())
 
     # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # Section - Unused port unreachable field nonzero (UN)
