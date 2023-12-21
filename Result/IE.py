@@ -21,7 +21,7 @@ class IE:
             return False
         if self.cd != other.cd:
             return False
-        if self.t != other.t:
+        if self.t > other.t[1] or self.t < other.t[0]:
             return False
         if self.tg != other.tg:
             return False
@@ -37,16 +37,34 @@ class IE:
 
         self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
         self.cd = self.calculate_cd(icmp_sender)
-        self.t = None #TODO impl
+        self.t = self.calculate_ttl_diff(icmp_sender)
         self.tg = None  # TODO impl IP initial time-to-live guess (TG)
+
+    @staticmethod
+    def calculate_ttl_diff(icmp_sender):
+        icmp_checks_list = icmp_sender.get_checks_list()
+        return 0XFF - icmp_checks_list[0].get_response_ttl()
 
     def init_from_db(self, tests : dict):
         # If responsiveness result doesn't exist, it means responsiveness = Y
         self.r = tests.get('R', 'Y')
 
+        if self.r == 'N':
+            return
+
         self.dfi = tests.get('DFI', '')
         self.cd = tests.get('CD', '')
-        self.t = tests.get('T', '')
+
+        # T value is a hexadecimal range so we need to parse it, and create a tuple
+        t_range = tests.get('T', '')
+        t_values = t_range.split('-')
+
+        # Convert hexadecimal strings to integers
+        start_value = int(t_values[0], 16)
+        end_value = int(t_values[1], 16)
+
+        # Create a tuple of start and end values
+        self.t = (start_value, end_value)
         self.tg = tests.get('TG', '')
 
     @staticmethod

@@ -145,6 +145,9 @@ class Check:
             self.logger.error("This is not a TCP packet, cannot extract options!")
             return None
 
+    def get_response_ttl(self):
+        return self._response_packet[IP].ttl
+
     def get_send_time(self):
         return self._send_timestamp
 
