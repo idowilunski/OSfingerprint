@@ -19,10 +19,14 @@ class U1:
         self.ruck = None
         self.rud = None
 
-    # TODO - implement more complex logic here, ranges etc.
     def __eq__(self, other):
         if self.r != other.r:
             return False
+
+        # If responsiveness test returned "no", then all values will be empty
+        if self.r == 'N':
+            return True
+
         if self.df != other.df:
             return False
         if self.tg != other.tg:
@@ -59,7 +63,12 @@ class U1:
         self.rud = self.calculate_rud(u1_check)
 
     def init_from_db(self, tests: dict):
-        self.r = tests.get('R', '')
+        # If responsiveness result doesn't exist, it means responsiveness = Y
+        self.r = tests.get('R', 'Y')
+
+        if self.r == 'N':
+            return
+
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
@@ -133,9 +142,7 @@ class U1:
     @staticmethod
     def calculate_ipl(u1_check):
         # This test records the total length (in octets) of an IP packet
-        # That length varies by implementation because they are allowed to choose
-        # how much data from the original probe to include, as long as they meet the minimum RFC 1122 requirement.
-        return len(u1_check.get_response_packet())
+        return oct(len(u1_check.get_response_packet()))
 
     # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
     # Section - Unused port unreachable field nonzero (UN)

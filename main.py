@@ -35,7 +35,7 @@ if __name__ == '__main__':
 # port 19575 is also open and 19576 and 19577
     for port in range(1, 2):
             # tested until 13704
-            udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 19576)
+            udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 7772)
         # Call the function or perform any other actions here
         # For example, ecn_sender.some_function()
 
