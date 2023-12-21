@@ -79,4 +79,4 @@ class CommonTests:
 
     @staticmethod
     def calculate_dont_fragment(check):
-        return check.is_dont_fragment_bit_set()
+        return check.get_dont_fragment_bit_value()

@@ -90,7 +90,7 @@ class Check:
     def is_response_packet_empty(self) -> bool:
         return not self._response_packet
 
-    def is_dont_fragment_bit_set(self):
+    def get_dont_fragment_bit_value(self):
         if not self._response_packet:
             raise "No response packet received"
         if not self._response_packet.haslayer(ICMP) and not self._response_packet.haslayer(IP):
