@@ -9,32 +9,30 @@ class IE:
         self.t = None
         self.tg = None
 
-    def __eq__(self, other):
-        if self.r != other.r:
-            return False
+    def calculate_similarity_score(self, other):
+        score = 0
+        if self.r == other.r:
+            score += 50
 
-        # If responsiveness test returned "no", then all values will be empty
-        if self.r == 'N':
-            return True
-
-        if self.dfi != other.dfi:
-            return False
-        if self.cd != other.cd:
-            return False
+        if self.dfi == other.dfi:
+            score += 40
+        if self.cd == other.cd:
+            score += 100
 
         # T can either be a range, or value to compare
-        if isinstance(other.t, tuple):
-            # Check if it's a tuple, compare using the tuple values
-            if not (other.t[0] < self.t < other.t[1]):
-                return False
+        if isinstance(other.t, list):
+            for t_tuple in other.t:
+                if len(t_tuple) == 2 and t_tuple[0] <= self.t <= t_tuple[1]:
+                    score += 15
+                    break  # Break the loop if the score is within any tuple's range
         else:
             # If it's not a tuple, perform a normal comparison
-            if self.t != other.t:
-                return False
+            if self.t == other.t:
+                score += 15
 
-        if self.tg != other.tg:
-            return False
-        return True
+        if self.tg == other.tg:
+            score += 15
+        return score
 
     def init_from_response(self, icmp_sender):
         icmp_check = icmp_sender.get_checks_list()[0]

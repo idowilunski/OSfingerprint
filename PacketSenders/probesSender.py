@@ -1,5 +1,5 @@
-from probePackets import *
-from PacketSender import *
+from Packets.probePackets import *
+from PacketSenders.PacketSender import *
 
 
 # Generates 6 TCP probes, sends them and parses the response

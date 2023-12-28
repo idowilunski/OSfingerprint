@@ -19,7 +19,7 @@ class U1:
         self.ruck = None
         self.rud = None
 
-    def get_similarity_score(self, other):
+    def calculate_similarity_score(self, other):
         score = 0
         if self.r == other.r:
             score += 50
@@ -27,7 +27,7 @@ class U1:
             score += 20
         if isinstance(other.t, list):
             for t_tuple in other.t:
-                if len(t_tuple) == 2 and t_tuple[0] <= score <= t_tuple[1]:
+                if len(t_tuple) == 2 and t_tuple[0] <= self.t <= t_tuple[1]:
                     score += 15
                     break  # Break the loop if the score is within any tuple's range
         else:

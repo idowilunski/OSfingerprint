@@ -1,6 +1,6 @@
 import logging
-from TcpClosePortPackets import *
-from PacketSender import *
+from Packets.TcpClosePortPackets import *
+from PacketSenders.PacketSender import *
 
 
 class TcpClosePortSender(PacketSender):

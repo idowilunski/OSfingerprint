@@ -1,5 +1,5 @@
-from TcpOpenPortPackets import *
-from PacketSender import *
+from Packets.TcpOpenPortPackets import *
+from PacketSenders.PacketSender import *
 
 
 class TcpOpenPortSender(PacketSender):

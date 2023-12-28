@@ -10,21 +10,21 @@ class Options:
         self.o5 = None
         self.o6 = None
 
-    def __eq__(self, other):
-        if self.o1 != other.o1:
-            return False
-        if self.o2 != other.o2:
-            return False
-        if self.o3 != other.o3:
-            return False
-        if self.o4 != other.o4:
-            return False
-        if self.o5 != other.o5:
-            return False
-        if self.o6 != other.o6:
-            return False
-
-        return True
+    def calculate_similarity_score(self, other):
+        score = 0
+        if self.o1 == other.o1:
+            score += 20
+        if self.o2 == other.o2:
+            score += 20
+        if self.o3 == other.o3:
+            score += 20
+        if self.o4 == other.o4:
+            score += 20
+        if self.o5 == other.o5:
+            score += 20
+        if self.o6 == other.o6:
+            score += 20
+        return score
 
     def init_from_response(self, probe_sender):
         checks_list = probe_sender.get_checks_list()

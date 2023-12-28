@@ -1,6 +1,8 @@
 import logging
-from CommonTests import *
+import math
 
+from CommonTests import *
+from math import sqrt, log2
 
 # runs the sequence (SEQ) check -
 # According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
@@ -20,26 +22,25 @@ class Sequence:
         self.ss = None
         self.ts = None
 
-    def __eq__(self, other):
-        if self.sp != other.sp:
-            return False
-        if self.gcd != other.gcd:
-            return False
-        if self.isr != other.isr:
-            return False
-        if self.ti != other.ti:
-            return False
-        if self.rd != other.rd:
-            return False
-        if self.ci != other.ci:
-            return False
-        if self.ii != other.ii:
-            return False
-        if self.ss != other.ss:
-            return False
-        if self.ts != other.ts:
-            return False
-        return True
+    def calculate_similarity_score(self, other) -> int:
+        score = 0
+        if self.sp == other.sp:
+            score += 25
+        if self.gcd == other.gcd:
+            score += 75
+        if self.isr == other.isr:
+            score += 25
+        if self.ti == other.ti:
+            score += 100
+        if self.ci == other.ci:
+            score += 50
+        if self.ii == other.ii:
+            score += 100
+        if self.ss == other.ss:
+            score += 80
+        if self.ts == other.ts:
+            score += 100
+        return score
 
     def init_from_response(self, probe_sender, close_ports_sender, icmp_sender):
         self.sp = self.calculate_sp(probe_sender)
@@ -174,9 +175,9 @@ class Sequence:
         #  If the previously computed GCD value is greater than nine,
         #  the elements of the previously computed seq_rates array are divided by that value.
         #  We don't do the division for smaller GCD values because those are usually caused by chance.
-        if self._gcd and self._gcd > 9:
+        if self.gcd and self.gcd > 9:
             # Divide elements of seq_rates by the GCD value
-            normalized_seq_rates = [rate / self._gcd for rate in self._seq_rates]
+            normalized_seq_rates = [rate / self.gcd for rate in self.seq_rates]
 
             # Calculate the standard deviation of the normalized_seq_rates
             std_dev = math.sqrt(sum(
@@ -200,10 +201,10 @@ class Sequence:
     def calculate_gcd(self, probe_sender):
         # TODO - make sure we've received here a non-empty response, and only if so, add it in the calculation?
         for i in range(len(probe_sender.get_checks_list()) - 1):
-            first_isn = probe_sender.get_checks_list()[i].get_isn()
+            first_isn = probe_sender.get_checks_list()[i].get_response_sequence_number()
             if not first_isn:
                 raise
-            second_isn = probe_sender.get_checks_list()[i + 1].get_isn()
+            second_isn = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
             if not second_isn:
                 raise
 
@@ -221,13 +222,13 @@ class Sequence:
             final_difference = min(absolute_difference, wrapped_around_difference)
 
             self.logger.debug(f"Appending diff between {first_isn} and {second_isn}: {final_difference}")
-            self._diff1.append(final_difference)
+            self.diff1.append(final_difference)
 
         # Note: before python 3.9 usage of list in gcd function won't be supported, make sure you've installed the
         # environment from the requirements.txt
         # TODO make it work somehow either with 3.7 or download 3.9
-        if len(self._diff1) > 0:
-            return Sequence.find_gcd_of_list(self._diff1)
+        if len(self.diff1) > 0:
+            return Sequence.find_gcd_of_list(self.diff1)
 
         # TODO add UT that does the following:
         #  So the difference between 0x20000 followed by 0x15000 is 0xB000.
@@ -332,15 +333,15 @@ class Sequence:
             #  The result is an array, which we'll call seq_rates,
             #  containing the rates of ISN counter increases per second.
 
-            self._seq_rates.append(self._diff1[i] / float(time_difference))
+            self.seq_rates.append(self.diff1[i] / float(time_difference))
 
-        # Calculate the average of self._seq_rates
-        average_value = sum(self._seq_rates) / len(self._seq_rates)
+        # Calculate the average of self.seq_rates
+        average_value = sum(self.seq_rates) / len(self.seq_rates)
 
         # Determine ISR based on the average value
         if average_value < 1:
-            self._isr = 0
+            self.isr = 0
         else:
-            self._isr = round(8 * math.log2(average_value))
+            self.isr = round(8 * math.log2(average_value))
 
-        self.logger.info(f"ISR: {self._isr}")
+        self.logger.info(f"ISR: {self.isr}")

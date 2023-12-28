@@ -15,30 +15,33 @@ class TCheck:
         self.rd = None
         self.q = None
 
-    def __eq__(self, other):
-        if self.r != other.r:
-            return False
-        if self.df != other.df:
-            return False
-        if self.t != other.t:
-            return False
-        if self.tg != other.tg:
-            return False
-        if self.w != other.w:
-            return False
-        if self.s != other.s:
-            return False
-        if self.a != other.a:
-            return False
-        if self.f != other.f:
-            return False
-        if self.o != other.o:
-            return False
-        if self.rd != other.rd:
-            return False
-        if self.q != other.q:
-            return False
-        return True
+    def calculate_similarity_score(self, other):
+        score = 0
+        # TODO - for T2,T3,T7 has 80 score here
+        if self.r == other.r:
+            score += 100
+        if self.df == other.df:
+            score += 20
+        if self.t == other.t:
+            score += 15
+        if self.tg == other.tg:
+            score += 15
+        # TODO - T1 doesn't have matchpoint for W score!
+        if self.w == other.w:
+            score += 25
+        if self.s == other.s:
+            score += 20
+        if self.a == other.a:
+            score += 20
+        if self.f == other.f:
+            score += 30
+        if self.o == other.o:
+            score += 10
+        if self.rd == other.rd:
+            score += 20
+        if self.q == other.q:
+            score += 20
+        return score
 
     def init_from_response(self, t_sender):
         self.r = CommonTests.calculate_responsiveness(t_sender)

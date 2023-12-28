@@ -20,21 +20,22 @@ class WindowSize:
         self.w5 = None
         self.w6 = None
 
-    def __eq__(self, other):
-        if self.w1 != other.w1:
-            return False
-        if self.w2 != other.w2:
-            return False
-        if self.w3 != other.w3:
-            return False
-        if self.w4 != other.w4:
-            return False
-        if self.w5 != other.w5:
-            return False
-        if self.w6 != other.w6:
-            return False
+    def calculate_similarity_score(self, other):
+        score = 0
+        if self.w1 == other.w1:
+            score += 15
+        if self.w2 == other.w2:
+            score += 15
+        if self.w3 == other.w3:
+            score += 15
+        if self.w4 == other.w4:
+            score += 15
+        if self.w5 == other.w5:
+            score += 15
+        if self.w6 == other.w6:
+            score += 15
 
-        return True
+        return score
 
     def init_from_response(self, probe_sender):
         logging.basicConfig(level=logging.INFO)

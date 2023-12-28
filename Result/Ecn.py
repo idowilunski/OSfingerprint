@@ -13,27 +13,29 @@ class Ecn:
         self.cc = None
         self.q = None
 
-    def __eq__(self, other):
-        if not isinstance(other, Ecn):
-            return False
+    def calculate_similarity_score(self, other):
+        score = 0
 
-        if self.r != other.r:
-            return False
-        if self.df != other.df:
-            return False
-        if self.t != other.t:
-            return False
-        if self.tg != other.tg:
-            return False
-        if self.w != other.w:
-            return False
-        if self.o != other.o:
-            return False
-        if self.cc != other.cc:
-            return False
-        if self.q != other.q:
-            return False
-        return True
+        if not isinstance(other, Ecn):
+            return score
+
+        if self.r == other.r:
+            score += 100
+        if self.df == other.df:
+            score += 20
+        if self.t == other.t:
+            score += 15
+        if self.tg == other.tg:
+            score += 15
+        if self.w == other.w:
+            score += 15
+        if self.o == other.o:
+            score += 15
+        if self.cc == other.cc:
+            score += 100
+        if self.q == other.q:
+            score += 20
+        return score
 
     def init_from_response(self, ecn_sender):
         ecn_check = ecn_sender.get_checks_list()[0]
