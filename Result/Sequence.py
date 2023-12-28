@@ -8,6 +8,8 @@ from CommonTests import *
 # This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
 class Sequence:
     def __init__(self):
+        self.seq_rates = None
+        self.diff1 = None  # Differences list, diff1 is the name in the nmap documentation reference
         self.sp = None
         self.gcd = None
         self.isr = None
@@ -17,7 +19,6 @@ class Sequence:
         self.ii = None
         self.ss = None
         self.ts = None
-
 
     def __eq__(self, other):
         if self.sp != other.sp:
@@ -41,9 +42,7 @@ class Sequence:
 
         return True
 
-    def init_from_response(self, probe_sender):
-        self.seq_rates = None
-        self.diff1 = None  # Differences list, diff1 is the name in the nmap documentation reference
+    def init_from_response(self, probe_sender, close_ports_sender, icmp_sender):
         self.sp = self.calculate_sp(probe_sender)
         self.gcd = self.calculate_gcd(probe_sender)
         self.isr = self.calculate_isr(probe_sender)
