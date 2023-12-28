@@ -72,7 +72,7 @@ class CommonTests:
     # No standard has yet been established for such data.
     # Do CRC32 checksum and set RD
     def calculate_rd(probe_sender):
-        response_data = probe_sender.get_checks_list[0].get_data()
+        response_data = probe_sender.get_checks_list()[0].get_response_packet()
         if len(response_data) == 0:
             return 0
         return binascii.crc32(response_data)

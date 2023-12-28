@@ -34,11 +34,11 @@ if __name__ == '__main__':
 #Discovered open port 4001/tcp on 127.0.0.1
 #Discovered open port 6881/tcp on 127.0.0.1
 
-    udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 7772)
-    ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", 7772)
-    icmp_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", 7772)
-    probe_sender = PacketSenders.probesSender.ProbesSender("127.0.0.1", 7772)
-    tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender("127.0.0.1", 7772)
+    udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 19576)
+    ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", 19576)
+    icmp_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", 19576)
+    probe_sender = PacketSenders.probesSender.ProbesSender("127.0.0.1", 19576)
+    tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender("127.0.0.1", 19576)
     tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender("127.0.0.1", 1)
 
     udp_sender.prepare_packets()

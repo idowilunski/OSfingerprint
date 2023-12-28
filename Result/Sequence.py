@@ -10,8 +10,8 @@ from math import sqrt, log2
 # This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
 class Sequence:
     def __init__(self):
-        self.seq_rates = None
-        self.diff1 = None  # Differences list, diff1 is the name in the nmap documentation reference
+        self.seq_rates = []
+        self.diff1 = []  # Differences list, diff1 is the name in the nmap documentation reference
         self.sp = None
         self.gcd = None
         self.isr = None
@@ -221,7 +221,7 @@ class Sequence:
             # Choose the smaller of the two differences
             final_difference = min(absolute_difference, wrapped_around_difference)
 
-            self.logger.debug(f"Appending diff between {first_isn} and {second_isn}: {final_difference}")
+            print(f"Appending diff between {first_isn} and {second_isn}: {final_difference}")
             self.diff1.append(final_difference)
 
         # Note: before python 3.9 usage of list in gcd function won't be supported, make sure you've installed the
@@ -343,5 +343,3 @@ class Sequence:
             self.isr = 0
         else:
             self.isr = round(8 * math.log2(average_value))
-
-        self.logger.info(f"ISR: {self.isr}")
