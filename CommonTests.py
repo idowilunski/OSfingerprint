@@ -75,7 +75,7 @@ class CommonTests:
         response_data = probe_sender.get_checks_list()[0].get_response_packet()
         if len(response_data) == 0:
             return 0
-        return binascii.crc32(response_data)
+        return binascii.crc32(response_data.original)
 
     @staticmethod
     def calculate_dont_fragment(check):

@@ -172,7 +172,7 @@ class Check:
 
     def parse_response_packet(self):
         if not self._response_packet:
-            self.logger.error("Response packet is empty")
+            self.logger.error(f"Response packet is empty for port {self._target_port}")
             return
             # This is not an error, according to documentation it's expected to sometimes happen and should
             # be treated downstream

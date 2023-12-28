@@ -1,14 +1,5 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import Fingerprint
-import PacketSenders
-from Result import Ecn
-from PacketSenders import *
 import PacketSenders.EcnSender, PacketSenders.EchoSender, PacketSenders.UdpSender, PacketSenders.probesSender, \
     PacketSenders.TcpClosePortSender, PacketSenders.TcpOpenPortSender
-import Result.Ecn, Result.IE, Result.U1
 from databaseParser import *
 from Fingerprint import Fingerprint
 
@@ -16,8 +7,6 @@ from Fingerprint import Fingerprint
 # ECN(R=Y%DF=Y%T=7B-85%TG=80%W=FFFF%O=MFFD7NW8NNS%CC=N%Q=)
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-
-    # TODO call ido's functions
     db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
     parser = DatabaseParser(db_path)
     #parser.read_database()
@@ -34,12 +23,12 @@ if __name__ == '__main__':
 #Discovered open port 4001/tcp on 127.0.0.1
 #Discovered open port 6881/tcp on 127.0.0.1
 
-    udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 19576)
-    ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", 19576)
-    icmp_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", 19576)
-    probe_sender = PacketSenders.probesSender.ProbesSender("127.0.0.1", 19576)
-    tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender("127.0.0.1", 19576)
-    tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender("127.0.0.1", 1)
+    udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 63342)
+    ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", 63342)
+    icmp_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", 63342)
+    probe_sender = PacketSenders.probesSender.ProbesSender("127.0.0.1", 63342)
+    tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender("127.0.0.1", 63342)
+    tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender("127.0.0.1", 57468)
 
     udp_sender.prepare_packets()
     ecn_sender.prepare_packets()
@@ -68,7 +57,7 @@ if __name__ == '__main__':
 
 # port 19575 is also open and 19576 and 19577
     max_score = -1  # Set an initial value lower than any possible score
-    best_u1_result = None
+    best_result = None
 
     for entry in list_of_entries:
         curr_entry = Fingerprint()
@@ -81,15 +70,6 @@ if __name__ == '__main__':
         # Check if the current score is higher than the maximum
         if score > max_score:
             max_score = score
-            best_u1_result = curr_entry
+            best_result = curr_entry
 
-
-    print(f"DONE! Max score is: {best_u1_result.name}")
-
-    #    fingerprints = parser.get_fingerprints()
-    #    for fingerprint in fingerprints:
-    #        print(fingerprint)
-    #        fingerprint.print()
-    #ecn.init_from_db(tests)
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    print(f"DONE! Max score is: {best_result.name}")
