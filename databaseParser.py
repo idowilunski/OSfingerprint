@@ -50,7 +50,9 @@ class DatabaseParser:
                     continue
 
                 entry_data = self.parse_entry(entry)
-                list_of_u1s.append(entry_data.get('U1'))
+                u1_data = entry_data.get('U1')
+                u1_data['Fingerprint'] = entry_data.get('Fingerprint')
+                list_of_u1s.append(u1_data)
 
         return list_of_u1s
 

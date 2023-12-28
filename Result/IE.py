@@ -23,9 +23,9 @@ class IE:
             return False
 
         # T can either be a range, or value to compare
-        if isinstance(self.t, tuple):
+        if isinstance(other.t, tuple):
             # Check if it's a tuple, compare using the tuple values
-            if self.t[1] > other.t[1] or self.t[0] < other.t[0]:
+            if not (other.t[0] < self.t < other.t[1]):
                 return False
         else:
             # If it's not a tuple, perform a normal comparison

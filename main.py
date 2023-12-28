@@ -15,7 +15,7 @@ from databaseParser import *
 if __name__ == '__main__':
 
     # TODO call ido's functions
-    db_path = 'DB_example.txt'
+    db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
     parser = DatabaseParser(db_path)
     #parser.read_database()
 
@@ -48,13 +48,24 @@ if __name__ == '__main__':
             response_u1 = Result.U1.U1()
             response_u1.init_from_response(udp_sender)
 
+            max_score = -1  # Set an initial value lower than any possible score
+            best_u1_result = None
+
             for u1_dict in list_of_u1s:
                 curr_u1 = Result.U1.U1()
                 curr_u1.init_from_db(u1_dict)
-                if response_u1 == curr_u1:
-                    print("YAY")
 
-    print("DONE")
+                # Calculate the similarity score
+                score = response_u1.get_similarity_score(curr_u1)
+
+                print(f"Score is {score} and fingerprint is: {u1_dict['Fingerprint']}")
+                # Check if the current score is higher than the maximum
+                if score > max_score:
+                    max_score = score
+                    best_u1_result = u1_dict['Fingerprint']
+
+
+    print(f"DONE! Max score is: {best_u1_result}")
 
     #    fingerprints = parser.get_fingerprints()
     #    for fingerprint in fingerprints:

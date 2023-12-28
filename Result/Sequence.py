@@ -39,7 +39,6 @@ class Sequence:
             return False
         if self.ts != other.ts:
             return False
-
         return True
 
     def init_from_response(self, probe_sender, close_ports_sender, icmp_sender):

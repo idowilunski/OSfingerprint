@@ -19,45 +19,39 @@ class U1:
         self.ruck = None
         self.rud = None
 
-
-    def __eq__(self, other):
-        if self.r != other.r:
-            return False
-
-        # If responsiveness test returned "no", then all values will be empty
-        if self.r == 'N':
-            return True
-
-        if self.df != other.df:
-            return False
-        # T can either be a range, or value to compare
-        if isinstance(self.t, tuple):
-            # Check if it's a tuple, compare using the tuple values
-            if self.t[1] > other.t[1] or self.t[0] < other.t[0]:
-                return False
+    def get_similarity_score(self, other):
+        score = 0
+        if self.r == other.r:
+            score += 50
+        if self.df == other.df:
+            score += 20
+        if isinstance(other.t, list):
+            for t_tuple in other.t:
+                if len(t_tuple) == 2 and t_tuple[0] <= score <= t_tuple[1]:
+                    score += 15
+                    break  # Break the loop if the score is within any tuple's range
         else:
-            # If it's not a tuple, perform a normal comparison
-            if self.t != other.t:
-                return False
+            # Handle the case when other.t is not a list of tuples
+            if self.t == other.t:
+                score += 15
 
-        if self.tg != other.tg:
-            return False
-        if self.ipl != other.ipl:
-            return False
-        if self.un != other.un:
-            return False
-        if self.ripl != other.ripl:
-            return False
-        if self.rid != other.rid:
-            return False
-        if self.ripck != other.ripck:
-            return False
-        if self.ruck != other.ruck:
-            return False
-        if self.rud != other.rud:
-            return False
-
-        return True
+        if self.tg == other.t:
+            score += 15
+        if self.ipl == other.ipl:
+            score += 100
+        if self.un == other.un:
+            score += 100
+        if self.ripl == other.ripl:
+            score += 100
+        if self.rid == other.rid:
+            score += 100
+        if self.ripck == other.ripck:
+            score += 100
+        if self.ruck == other.ruck:
+            score += 100
+        if self.rud == other.rud:
+            score += 100
+        return score
 
     def init_from_response(self, udp_sender):
         u1_check = udp_sender.get_checks_list()[0]
@@ -84,16 +78,47 @@ class U1:
 
         t_value = tests.get('T', '')
 
-        if '-' in t_value:
+        if '|' in t_value:
+            # Handle multiple tuples separated by "|"
+            tuple_strings = t_value.split('|')
+            self.t = [tuple(map(int, t.split('-'))) for t in tuple_strings]
+        elif '-' in t_value:
+            # Handle a single tuple
             t_range = t_value.split('-')
-            # Convert hexadecimal strings to integers and create a tuple
-            self.t = (int(t_range[0], 16), int(t_range[1], 16))
+            self.t = [[int(t_range[0], 16), int(t_range[1], 16)]]
         else:
-            self.t = t_value
+            # Handle a single value
+            self.t = int(t_value, 16)
 
         # Convert hexadecimal string to integer
-        self.tg = int(tests.get('TG', ''), 16)
-        self.ipl = int(tests.get('IPL', ''), 16)
+        tg_value = tests.get('TG', '')
+
+        if '|' in tg_value:
+            # Handle multiple tuples separated by "|"
+            tuple_strings = tg_value.split('|')
+            self.tg = [tuple(map(int, t.split('-'))) for t in tuple_strings]
+        elif '-' in tg_value:
+            # Handle a single tuple
+            t_range = tg_value.split('-')
+            self.tg = [[int(t_range[0], 16), int(t_range[1], 16)]]
+        else:
+            # Handle a single value
+            self.tg = int(tg_value, 16)
+
+        ipl_value = tests.get('IPL', '')
+
+        if '|' in ipl_value:
+            # Handle multiple tuples separated by "|"
+            tuple_strings = ipl_value.split('|')
+            self.ipl = [tuple(map(int, t.split('-'))) for t in tuple_strings]
+        elif '-' in ipl_value:
+            # Handle a single tuple
+            t_range = ipl_value.split('-')
+            self.ipl = [[int(t_range[0], 16), int(t_range[1], 16)]]
+        else:
+            # Handle a single value
+            self.ipl = int(ipl_value, 16)
+
         self.un = tests.get('UN', '')
         self.ripl = tests.get('RIPL', '')
         self.rid = tests.get('RID', '')
