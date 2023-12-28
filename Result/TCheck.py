@@ -6,7 +6,7 @@ class TCheck:
         self.r = None
         self.df = None
         self.t = None
-        self.tg = None # TODO impl IP initial time-to-live guess (TG)
+        self.tg = None
         self.w = None
         self.s = None
         self.a = None
@@ -40,18 +40,18 @@ class TCheck:
             return False
         return True
 
-    def init_from_response(self, t_check):
-        self.r = CommonTests.calculate_responsiveness(t_check)
-        self.df = CommonTests.calculate_dont_fragment(t_check)
-        self.t = self.calculate_initial_ttl(t_check)
-        self.tg = None  # TODO impl IP initial time-to-live guess (TG)
-        self.w = CommonTests.calculate_window_size(t_check)
-        self.s = self.calculate_sequence_number(t_check)
-        self.a = self.calculate_ack_number(t_check)
-        self.f = self.calculate_tcp_flags(t_check)
-        self.o = CommonTests.calculate_o(t_check)
-        self.rd = CommonTests.calculate_rd(t_check)
-        self.q = CommonTests.calculate_quirks(t_check)
+    def init_from_response(self, t_sender):
+        self.r = CommonTests.calculate_responsiveness(t_sender)
+        self.df = CommonTests.calculate_dont_fragment(t_sender)
+        self.t = CommonTests.calculate_initial_ttl(t_sender)
+        self.tg = CommonTests.calculate_ttl_guess(t_sender)
+        self.w = CommonTests.calculate_window_size(t_sender)
+        self.s = self.calculate_sequence_number(t_sender)
+        self.a = self.calculate_ack_number(t_sender)
+        self.f = self.calculate_tcp_flags(t_sender)
+        self.o = CommonTests.calculate_o(t_sender)
+        self.rd = CommonTests.calculate_rd(t_sender)
+        self.q = CommonTests.calculate_quirks(t_sender)
 
     def init_from_db(self, tests: dict):
         self.r = tests.get('R', '')
@@ -71,25 +71,6 @@ class TCheck:
     # which are the ones most likely to be dropped. In addition, if Nmap is missing a closed TCP port for a target,
     # it will not set R=N for the T5, T6, or T7 tests even if the port it tries is non-responsive.
     # After all, the lack of a closed port may be because they are all filtered.
-
-    # Calculate IP initial time-to-live (T)
-    # in documentation: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # Nmap determines how many hops away it is from the target by examining the ICMP port unreachable response
-    # to the U1 probe.
-    # That response includes the original IP packet, including the already-decremented TTL field, received by the target
-    # . By subtracting that value from our as-sent TTL, we learn how many hops away the machine is. Nmap then adds that
-    # hop distance to the probe response TTL to determine what the initial TTL was when that ICMP probe response packet
-    # was sent. That initial TTL value is stored in the fingerprint as the T result.
-    # Even though an eight-bit field like TTL can never hold values greater than 0xFF, this test occasionally results in
-    # values of 0x100 or higher. This occurs when a system (could be the source, a target, or a system in between)
-    # corrupts or otherwise fails to correctly decrement the TTL. It can also occur due to asymmetric routes
-    # Nmap can also learn from the system interface and routing tables when the hop distance is zero (localhost scan)
-    # or one (on the same network segment). This value is used when Nmap prints the hop distance for the user,
-    # but it is not used for T result computation.
-    # TODO impl
-    @staticmethod
-    def calculate_initial_ttl(t_check):
-        return ""
 
     @staticmethod
     def calculate_tcp_flags(t_check):

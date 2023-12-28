@@ -10,7 +10,7 @@ class U1:
         self.r = None
         self.df = None
         self.t = None
-        self.tg = None # TODO impl IP initial time-to-live guess (TG) - check if it's the same as IE
+        self.tg = None
         self.ipl = None
         self.un = None
         self.ripl = None
@@ -19,12 +19,6 @@ class U1:
         self.ruck = None
         self.rud = None
 
-    # TODO consider combining it in the commonTests together with the IE func
-    # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
-    @staticmethod
-    def calculate_ttl_diff(u1_sender):
-        u1_checks_list = u1_sender.get_checks_list()
-        return 0XFF - u1_checks_list[0].get_response_ttl()
 
     def __eq__(self, other):
         if self.r != other.r:
@@ -69,8 +63,8 @@ class U1:
         u1_check = udp_sender.get_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(u1_check)
         self.df = CommonTests.calculate_dont_fragment(u1_check)
-        self.t = self.calculate_ttl_diff(udp_sender)
-        self.tg = None # TODO impl IP initial time-to-live guess (TG)
+        self.t = CommonTests.calculate_ttl_diff(udp_sender)
+        self.tg = CommonTests.calculate_ttl_guess(udp_sender)
         self.ipl = self.calculate_ipl(u1_check)
         self.un = self.calculate_un(u1_check)
         self.ripl = self.calculate_ripl(u1_check)

@@ -80,3 +80,25 @@ class CommonTests:
     @staticmethod
     def calculate_dont_fragment(check):
         return check.get_dont_fragment_bit_value()
+
+    # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
+    @staticmethod
+    def calculate_ttl_diff(sender):
+        checks_list = sender.get_checks_list()
+        return 0XFF - checks_list[0].get_response_ttl()
+
+    @staticmethod
+    def calculate_ttl_guess(sender):
+        checks_list = sender.get_checks_list()
+        ttl = 0XFF - checks_list[0].get_response_ttl()
+        return CommonTests.round_up_to_nearest(ttl)
+
+    @staticmethod
+    def round_up_to_nearest(value):
+        # List of possible values
+        possible_values = [32, 64, 128, 255]
+
+        # Find the next highest value
+        next_highest_value = min(possible_values, key=lambda x: (x - value) if x >= value else float('inf'))
+
+        return next_highest_value

@@ -46,30 +46,9 @@ class IE:
 
         self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
         self.cd = self.calculate_cd(icmp_sender)
-        self.t = self.calculate_ttl_diff(icmp_sender)
-        self.tg = self.calculate_ttl_guess(icmp_sender)
+        self.t = CommonTests.calculate_ttl_diff(icmp_sender)
+        self.tg = CommonTests.calculate_ttl_guess(icmp_sender)
 
-    @staticmethod
-    def calculate_ttl_guess(icmp_sender):
-        icmp_checks_list = icmp_sender.get_checks_list()
-        ttl = 0XFF - icmp_checks_list[0].get_response_ttl()
-        return IE.round_up_to_nearest(ttl)
-
-    @staticmethod
-    def round_up_to_nearest(value):
-        # List of possible values
-        possible_values = [32, 64, 128, 255]
-
-        # Find the next highest value
-        next_highest_value = min(possible_values, key=lambda x: (x - value) if x >= value else float('inf'))
-
-        return next_highest_value
-
-    # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
-    @staticmethod
-    def calculate_ttl_diff(icmp_sender):
-        icmp_checks_list = icmp_sender.get_checks_list()
-        return 0XFF - icmp_checks_list[0].get_response_ttl()
 
     def init_from_db(self, tests : dict):
         # If responsiveness result doesn't exist, it means responsiveness = Y

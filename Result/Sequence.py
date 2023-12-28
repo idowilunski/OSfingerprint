@@ -55,17 +55,15 @@ class Sequence:
         self.ts = self.calculate_ts(probe_sender)
 
     def init_from_db(self, tests: dict):
-        self.r = tests.get('R', None)
-        self.df = tests.get('DF', None)
-        self.t = tests.get('T', None)
-        self.tg = tests.get('TG', None)
-        self.ipl = tests.get('IPL', None)
-        self.un = tests.get('UN', None)
-        self.ripl = tests.get('RIPL', None)
-        self.rid = tests.get('RID', None)
-        self.ripck = tests.get('RIPCK', None)
-        self.ruck = tests.get('RUCK', None)
-        self.rud = tests.get('RUD', None)
+        self.sp = tests.get('SP', None)
+        self.gcd = tests.get('GCD', None)
+        self.isr = tests.get('ISR', None)
+        self.ti = tests.get('TI', None)
+        self.rd = tests.get('RD', None)
+        self.ci = tests.get('CI', None)
+        self.ii = tests.get('II', None)
+        self.ss = tests.get('SS', None)
+        self.ts = tests.get('TS', None)
 
     @staticmethod
     # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
