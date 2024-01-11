@@ -84,8 +84,7 @@ class CommonTests:
     # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
     @staticmethod
     def calculate_ttl_diff(sender):
-        checks_list = sender.get_checks_list()
-        return 0XFF - checks_list[0].get_response_ttl()
+        return 0XFF - sender.get_checks_list()[0].get_response_ttl()
 
     @staticmethod
     def calculate_ttl_guess(sender):

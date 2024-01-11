@@ -1,5 +1,6 @@
 import PacketSenders.EcnSender, PacketSenders.EchoSender, PacketSenders.UdpSender, PacketSenders.probesSender, \
     PacketSenders.TcpClosePortSender, PacketSenders.TcpOpenPortSender
+from PortScanner import perform_port_scan
 from databaseParser import *
 from Fingerprint import Fingerprint
 
@@ -7,6 +8,8 @@ from Fingerprint import Fingerprint
 # ECN(R=Y%DF=Y%T=7B-85%TG=80%W=FFFF%O=MFFD7NW8NNS%CC=N%Q=)
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    open_port, close_port = 912, 951 #perform_port_scan()
+
     db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
     parser = DatabaseParser(db_path)
     #parser.read_database()
@@ -23,12 +26,12 @@ if __name__ == '__main__':
 #Discovered open port 4001/tcp on 127.0.0.1
 #Discovered open port 6881/tcp on 127.0.0.1
 
-    udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", 63342)
-    ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", 63342)
-    icmp_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", 63342)
-    probe_sender = PacketSenders.probesSender.ProbesSender("127.0.0.1", 63342)
-    tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender("127.0.0.1", 63342)
-    tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender("127.0.0.1", 57468)
+    udp_sender = PacketSenders.UdpSender.UdpSender("127.0.0.1", close_port)
+    ecn_sender = PacketSenders.EcnSender.EcnSender("127.0.0.1", open_port)
+    icmp_sender = PacketSenders.EchoSender.EchoSender("127.0.0.1", open_port)
+    probe_sender = PacketSenders.probesSender.ProbesSender("127.0.0.1", open_port)
+    tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender("127.0.0.1", open_port)
+    tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender("127.0.0.1", close_port)
 
     udp_sender.prepare_packets()
     ecn_sender.prepare_packets()
@@ -52,8 +55,9 @@ if __name__ == '__main__':
     tcp_close_port_sender.parse_response_packets()
 
     response_fingerprint = Fingerprint()
-    response_fingerprint.init_from_response(ecn_sender, tcp_open_port_sender, udp_sender, icmp_sender, probe_sender,
-                           tcp_close_port_sender)
+    response_fingerprint.init_from_response(ecn_sender, tcp_open_port_sender,
+                                            udp_sender, icmp_sender, probe_sender,
+                                            tcp_close_port_sender)
 
 # port 19575 is also open and 19576 and 19577
     max_score = -1  # Set an initial value lower than any possible score

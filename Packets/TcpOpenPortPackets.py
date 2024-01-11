@@ -12,9 +12,14 @@ class TcpPacket2(Check):
     # Those 20 bytes correspond to window scale (10), NOP, MSS (265), Timestamp
     # (TSval: 0xFFFFFFFF; TSecr: 0), then SACK permitted.
     def prepare_packet(self):
-        return IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, window=128,
-                                                         options=bytes.fromhex(
-                                                             "03030A0102040109080AFFFFFFFF000000000402"))
+        self._packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, window=128,
+                                                                 options=[
+                                                                     ("WScale", 10),
+                                                                     ("NOP", ''),
+                                                                     ("MSS", 265),
+                                                                     ("Timestamp", (0xFFFFFFFF, 0)),
+                                                                     ("SAck", '')
+                                                                 ])
 
 
 class TcpPacket3(Check):
@@ -24,8 +29,14 @@ class TcpPacket3(Check):
     # T3 sends a TCP packet with the SYN, FIN, URG,
     # and PSH flags set and a window field of 256 to an open port. The IP DF bit is not set.
     def prepare_packet(self):
-        return IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="SFUP", window=256,
-                                             options=bytes.fromhex("03030A0102040109080AFFFFFFFF000000000402"))
+        self._packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="SFUP", window=256,
+                                                     options=[
+                                                         ("WScale", 10),
+                                                         ("NOP", ''),
+                                                         ("MSS", 265),
+                                                         ("Timestamp", (0xFFFFFFFF, 0)),
+                                                         ("SAck", '')
+                                                     ])
 
 
 class TcpPacket4(Check):
@@ -34,6 +45,11 @@ class TcpPacket4(Check):
 
     # T4 sends a TCP ACK packet with IP DF and a window field of 1024 to an open port.
     def prepare_packet(self):
-        return IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=1024,
-                                                         options=bytes.fromhex(
-                                                             "03030A0102040109080AFFFFFFFF000000000402"))
+        self._packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=1024,
+                                                                 options=[
+                                                                     ("WScale", 10),
+                                                                     ("NOP", ''),
+                                                                     ("MSS", 265),
+                                                                     ("Timestamp", (0xFFFFFFFF, 0)),
+                                                                     ("SAck", '')
+                                                                 ])

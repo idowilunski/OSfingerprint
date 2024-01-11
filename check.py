@@ -133,7 +133,7 @@ class Check:
         if not self._response_packet.haslayer(TCP):
             raise "This function was incorrectly called on a non TCP packet"
 
-        if TCPFlags.SYN | TCPFlags.ACK != self._response_packet[TCP].flags:
+        if (TCPFlags.SYN | TCPFlags.ACK) != self._response_packet[TCP].flags:
             raise "This function was incorrectly called on a TCP packet returned to a non-open port"
 
         return self._response_packet[TCP].seq  # ISN - Initial sequence number
@@ -166,6 +166,7 @@ class Check:
             self._send_timestamp = datetime.now()
 
             self._response_packet = sr1(self._packet, verbose=0, timeout=10)
+            print("sent!")
         except Exception as e:
             self.logger.error(f"Error sending request: {e}")
             raise

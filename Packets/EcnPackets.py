@@ -47,25 +47,29 @@ class EcnPacket(Check):
         #                                             urgptr=0xF7F5  # Urgent field value
         #                                             )
 
-        #self._packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S",
-        #                                             options=options,
-        #                                             window=window_size,
-        #                                             ack=0,
-        #                                             reserved=1,
-        #                                             urgptr=0xF7F5  # Urgent Pointer
-        #                                             )
+        self._packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S",
+                                                     options=options,
+                                                     window=window_size,
+                                                     ack=0,
+                                                     reserved=1,
+                                                     urgptr=0xF7F5  # Urgent Pointer
+                                                     )
 
         # Define the raw payload as bytes
         # Define the raw payload as bytes
+        ip_address_bytes = socket.inet_aton(self._target_ip)
+        destination_port_bytes = self._target_port.to_bytes(2, byteorder='big')
+
         raw_payload = (
-                b'\x45\x00\x00\x3c\x00\x00\x00\x00\x40\x06\x00\x00'
-                b'\xc0\xa8\x01\x01' + self._target_ip.encode() +
-                b'\x00\x50\x00\x00\x00\x00\x00\x00\x00\x00\x00\x50'
-                b'\x02\x03\x00\xf7\xf5\x00\x00\x02\x04\x03\x03\x0a'
-                b'\x01\x01\x02\x04\x04\x5b\x04\x00\x01\x01\x01'
+            b'\x45\x00\x00\x3c\x00\x00\x00\x00\x40\x06\x00\x00'
+            b'\xc0\xa8\x01\x01' + ip_address_bytes +
+            destination_port_bytes +
+            b'\x00\x50\x00\x00\x00\x00\x00\x00\x00\x00\x00\x50'
+            b'\x02\x03\x00\xf7\xf5\x00\x00\x02\x04\x03\x03\x0a'
+            b'\x01\x01\x02\x04\x04\x5b\x04\x00\x01\x01\x01'
         )
 
-        self._packet = IP(raw_payload)
+        #self._packet = IP(raw_payload)
         # TODO - found a bug in settings CE flag (ECN CWR and ECE congestion control flags)
         # Urgent field value
         # TODO - need to check if this makes sense

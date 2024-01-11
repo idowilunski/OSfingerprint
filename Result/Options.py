@@ -33,7 +33,7 @@ class Options:
         self.o3 = CommonTests.calculate_o(checks_list[2])
         self.o4 = CommonTests.calculate_o(checks_list[3])
         self.o5 = CommonTests.calculate_o(checks_list[4])
-        self.o6 = CommonTests.calculate_o(checks_list[6])
+        self.o6 = CommonTests.calculate_o(checks_list[5])
 
     def init_from_db(self, tests : dict):
         self.o1 = tests.get('O1', None)

@@ -11,8 +11,14 @@ class TcpPacket5(Check):
 
     # T5 sends a TCP SYN packet without IP DF and a window field of 31337 to a closed port.
     def prepare_packet(self):
-        return IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S", window=31337,
-                                             options=bytes.fromhex("03030A0102040109080AFFFFFFFF000000000402"))
+        self._packet =  IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S", window=31337,
+                                                      options=[
+                                                          ("WScale", 10),
+                                                          ("NOP", ''),
+                                                          ("MSS", 265),
+                                                          ("Timestamp", (0xFFFFFFFF, 0)),
+                                                          ("SAck", '')
+                                                      ])
 
 
 class TcpPacket6(Check):
@@ -21,9 +27,14 @@ class TcpPacket6(Check):
 
     # T6 sends a TCP ACK packet with IP DF and a window field of 32768 to a closed port.
     def prepare_packet(self):
-        return IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=32768,
-                                                         options=bytes.fromhex(
-                                                             "03030A0102040109080AFFFFFFFF000000000402"))
+        self._packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=32768,
+                                                                 options=[
+                                                                     ("WScale", 10),
+                                                                     ("NOP", ''),
+                                                                     ("MSS", 265),
+                                                                     ("Timestamp", (0xFFFFFFFF, 0)),
+                                                                     ("SAck", '')
+                                                                 ])
 
 
 class TcpPacket7(Check):
@@ -34,6 +45,12 @@ class TcpPacket7(Check):
     # The IP DF bit is not set.
     # The exception is that T7 uses a Window scale value of 15 rather than 10
     def prepare_packet(self):
-        return IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="FPU", window=65535,
+        self._packet =  IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="FPU", window=65535,
                                              # Note 03030F insteaf of 03030A - changes the window scale
-                                             options=bytes.fromhex("03030F0102040109080AFFFFFFFF000000000402"))
+                                                      options=[
+                                                          ("WScale", 15),
+                                                          ("NOP", ''),
+                                                          ("MSS", 265),
+                                                          ("Timestamp", (0xFFFFFFFF, 0)),
+                                                          ("SAck", '')
+                                                      ])
