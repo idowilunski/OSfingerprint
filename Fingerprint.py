@@ -45,19 +45,19 @@ class Fingerprint:
     def init_from_db(self, tests: dict):
         self.name = tests['Fingerprint']
         self.CPE = tests['CPE']
-        self.SEQ.init_from_db(tests)
-        self.OPS.init_from_db(tests)
-        self.WIN.init_from_db(tests)
-        self.ECN.init_from_db(tests)
-        self.T1.init_from_db(tests)
-        self.T2.init_from_db(tests)
-        self.T3.init_from_db(tests)
-        self.T4.init_from_db(tests)
-        self.T5.init_from_db(tests)
-        self.T6.init_from_db(tests)
-        self.T7.init_from_db(tests)
-        self.U1.init_from_db(tests)
-        self.IE.init_from_db(tests)
+        self.SEQ.init_from_db(tests.get('SEQ'))
+        self.OPS.init_from_db(tests.get('OPS'))
+        self.WIN.init_from_db(tests.get('WIN'))
+        self.ECN.init_from_db(tests.get('ECN'))
+        self.T1.init_from_db(tests.get('T1'))
+        self.T2.init_from_db(tests.get('T2'))
+        self.T3.init_from_db(tests.get('T3'))
+        self.T4.init_from_db(tests.get('T4'))
+        self.T5.init_from_db(tests.get('T5'))
+        self.T6.init_from_db(tests.get('T6'))
+        self.T7.init_from_db(tests.get('T7'))
+        self.U1.init_from_db(tests.get('U1'))
+        self.IE.init_from_db(tests.get('IE'))
 
     def calculate_similarity_score(self, other_fingerprint):
         # Perform similarity score calculations for each member

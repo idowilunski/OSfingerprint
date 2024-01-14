@@ -61,6 +61,7 @@ class TCheck:
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
+        # TODO here there's a bug
         self.w = int(tests.get('W', ''))
         self.s = tests.get('S', '')
         self.a = tests.get('A', '')
