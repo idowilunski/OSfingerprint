@@ -133,8 +133,8 @@ class Check:
         if not self._response_packet.haslayer(TCP):
             raise "This function was incorrectly called on a non TCP packet"
 
-        if (TCPFlags.SYN | TCPFlags.ACK) != self._response_packet[TCP].flags:
-            raise "This function was incorrectly called on a TCP packet returned to a non-open port"
+        #if (TCPFlags.SYN | TCPFlags.ACK) != self._response_packet[TCP].flags:
+        #    raise "This function was incorrectly called on a TCP packet returned to a non-open port"
 
         return self._response_packet[TCP].seq  # ISN - Initial sequence number
 
