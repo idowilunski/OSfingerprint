@@ -33,8 +33,9 @@ class TCheck:
             score += 20
         if self.a == other.a:
             score += 20
-        if self.f == other.f:
-            score += 30
+        for flags_list in other.f:
+            if sorted(self.f) == sorted(flags_list):
+                    score += 30
         if self.o == other.o:
             score += 10
         if self.rd == other.rd:
@@ -61,15 +62,14 @@ class TCheck:
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
-        # TODO here there's a bug
         temp_w = tests.get('W', '')
         if temp_w == '':
             self.w = temp_w
         else:
-            self.w = int(temp_w)
+            self.w = int(temp_w, 16)
         self.s = tests.get('S', '')
         self.a = tests.get('A', '')
-        self.f = tests.get('F', '')
+        self.f = [list(entry) for entry in tests.get('F', '').split('|')]
         self.o = tests.get('O', '')
         self.rd = tests.get('RD', '')
         self.q = tests.get('Q', '')

@@ -55,7 +55,12 @@ class Ecn:
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
-        self.w = int(tests.get('W', ''))
+        temp_w = tests.get('W', '')
+        if temp_w == '':
+            self.w = temp_w
+        else:
+            self.w = int(temp_w, 16)
+
         self.o = tests.get('O', '')
         self.cc = tests.get('CC', '')
         self.q = tests.get('Q', '')
