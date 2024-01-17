@@ -27,15 +27,16 @@ class TCheck:
         if self.tg == other.tg:
             score += 15
         # TODO - T1 doesn't have matchpoint for W score!
-        if self.w == other.w:
-            score += 25
+        for window_size in other.w:
+            if self.w == int(window_size, 16):
+                score += 25
         if self.s == other.s:
             score += 20
         if self.a == other.a:
             score += 20
         for flags_list in other.f:
             if sorted(self.f) == sorted(flags_list):
-                    score += 30
+                score += 30
         if self.o == other.o:
             score += 10
         if self.rd == other.rd:
@@ -62,11 +63,7 @@ class TCheck:
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
-        temp_w = tests.get('W', '')
-        if temp_w == '':
-            self.w = temp_w
-        else:
-            self.w = int(temp_w, 16)
+        self.w = [entry for entry in tests.get('W', '').split('|') if entry]
         self.s = tests.get('S', '')
         self.a = tests.get('A', '')
         self.f = [list(entry) for entry in tests.get('F', '').split('|')]

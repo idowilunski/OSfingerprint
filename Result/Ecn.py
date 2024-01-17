@@ -27,8 +27,9 @@ class Ecn:
             score += 15
         if self.tg == other.tg:
             score += 15
-        if self.w == other.w:
-            score += 15
+        for window_size in other.w:
+            if self.w == int(window_size, 16):
+                score += 15
         if self.o == other.o:
             score += 15
         if self.cc == other.cc:
@@ -55,12 +56,7 @@ class Ecn:
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
-        temp_w = tests.get('W', '')
-        if temp_w == '':
-            self.w = temp_w
-        else:
-            self.w = int(temp_w, 16)
-
+        self.w = [entry for entry in tests.get('W', '').split('|') if entry]
         self.o = tests.get('O', '')
         self.cc = tests.get('CC', '')
         self.q = tests.get('Q', '')
