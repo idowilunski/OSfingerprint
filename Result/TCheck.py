@@ -82,7 +82,7 @@ class TCheck:
 
     @staticmethod
     def calculate_tcp_flags(t_check):
-        return t_check.get_tcp_flags()
+        return list(t_check.get_tcp_flags())
 
     @staticmethod
     # Tested according to TCP acknowledgment number (A)
