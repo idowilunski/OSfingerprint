@@ -61,15 +61,70 @@ class IE:
         # T value is a hexadecimal range so we need to parse it, and create a tuple
         t_value = tests.get('T', '')
 
-        if '-' in t_value:
-            t_range = t_value.split('-')
+        #if '-' in t_value:
+        #    t_range = t_value.split('-')
             # Convert hexadecimal strings to integers and create a tuple
-            self.t = (int(t_range[0], 16), int(t_range[1], 16))
-        else:
-            self.t = t_value
+        #     self.t = (int(t_range[0], 16), int(t_range[1], 16))
+        #else:
+        #    self.t = t_value
 
-        # Convert hexadecimal string to integer
-        self.tg = int(tests.get('TG', ''), 16)
+        # Check if "|" exists
+        if '|' in t_value:
+            # Split by "|"
+            parts = t_value.split('|')
+            # Process each part separately
+            processed_parts = []
+            self.t = []
+            for part in parts:
+                # Check if "-" exists in the part
+                if '-' in part:
+                    # Split by "-"
+                    sub_parts = part.split('-')
+                    # Convert each sub-part to a tuple of integers
+                    processed_sub_parts = tuple(int(part, 16) for part in sub_parts)
+                    self.t.append(processed_sub_parts)
+                else:
+                    # Convert the part to an integer
+                    self.t.append(int(part, 16))
+        else:
+            # If "|" doesn't exist, check if "-" exists
+            if '-' in t_value:
+                # Split by "-"
+                parts = t_value.split('-')
+                # Convert each part to a tuple of integers
+                self.t = tuple(int(part, 16) for part in parts)
+            else:
+                # Convert the entire value to an integer
+                self.t = int(t_value, 16)
+
+        # Check if "|" exists
+        if '|' in t_value:
+            # Split by "|"
+            parts = t_value.split('|')
+            # Process each part separately
+            processed_parts = []
+            self.tg = []
+            for part in parts:
+                # Check if "-" exists in the part
+                if '-' in part:
+                    # Split by "-"
+                    sub_parts = part.split('-')
+                    # Convert each sub-part to a tuple of integers
+                    processed_sub_parts = tuple(int(sub_part, 16) for sub_part in sub_parts)
+                    self.tg.append(processed_sub_parts)
+                else:
+                    # Convert the part to an integer
+                    self.tg.append(int(part, 16))
+        else:
+            # If "|" doesn't exist, check if "-" exists
+            if '-' in t_value:
+                # Split by "-"
+                parts = t_value.split('-')
+                # Convert each part to a tuple of integers
+                self.tg = tuple(int(part, 16) for part in parts)
+            else:
+                # Convert the entire value to an integer
+                self.tg = int(t_value, 16)
 
     # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
     @staticmethod
