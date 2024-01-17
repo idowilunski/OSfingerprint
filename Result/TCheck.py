@@ -66,7 +66,7 @@ class TCheck:
         if temp_w == '':
             self.w = temp_w
         else:
-            self._w = int(w)
+            self.w = int(temp_w)
         self.s = tests.get('S', '')
         self.a = tests.get('A', '')
         self.f = tests.get('F', '')
