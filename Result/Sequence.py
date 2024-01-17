@@ -259,7 +259,10 @@ class Sequence:
         max_difference = 0
 
         for i in range(len(probe_sender.get_checks_list()) - 1):
-            difference = abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i])
+            # TODO fix this to be the difference between ISN of the resposnes and not something else
+            isn_first = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
+            isn_second = probe_sender.get_checks_list()[i].get_response_sequence_number()
+            difference = abs(isn_first - isn_second)
             max_difference = max(max_difference, difference)
 
         # TODO - make sure for ii it can't be returned.
