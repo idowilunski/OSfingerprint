@@ -44,7 +44,10 @@ class Fingerprint:
 
     def init_from_db(self, tests: dict):
         self.name = tests['Fingerprint']
-        self.CPE = tests['CPE']
+        try:
+            self.CPE = tests['CPE']
+        except:
+            pass
         self.SEQ.init_from_db(tests.get('SEQ'))
         self.OPS.init_from_db(tests.get('OPS'))
         self.WIN.init_from_db(tests.get('WIN'))

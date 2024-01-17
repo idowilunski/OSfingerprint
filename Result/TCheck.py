@@ -62,7 +62,11 @@ class TCheck:
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')
         # TODO here there's a bug
-        self.w = int(tests.get('W', ''))
+        temp_w = tests.get('W', '')
+        if temp_w == '':
+            self.w = temp_w
+        else:
+            self._w = int(w)
         self.s = tests.get('S', '')
         self.a = tests.get('A', '')
         self.f = tests.get('F', '')
