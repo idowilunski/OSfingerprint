@@ -5,6 +5,12 @@ from databaseParser import *
 from Fingerprint import Fingerprint
 import shutil
 import os
+import sys
+
+
+def print_usage():
+    print("Usage: py main.py <ip_address>")
+    sys.exit(1)
 
 
 def find_nmap_directory():
@@ -18,7 +24,12 @@ def find_nmap_directory():
 
 
 if __name__ == '__main__':
-    ip_addr = "127.0.0.1"
+    # Check if the user provided an IP address
+    if len(sys.argv) != 2:
+        print("Error: Please provide an IP address.")
+        print_usage()
+
+    ip_addr = sys.argv[1]
     open_port, close_port = perform_port_scan(ip_addr)
 
     db_path = find_nmap_directory() + "\\nmap-os-db"
