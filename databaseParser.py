@@ -6,7 +6,8 @@ class DatabaseParser:
         self.db_path = db_path
         self.fingerprints = []
 
-    def parse_entry(self, entry):
+    @staticmethod
+    def parse_entry(entry):
         lines = entry.split('\n')
         entry_data = {}
         for line in lines:
@@ -26,6 +27,7 @@ class DatabaseParser:
 
         return entry_data
 
+    @staticmethod
     def parse_tests(tests_str):
         # Splitting the input string by '%'
         substrings = tests_str.split('%')
