@@ -5,7 +5,9 @@ from databaseParser import *
 from Fingerprint import Fingerprint
 
 if __name__ == '__main__':
-    open_port, close_port = 912, 951 #TODO - perform_port_scan()
+    ip_addr = "127.0.0.1"
+    open_port, close_port = perform_port_scan(ip_addr)
+        #912, 951
 
     db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
     parser = DatabaseParser(db_path)
@@ -14,10 +16,9 @@ if __name__ == '__main__':
 
     # TODO - go over each port and detect / get it from commandline
 
-#    ip_addr = "127.0.0.1"
-    ip_addr = "45.33.32.156"
-    open_port = 80
-    close_port = 150
+#    ip_addr = "45.33.32.156"
+#    open_port = 80
+#    close_port = 150
     udp_sender = PacketSenders.UdpSender.UdpSender(ip_addr, close_port)
     ecn_sender = PacketSenders.EcnSender.EcnSender(ip_addr, open_port)
     icmp_sender = PacketSenders.EchoSender.EchoSender(ip_addr, open_port)
