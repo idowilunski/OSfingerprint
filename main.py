@@ -3,13 +3,25 @@ import PacketSenders.EcnSender, PacketSenders.EchoSender, PacketSenders.UdpSende
 from PortScanner import perform_port_scan
 from databaseParser import *
 from Fingerprint import Fingerprint
+import shutil
+import os
+
+
+def find_nmap_directory():
+    nmap_path = shutil.which('nmap')
+
+    if nmap_path:
+        nmap_directory = os.path.dirname(nmap_path)
+        return nmap_directory
+    else:
+        return None
+
 
 if __name__ == '__main__':
     ip_addr = "127.0.0.1"
     open_port, close_port = perform_port_scan(ip_addr)
-        #912, 951
 
-    db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
+    db_path = find_nmap_directory() + "\\nmap-os-db"
     parser = DatabaseParser(db_path)
 
     list_of_entries = parser.read_database_and_get_all_entries()
