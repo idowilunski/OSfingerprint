@@ -19,6 +19,9 @@ class Ecn:
         if not isinstance(other, Ecn):
             return score
 
+        if self.r == 'N':
+            return 0
+
         if self.r == other.r:
             score += 100
         if self.df == other.df:

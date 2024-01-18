@@ -274,8 +274,10 @@ class Sequence:
         if are_all_identical:
             return hex(probe_sender.get_checks_list()[0])
 
+        isn_first = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
+        isn_second = probe_sender.get_checks_list()[i].get_response_sequence_number()
         for i in range(len(probe_sender.get_checks_list()) - 1):
-            difference = abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i])
+            difference = abs(isn_first - isn_second)
 
             # If any of the differences between two consecutive IDs exceeds 1,000, and is not evenly divisible by 256,
             # the test's value is RI (random positive increments)
@@ -293,7 +295,7 @@ class Sequence:
         # than network byte order. It works fine and isn't any sort of RFC violation,
         # though it does give away host architecture details which can be useful to attackers.
         all_divisible_by_256 = all(
-            abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i]) % 256 == 0
+            abs(isn_first - isn_second) % 256 == 0
             for i in range(len(probe_sender.get_checks_list()) - 1))
 
         if all_divisible_by_256 and max_difference < 5120:
@@ -301,7 +303,7 @@ class Sequence:
 
         # If all of the differences are less than ten, the value is I (incremental). We allow difference up to ten here
         # (rather than requiring sequential ordering) because traffic from other hosts can cause sequence gaps.
-        all_less_than_ten = all(abs(probe_sender.get_checks_list()[i + 1] - probe_sender.get_checks_list()[i]) < 10
+        all_less_than_ten = all(abs(isn_first - isn_second) < 10
                                 for i in range(len(probe_sender.get_checks_list()) - 1))
         if all_less_than_ten:
             return 'I'

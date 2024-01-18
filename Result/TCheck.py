@@ -1,6 +1,7 @@
 from CommonTests import *
 
-
+# TODO - we need to still add the port scanner, maybe some console options like printing
+# nmap -O -sV -T4 -d  scanme.nmap.org === verbose, prints all the results
 class TCheck:
     def __init__(self):
         self.r = None
@@ -18,6 +19,9 @@ class TCheck:
     def calculate_similarity_score(self, other):
         score = 0
         # TODO - for T2,T3,T7 has 80 score here
+        if self.r == 'N':
+            return 0
+
         if self.r == other.r:
             score += 100
         if self.df == other.df:

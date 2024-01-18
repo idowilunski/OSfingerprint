@@ -53,34 +53,39 @@ class Check:
         return self._response_packet[ICMP].type == 0
 
     def get_tcp_flags(self):
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+            return ""
+            #raise "This function was incorrectly called on a non TCP packet"
 
         return self._response_packet[TCP].flags
 
     def is_response_urgent_bit_set(self) -> bool:
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+            #raise "This function was incorrectly called on a non TCP packet"
+            return False
 
         # Read the urgent field from the TCP packet
         return bool(self._response_packet[TCP].urgptr)
 
     def is_response_reserved_bit_set(self) -> bool:
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+            #raise "This function was incorrectly called on a non TCP packet"
+            return False
 
         # Read the reserved field from the TCP packet
         return bool(self._response_packet[TCP].flags & 0x70)
 
     def is_response_ece_set(self):
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+        #raise "This function was incorrectly called on a non TCP packet"
+            return False
 
         return bool(self._response_packet[TCP].flags & 0x40) # 0x40 is the ECE flag
 
     def is_response_cwr_set(self):
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+            #raise "This function was incorrectly called on a non TCP packet"
+            return False
 
         return bool(self._response_packet[TCP].flags & 0x80) # 0x80 is the CWR flag
 
@@ -98,9 +103,12 @@ class Check:
 
     def get_dont_fragment_bit_value(self):
         if not self._response_packet:
-            raise "No response packet received"
+            return 'Y'
+#            raise "No response packet received"
         if not self._response_packet.haslayer(ICMP) and not self._response_packet.haslayer(IP):
-            raise "This function was incorrectly called on a non IP, and non ICMP packet"
+            #raise "This function was incorrectly called on a non IP, and non ICMP packet"
+            return 'Y'
+
 
         # TODO remove magic numbers here
         fragmentation_needed = 3
@@ -118,8 +126,9 @@ class Check:
         return self._response_packet[IP].id
 
     def get_response_ack_number(self):
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+            return 0
+            #raise "This function was incorrectly called on a non TCP packet"
         return self._response_packet[TCP].ack
 
     def get_probe_ack_number(self):
@@ -130,8 +139,9 @@ class Check:
 
     def get_response_sequence_number(self):
         # TODO - add verification seq number makes sense? 32-bit number?
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+            return 0
+#            raise "This function was incorrectly called on a non TCP packet"
 
         #if (TCPFlags.SYN | TCPFlags.ACK) != self._response_packet[TCP].flags:
         #    raise "This function was incorrectly called on a TCP packet returned to a non-open port"
@@ -139,8 +149,9 @@ class Check:
         return self._response_packet[TCP].seq  # ISN - Initial sequence number
 
     def get_received_window_size(self):
-        if not self._response_packet.haslayer(TCP):
-            raise "This function was incorrectly called on a non TCP packet"
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
+            #raise "This function was incorrectly called on a non TCP packet"
+            return 0
 
         return self._response_packet[TCP].window
 
@@ -152,6 +163,8 @@ class Check:
             return None
 
     def get_response_ttl(self):
+        if not self._response_packet or not self._response_packet.haslayer('IP'):
+            return 0
         return self._response_packet[IP].ttl
 
     def get_send_time(self):

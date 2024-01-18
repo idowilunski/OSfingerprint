@@ -21,6 +21,9 @@ class U1:
 
     def calculate_similarity_score(self, other):
         score = 0
+        if self.r == 'N':
+            return 0
+
         if self.r == other.r:
             score += 50
         if self.df == other.df:

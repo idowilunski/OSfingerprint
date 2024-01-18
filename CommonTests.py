@@ -32,6 +32,7 @@ class CommonTests:
         if not check.is_response_packet_empty():
             return ''.join(
                 [CommonTests.format_option(opt) for opt in check.get_received_tcp_options()])
+        return ''
 
     @staticmethod
     def format_option(option):
