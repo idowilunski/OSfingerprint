@@ -1,5 +1,6 @@
 from Fingerprint import *
 
+
 class DatabaseParser:
     def __init__(self, db_path):
         self.db_path = db_path
@@ -52,36 +53,6 @@ class DatabaseParser:
                 list_of_entries.append(entry_data)
 
         return list_of_entries
-
-    def read_database(self):
-        with open(self.db_path, 'r', encoding='utf-8', errors='ignore') as file:
-            count = 0
-            entries = file.read().split('\n\n')
-            for entry in entries:
-                if count < 2:
-                    count += 1
-                    continue
-
-                entry_data = self.parse_entry(entry)
-#                fingerprint = Fingerprint(
-#                    entry_data.get('Fingerprint', ''),
-#                    entry_data.get('CPE', ''),
-#                    entry_data.get('SEQ', ''),
-#                    entry_data.get('OPS', ''),
-#                    entry_data.get('WIN', ''),
-#                    entry_data.get('ECN', ''),
-#                    entry_data.get('T1', ''),
-#                    entry_data.get('T2', ''),
-#                    entry_data.get('T3', ''),
-#                    entry_data.get('T4', ''),
-#                    entry_data.get('T5', ''),
-#                    entry_data.get('T6', ''),
-#                    entry_data.get('T7', ''),
-#                    entry_data.get('U1', ''),
-#                    entry_data.get('IE', '')
-#                    )
-#               self.fingerprints.append(fingerprint)
-#                print(entry_data)
 
     def get_fingerprints(self):
         return self.fingerprints
