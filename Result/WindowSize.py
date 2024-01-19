@@ -12,6 +12,8 @@ import logging
 # Despite the different names, each test is processed exactly the same way."
 class WindowSize:
     def __init__(self):
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
 
         self.w1 = None
         self.w2 = None
@@ -22,34 +24,25 @@ class WindowSize:
 
     def calculate_similarity_score(self, other):
         score = 0
-        if self.w1 == other.w1:
-            score += 15
-        if self.w2 == other.w2:
-            score += 15
-        if self.w3 == other.w3:
-            score += 15
-        if self.w4 == other.w4:
-            score += 15
-        if self.w5 == other.w5:
-            score += 15
-        if self.w6 == other.w6:
-            score += 15
-
+        for attr in ['w1', 'w2', 'w3', 'w4', 'w5', 'w6']:
+            if getattr(self, attr) == getattr(other, attr):
+                score += 15
         return score
 
     def init_from_response(self, probe_sender):
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
 
         checks_list = probe_sender.get_checks_list()
-        self.w1 = self.calculate_w(checks_list[0])
-        self.w2 = self.calculate_w(checks_list[1])
-        self.w3 = self.calculate_w(checks_list[2])
-        self.w4 = self.calculate_w(checks_list[3])
-        self.w5 = self.calculate_w(checks_list[4])
-        self.w6 = self.calculate_w(checks_list[5])
+        self.w1 = checks_list[0].check.get_received_window_size()
+        self.w2 = checks_list[1].check.get_received_window_size()
+        self.w3 = checks_list[2].check.get_received_window_size()
+        self.w4 = checks_list[3].check.get_received_window_size()
+        self.w5 = checks_list[4].check.get_received_window_size()
+        self.w6 = checks_list[5].check.get_received_window_size()
 
     def init_from_db(self, tests: dict):
+        if not isinstance(tests, dict):
+            raise Exception("Init from DB called with a non dictionary object!")
+
         self.w1 = tests.get('W1', None)
         self.w2 = tests.get('W2', None)
         self.w3 = tests.get('W3', None)
@@ -57,6 +50,3 @@ class WindowSize:
         self.w5 = tests.get('W5', None)
         self.w6 = tests.get('W6', None)
 
-    @staticmethod
-    def calculate_w(check):
-        return check.get_received_window_size()

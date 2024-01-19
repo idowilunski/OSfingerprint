@@ -22,6 +22,19 @@ class Sequence:
         self.ss = None
         self.ts = None
 
+    def __eq__(self, other):
+        return self.seq_rates == other.seq_rates and \
+            self.diff1 == other.diff1 and \
+            self.gcd == other.gcd and \
+            self.isr == other.isr and \
+            self.ti == other.ti and \
+            self.rd == other.rd and \
+            self.ci == other.ci and \
+            self.ii == other.ii and \
+            self.ss == other.ss and \
+            self.ts == other.ts
+
+
     def calculate_similarity_score(self, other) -> int:
         score = 0
         if self.sp == other.sp:
