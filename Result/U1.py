@@ -60,8 +60,8 @@ class U1:
         u1_check = udp_sender.get_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(u1_check)
         self.df = CommonTests.calculate_dont_fragment(u1_check)
-        self.t = CommonTests.calculate_ttl_diff(udp_sender)
-        self.tg = CommonTests.calculate_ttl_guess(udp_sender)
+        self.t = CommonTests.calculate_ttl_diff(udp_sender.get_checks_list()[0])
+        self.tg = CommonTests.calculate_ttl_guess(udp_sender.get_checks_list()[0])
         self.ipl = self.calculate_ipl(u1_check)
         self.un = self.calculate_un(u1_check)
         self.ripl = self.calculate_ripl(u1_check)

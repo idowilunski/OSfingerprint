@@ -31,12 +31,12 @@ class WindowSize:
 
     def init_from_response(self, probe_sender):
         checks_list = probe_sender.get_checks_list()
-        self.w1 = checks_list[0].check.get_received_window_size()
-        self.w2 = checks_list[1].check.get_received_window_size()
-        self.w3 = checks_list[2].check.get_received_window_size()
-        self.w4 = checks_list[3].check.get_received_window_size()
-        self.w5 = checks_list[4].check.get_received_window_size()
-        self.w6 = checks_list[5].check.get_received_window_size()
+        self.w1 = checks_list[0].get_received_window_size()
+        self.w2 = checks_list[1].get_received_window_size()
+        self.w3 = checks_list[2].get_received_window_size()
+        self.w4 = checks_list[3].get_received_window_size()
+        self.w5 = checks_list[4].get_received_window_size()
+        self.w6 = checks_list[5].get_received_window_size()
 
     def init_from_db(self, tests: dict):
         if not isinstance(tests, dict):

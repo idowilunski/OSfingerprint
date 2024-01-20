@@ -33,7 +33,7 @@ class Ecn:
         for window_size in other.w:
             if self.w == int(window_size, 16):
                 score += 15
-        if self.o == other.o:
+        if self.o is not None and self.o == other.o:
             score += 15
         if self.cc == other.cc:
             score += 100
@@ -44,9 +44,14 @@ class Ecn:
     def init_from_response(self, ecn_sender):
         ecn_check = ecn_sender.get_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(ecn_check)
+
+        # If responsiveness test returned "no", no bother calculating, all values will be empty
+        if self.r == 'N':
+            return
+
         self.df = CommonTests.calculate_dont_fragment(ecn_check)
-        self.t = CommonTests.calculate_ttl_diff(ecn_sender)
-        self.tg = CommonTests.calculate_ttl_guess(ecn_sender)
+        self.t = CommonTests.calculate_ttl_diff(ecn_sender.get_checks_list()[0])
+        self.tg = CommonTests.calculate_ttl_guess(ecn_sender.get_checks_list()[0])
         self.w = CommonTests.calculate_window_size(ecn_check)
         self.o = CommonTests.calculate_o(ecn_check)
         if len(self.o) > 0:
@@ -56,6 +61,11 @@ class Ecn:
 
     def init_from_db(self, tests : dict):
         self.r = tests.get('R', '')
+
+        # If responsiveness test returned "no", no bother calculating, all values will be empty
+        if self.r == 'N':
+            return
+
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')

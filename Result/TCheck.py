@@ -41,7 +41,7 @@ class TCheck:
         for flags_list in other.f:
             if sorted(self.f) == sorted(flags_list):
                 score += 30
-        if self.o == other.o:
+        if self.o is not None and self.o == other.o:
             score += 10
         if self.rd == other.rd:
             score += 20
@@ -51,9 +51,14 @@ class TCheck:
 
     def init_from_response(self, t_sender, check):
         self.r = CommonTests.calculate_responsiveness(check)
+
+        # If responsiveness test returned "no", no bother calculating, all values will be empty
+        if self.r == 'N':
+            return
+
         self.df = CommonTests.calculate_dont_fragment(check)
-        self.t = CommonTests.calculate_ttl_diff(t_sender)
-        self.tg = CommonTests.calculate_ttl_guess(t_sender)
+        self.t = CommonTests.calculate_ttl_diff(t_sender.get_checks_list()[0])
+        self.tg = CommonTests.calculate_ttl_guess(t_sender.get_checks_list()[0])
         self.w = CommonTests.calculate_window_size(check)
         self.s = self.calculate_sequence_number(check)
         self.a = self.calculate_ack_number(check)
@@ -64,6 +69,11 @@ class TCheck:
 
     def init_from_db(self, tests: dict):
         self.r = tests.get('R', '')
+
+        # If responsiveness test returned "no", no bother calculating, all values will be empty
+        if self.r == 'N':
+            return
+
         self.df = tests.get('DF', '')
         self.t = tests.get('T', '')
         self.tg = tests.get('TG', '')

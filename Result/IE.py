@@ -47,8 +47,8 @@ class IE:
 
         self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
         self.cd = self.calculate_cd(icmp_sender)
-        self.t = CommonTests.calculate_ttl_diff(icmp_sender)
-        self.tg = CommonTests.calculate_ttl_guess(icmp_sender)
+        self.t = CommonTests.calculate_ttl_diff(icmp_sender.get_checks_list()[0])
+        self.tg = CommonTests.calculate_ttl_guess(icmp_sender.get_checks_list()[0])
 
 
     def init_from_db(self, tests : dict):
