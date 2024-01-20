@@ -1,16 +1,32 @@
 import logging
 
 
-#  This test simply records the 16-bit TCP window size of the received packet
-# According to the following documentation, under "TCP initial window size (W, W1–W6)":
-# https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-
-# "While this test is generally named W, the six probes sent for sequence generation purposes are a special case.
-# Those are inserted into a special WIN test line and take the names W1 through W6. The window size is recorded
-# for all the sequence number probes because they differ in TCP MSS option values,
-# which causes some operating systems to advertise a different window size.
-# Despite the different names, each test is processed exactly the same way."
 class WindowSize:
+    """
+    Represents a class for handling and comparing TCP window size values.
+
+    This class is designed to record and manage the 16-bit TCP window size values obtained from different probes.
+    It includes methods for calculating a similarity score between two instances and initializing the class attributes
+    from either response packets or database records.
+    According to the following documentation, under "TCP initial window size (W, W1–W6)":
+    https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+
+    Attributes:
+        w1 (int): 16-bit TCP window size value for probe W1.
+        w2 (int): 16-bit TCP window size value for probe W2.
+        w3 (int): 16-bit TCP window size value for probe W3.
+        w4 (int): 16-bit TCP window size value for probe W4.
+        w5 (int): 16-bit TCP window size value for probe W5.
+        w6 (int): 16-bit TCP window size value for probe W6.
+
+    Methods:
+        - calculate_similarity_score(other): Calculates a similarity score between two WindowSize instances based on
+          their window size values.
+        - init_from_response(probe_sender): Initializes the class attributes using the window size values obtained
+          from a ProbeSender instance.
+        - init_from_db(tests): Initializes the class attributes using window size values from a dictionary obtained
+          from a database.
+    """
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
@@ -23,6 +39,17 @@ class WindowSize:
         self.w6 = None
 
     def calculate_similarity_score(self, other):
+        """
+        Calculate the similarity score between two WindowSize instances.
+
+        The similarity score is calculated based on matching window size values between the two instances.
+
+        Args:
+            other (WindowSize): Another WindowSize instance to compare with.
+
+        Returns:
+            int: The similarity score, ranging from 0 to 90.
+        """
         score = 0
         for attr in ['w1', 'w2', 'w3', 'w4', 'w5', 'w6']:
             if getattr(self, attr) == getattr(other, attr):
@@ -30,6 +57,12 @@ class WindowSize:
         return score
 
     def init_from_response(self, probe_sender):
+        """
+        Initialize the class attributes from a ProbeSender instance.
+
+        Args:
+            probe_sender (ProbeSender): An instance of ProbeSender containing response packets with window size values.
+        """
         checks_list = probe_sender.get_checks_list()
         self.w1 = checks_list[0].get_received_window_size()
         self.w2 = checks_list[1].get_received_window_size()
@@ -39,6 +72,15 @@ class WindowSize:
         self.w6 = checks_list[5].get_received_window_size()
 
     def init_from_db(self, tests: dict):
+        """
+        Initialize the class attributes from a dictionary obtained from the NMAP database parsed earlier.
+
+        Args:
+            tests (dict): A dictionary containing window size values for probes W1 to W6.
+
+        Raises:
+            Exception: If the input is not a dictionary.
+        """
         if not isinstance(tests, dict):
             raise Exception("Init from DB called with a non dictionary object!")
 
@@ -48,4 +90,3 @@ class WindowSize:
         self.w4 = tests.get('W4', None)
         self.w5 = tests.get('W5', None)
         self.w6 = tests.get('W6', None)
-
