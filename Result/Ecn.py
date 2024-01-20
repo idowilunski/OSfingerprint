@@ -3,7 +3,24 @@ from CommonTests import *
 
 
 class Ecn:
+    """
+    Represents an ECN (Explicit Congestion Notification) test object.
+
+    Attributes:
+        r (str): Responsiveness result ('Y' for Yes, 'N' for No).
+        df (str): Don't Fragment result ('Y' for Yes, 'N' for No).
+        t (str): TTL Diff (Time To Live difference) result.
+        tg (str): TTL Guess result.
+        w (str): Window Size result.
+        o (str): O Test result.
+        cc (str): Congestion Notification result ('Y' for Yes, 'N' for No, 'S' for Echo, 'O' for Other).
+        q (str): Quirks result.
+    """
+
     def __init__(self):
+        """
+        Initializes an Ecn object with attributes representing ECN (Explicit Congestion Notification) test results.
+        """
         self.r = None
         self.df = None
         self.t = None
@@ -13,7 +30,16 @@ class Ecn:
         self.cc = None
         self.q = None
 
-    def calculate_similarity_score(self, other):
+    def calculate_similarity_score(self, other) -> int:
+        """
+        Calculates the similarity score between two Ecn objects.
+
+        Parameters:
+            other (Ecn): The other Ecn object to compare.
+
+        Returns:
+            int: The similarity score between the two Ecn objects.
+        """
         score = 0
 
         if not isinstance(other, Ecn):
@@ -43,6 +69,12 @@ class Ecn:
         return score
 
     def init_from_response(self, ecn_sender):
+        """
+        Initializes the Ecn object attributes based on the response from the ECN sender.
+
+        Parameters:
+            ecn_sender (Sender): The sender object for the ECN test.
+        """
         ecn_check = ecn_sender.get_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(ecn_check)
 
@@ -61,6 +93,12 @@ class Ecn:
         self.q = CommonTests.calculate_quirks(ecn_check)
 
     def init_from_db(self, tests : dict):
+        """
+        Initializes the Ecn object attributes based on the values stored in the database.
+
+        Parameters:
+            tests (dict): Dictionary containing the test results retrieved from the database.
+        """
         self.r = tests.get('R', '')
 
         # If responsiveness test returned "no", no bother calculating, all values will be empty
@@ -77,6 +115,15 @@ class Ecn:
 
     @staticmethod
     def calculate_congestion_notification(ecn_packet):
+        """
+        Calculates the congestion notification result based on the ECN packet.
+
+        Parameters:
+            ecn_packet (Packet): The ECN packet from the test.
+
+        Returns:
+            str: The calculated congestion notification result ('Y', 'N', 'S', or 'O').
+        """
         is_ece = ecn_packet.is_response_ece_set()
         is_cwr = ecn_packet.is_response_cwr_set()
         # Only the ECE bit is set (not CWR). This host supports ECN.
