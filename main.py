@@ -1,7 +1,7 @@
 import PacketSenders.EcnSender, PacketSenders.EchoSender, PacketSenders.UdpSender, PacketSenders.probesSender, \
     PacketSenders.TcpClosePortSender, PacketSenders.TcpOpenPortSender
 from PortScanner import perform_port_scan
-from databaseParser import *
+from DatabaseParser import *
 from Fingerprint import Fingerprint
 import shutil
 import os
