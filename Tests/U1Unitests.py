@@ -1,16 +1,32 @@
-# test_your_module.py
+# test WindowSize.py
 import pytest
-from Result.WindowSize import WindowSize
-import DummyProbeSender
+from Result.U1 import U1
+#import DummyProbeSender
+
 
 def test_init_initializes_all_members():
-    w_size = WindowSize()
-    assert w_size.w1 is None
-    assert w_size.w2 is None
-    assert w_size.w3 is None
-    assert w_size.w4 is None
-    assert w_size.w5 is None
-    assert w_size.w6 is None
+    u1 = U1()
+    assert u1.r is None
+    assert u1.df is None
+    assert u1.t is None
+    assert u1.tg is None
+    assert u1.ipl is None
+    assert u1.un is None
+    assert u1.ripl is None
+    assert u1.rid is None
+    assert u1.ripck is None
+    assert u1.ruck is None
+    assert u1.rud is None
+
+
+
+
+
+
+
+
+
+
 
 
 def test_init_from_db_with_missing_keys_doesnt_raise_exception():
