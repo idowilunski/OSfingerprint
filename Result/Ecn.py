@@ -30,9 +30,10 @@ class Ecn:
             score += 15
         if self.tg == other.tg:
             score += 15
-        for window_size in other.w:
-            if self.w == int(window_size, 16):
-                score += 15
+        if other.w is not None:
+            for window_size in other.w:
+                if self.w == int(window_size, 16):
+                    score += 15
         if self.o is not None and self.o == other.o:
             score += 15
         if self.cc == other.cc:

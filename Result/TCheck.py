@@ -30,17 +30,18 @@ class TCheck:
             score += 15
         if self.tg == other.tg:
             score += 15
-        # TODO - T1 doesn't have matchpoint for W score!
-        for window_size in other.w:
-            if self.w == int(window_size, 16):
-                score += 25
+        if other.w is not None:
+            for window_size in other.w:
+                if self.w == int(window_size, 16):
+                    score += 25
         if self.s == other.s:
             score += 20
         if self.a == other.a:
             score += 20
-        for flags_list in other.f:
-            if sorted(self.f) == sorted(flags_list):
-                score += 30
+        if other.f is not None:
+            for flags_list in other.f:
+                if sorted(self.f) == sorted(flags_list):
+                    score += 30
         if self.o is not None and self.o == other.o:
             score += 10
         if self.rd == other.rd:
