@@ -4,6 +4,7 @@ from TcpFlags import TCPFlags
 from scapy.layers.inet import IP, TCP, ICMP, UDP, RandNum, UDPerror, in4_chksum
 from datetime import datetime
 
+
 # Check is an abstract base class representing the interface for a "check" in OS-detection
 # Usage of inheriting class is expected to be: prepare_packet, send_packet, and analyze_response.
 class Check:
@@ -150,7 +151,6 @@ class Check:
 
     def get_received_window_size(self):
         if not self._response_packet or not self._response_packet.haslayer(TCP):
-            #raise "This function was incorrectly called on a non TCP packet"
             return 0
 
         return self._response_packet[TCP].window

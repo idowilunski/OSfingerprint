@@ -30,7 +30,6 @@ class WindowSize:
         return score
 
     def init_from_response(self, probe_sender):
-
         checks_list = probe_sender.get_checks_list()
         self.w1 = checks_list[0].check.get_received_window_size()
         self.w2 = checks_list[1].check.get_received_window_size()

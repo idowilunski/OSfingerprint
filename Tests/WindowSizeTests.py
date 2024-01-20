@@ -1,7 +1,7 @@
 # test_your_module.py
 import pytest
 from Result.WindowSize import WindowSize
-
+import DummyProbeSender
 
 def test_init_initializes_all_members():
     w_size = WindowSize()
@@ -45,6 +45,18 @@ def test_init_from_db_with_invalid_dict_raises_exception():
         w_size.init_from_db(list())
 
 
+def test_init_from_db_happy_flow():
+    w = WindowSize()
+    dict_to_init_from = {"W1": "abc", "W2": "dce", "W3": "fgh", "W4": "ijk", "W5": "lmn", "W6": "opq"}
+    w.init_from_db(dict_to_init_from)
+    assert w.w1 == "abc"
+    assert w.w2 == "dce"
+    assert w.w3 == "fgh"
+    assert w.w4 == "ijk"
+    assert w.w5 == "lmn"
+    assert w.w6 == "opq"
+
+
 def test_calculate_similarity_score():
     w1 = WindowSize()
     w1.w1 = "a"
@@ -75,4 +87,14 @@ def test_calculate_similarity_score():
     w3.w6 = "f"
     assert w1.calculate_similarity_score(w3) == 90
 
-# TODO need to verify init from DB that's ok, and init from response that's ok or with bugs
+
+def test_init_from_response_happy_flow():
+    dummy_probe_sender = DummyProbeSender.DummyProbeSender()
+    w = WindowSize()
+    w.init_from_response(dummy_probe_sender)
+    assert w.w1 == 1234
+    assert w.w2 == 1234
+    assert w.w3 == 1234
+    assert w.w4 == 1234
+    assert w.w5 == 1234
+    assert w.w6 == 1234
