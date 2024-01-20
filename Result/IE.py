@@ -11,8 +11,6 @@ class IE:
 
     def calculate_similarity_score(self, other):
         score = 0
-        if self.r == 'N':
-            return 0
 
         if self.r == other.r:
             score += 50
@@ -40,11 +38,6 @@ class IE:
     def init_from_response(self, icmp_sender):
         icmp_check = icmp_sender.get_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(icmp_check)
-
-        # If responsiveness test returned "no", no bother calculating, all values will be empty
-        if self.r == 'N':
-            return
-
         self.dfi = self.calculate_dont_fragment_icmp(icmp_sender)
         self.cd = self.calculate_cd(icmp_sender)
         self.t = CommonTests.calculate_ttl_diff(icmp_sender.get_checks_list()[0])
@@ -54,10 +47,6 @@ class IE:
     def init_from_db(self, tests : dict):
         # If responsiveness result doesn't exist, it means responsiveness = Y
         self.r = tests.get('R', 'Y')
-
-        if self.r == 'N':
-            return
-
         self.dfi = tests.get('DFI', '')
         self.cd = tests.get('CD', '')
 

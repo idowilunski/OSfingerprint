@@ -1,8 +1,31 @@
 from CommonTests import *
 
-# TODO - we need to still add the port scanner, maybe some console options like printing
-# nmap -O -sV -T4 -d  scanme.nmap.org === verbose, prints all the results
+
 class TCheck:
+    """
+    Represents a test check for the T (TCP) type of OS detection probes.
+
+    Attributes:
+        r (str): Responsiveness result ('Y', 'N', or '' if not applicable).
+        df (str): Don't Fragment (DF) result.
+        t (str): Time To Live (TTL) difference result.
+        tg (str): Time To Live (TTL) guess result.
+        w (list): List of window size values.
+        s (str): Sequence number result.
+        a (str): Acknowledgment number result.
+        f (list): List of TCP flags.
+        o (str): O value result.
+        rd (str): RD (Router Advertisement) result.
+        q (str): Quirks result.
+
+    Methods:
+        calculate_similarity_score(self, other): Calculates the similarity score between two TCheck instances.
+        init_from_response(self, t_sender, check): Initializes attributes from a TSender and a check instance.
+        init_from_db(self, tests: dict): Initializes attributes from a dictionary obtained from a database.
+        calculate_tcp_flags(t_check): Calculates the TCP flags from a TCheck instance.
+        calculate_ack_number(t_check): Calculates the acknowledgment number result.
+        calculate_sequence_number(t_check): Calculates the sequence number result.
+    """
     def __init__(self):
         self.r = None
         self.df = None
@@ -17,15 +40,21 @@ class TCheck:
         self.q = None
 
     def calculate_similarity_score(self, other):
+        """
+        Calculates the similarity score between two TCheck instances.
+
+        Args:
+            other (TCheck): Another TCheck instance to compare.
+
+        Returns:
+            int: The similarity score between the two instances.
+        """
         score = 0
         # TODO - for T2,T3,T7 has 80 score here
         if self.r == 'N':
             return 0
-
         if self.r == other.r:
             score += 100
-        if self.df == other.df:
-            score += 20
         if self.t == other.t:
             score += 15
         if self.tg == other.tg:
@@ -34,23 +63,30 @@ class TCheck:
             for window_size in other.w:
                 if self.w == int(window_size, 16):
                     score += 25
-        if self.s == other.s:
-            score += 20
-        if self.a == other.a:
-            score += 20
         if other.f is not None:
             for flags_list in other.f:
                 if sorted(self.f) == sorted(flags_list):
                     score += 30
         if self.o is not None and self.o == other.o:
             score += 10
-        if self.rd == other.rd:
-            score += 20
-        if self.q == other.q:
-            score += 20
+        attributes_to_compare = ['q', 'rd', 'a', 's', 'df']
+
+        for attribute in attributes_to_compare:
+            if getattr(self, attribute) == getattr(other, attribute):
+                score += 20
         return score
 
     def init_from_response(self, t_sender, check):
+        """
+        Initializes TCheck attributes from a TSender and a check instance.
+
+        Args:
+            t_sender (TSender): The TSender instance containing the T probe response.
+            check (Check): The check instance containing relevant information.
+
+        Returns:
+            None
+        """
         self.r = CommonTests.calculate_responsiveness(check)
 
         # If responsiveness test returned "no", no bother calculating, all values will be empty
@@ -69,6 +105,15 @@ class TCheck:
         self.q = CommonTests.calculate_quirks(check)
 
     def init_from_db(self, tests: dict):
+        """
+        Initializes TCheck attributes from a dictionary obtained from the NMAP database.
+
+        Args:
+            tests (dict): Dictionary containing information retrieved from the NMAP database.
+
+        Returns:
+            None
+        """
         self.r = tests.get('R', '')
 
         # If responsiveness test returned "no", no bother calculating, all values will be empty
@@ -86,22 +131,33 @@ class TCheck:
         self.rd = tests.get('RD', '')
         self.q = tests.get('Q', '')
 
-    # TODO somehow consider the following:
-    # To reduce this problem, reference fingerprints generally omit the R=Y test from the IE and U1 probes,
-    # which are the ones most likely to be dropped. In addition, if Nmap is missing a closed TCP port for a target,
-    # it will not set R=N for the T5, T6, or T7 tests even if the port it tries is non-responsive.
-    # After all, the lack of a closed port may be because they are all filtered.
-
     @staticmethod
     def calculate_tcp_flags(t_check):
+        """
+        Calculates the TCP flags from a TCheck instance.
+
+        Args:
+            t_check (TCheck): The TCheck instance containing the response packet.
+
+        Returns:
+            list: List of TCP flags.
+        """
         return list(t_check.get_tcp_flags())
 
     @staticmethod
-    # Tested according to TCP acknowledgment number (A)
-    # in documentation: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # This test is the same as S except that it tests how the acknowledgment number in the response compared
-    # to the sequence number in the respective probe.
     def calculate_ack_number(t_check):
+        """
+        Calculates the acknowledgment number result.
+        According to documentation: TCP acknowledgment number (A):
+        https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+
+        Args:
+            t_check (TCheck): The TCheck instance containing the response packet.
+
+        Returns:
+            str: Acknowledgment number result ('Z', 'S', 'S+', or 'O'), how the acknowledgment number in the
+            response compared to the sequence number in the respective probe.
+        """
         response_ack_num = t_check.get_response_ack_number()
         probe_seq_num = t_check.get_probe_sequence_number()
 
@@ -118,12 +174,18 @@ class TCheck:
         return 'O'
 
     @staticmethod
-    # Tested according to TCP sequence number (S)
-    # in documentation: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # This test examines the 32-bit sequence number field in the TCP header.
-    # Rather than record the field value as some other tests do,
-    # this one examines how it compares to the TCP acknowledgment number from the probe that elicited the response.
     def calculate_sequence_number(t_check):
+        """
+        Calculates the sequence number result.
+        TCP sequence number (S) in documentation: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+
+        Args:
+            t_check (TCheck): The TCheck instance containing the response packet.
+
+        Returns:
+            str: Sequence number result ('Z', 'A', 'A+', or 'O'), , how the acknowledgment number in the
+            probe compared to the sequence number in the respective response.
+        """
         probe_ack_num = t_check.get_probe_ack_number()
         response_seq_num = t_check.get_response_sequence_number()
 
@@ -138,5 +200,4 @@ class TCheck:
             return 'A+'
         # Sequence number is something else (other).
         return 'O'
-
 
