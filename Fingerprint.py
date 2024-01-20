@@ -8,8 +8,24 @@ from Result.IE import IE
 
 
 class Fingerprint:
+    """
+    Class representing a network fingerprint with various test results.
 
+    Attributes:
+    - SEQ (Sequence): Sequence test result.
+    - name (str): Name of the fingerprint.
+    - CPE (str): Common Platform Enumeration identifier.
+    - OPS (Options): Options test result.
+    - WIN (WindowSize): Window Size test result.
+    - ECN (Ecn): ECN test result.
+    - T1 to T7 (TCheck): Test results for T1 to T7.
+    - U1 (U1): U1 test result.
+    - IE (IE): IE test result.
+    """
     def __init__(self):
+        """
+            Initialize an instance of the Fingerprint class with default values.
+        """
         self.SEQ = Sequence()
         self.name = "N/A"
         self.CPE = "N/A"
@@ -28,6 +44,17 @@ class Fingerprint:
 
     def init_from_response(self, ecn_sender, open_ports_sender, udp_sender, icmp_sender, probe_sender,
                            close_ports_sender):
+        """
+                Initialize the Fingerprint instance from response data.
+
+                Parameters:
+                - ecn_sender: Contains response data for ECN test.
+                - open_ports_sender: Contains response data for open ports test.
+                - udp_sender: Contains response data for UDP test.
+                - icmp_sender: Contains response data for ICMP test.
+                - probe_sender: Contains response data for the probe test.
+                - close_ports_sender: Contains response data for closed ports test.
+        """
         self.SEQ.init_from_response(probe_sender, close_ports_sender, icmp_sender)
         self.OPS.init_from_response(probe_sender)
         self.WIN.init_from_response(probe_sender)
@@ -43,11 +70,19 @@ class Fingerprint:
         self.IE.init_from_response(icmp_sender)
 
     def init_from_db(self, tests: dict):
+        """
+        Initialize the Fingerprint instance from a dictionary of test results, parsed earlier from NmapDB.
+
+        Parameters:
+        - tests (dict): Dictionary containing test results.
+        """
         self.name = tests['Fingerprint']
+
         try:
             self.CPE = tests['CPE']
-        except:
+        except KeyError:
             pass
+
         self.SEQ.init_from_db(tests.get('SEQ'))
         self.OPS.init_from_db(tests.get('OPS'))
         self.WIN.init_from_db(tests.get('WIN'))
@@ -63,7 +98,15 @@ class Fingerprint:
         self.IE.init_from_db(tests.get('IE'))
 
     def calculate_similarity_score(self, other_fingerprint):
-        # Perform similarity score calculations for each member
+        """
+            Calculate the similarity score between two Fingerprint instances.
+
+            Parameters:
+            - other_fingerprint (Fingerprint): The other Fingerprint instance to compare with.
+
+            Returns:
+            The total similarity score between the two fingerprints.
+        """
         seq_score = self.SEQ.calculate_similarity_score(other_fingerprint.SEQ)
         ops_score = self.OPS.calculate_similarity_score(other_fingerprint.OPS)
         win_score = self.WIN.calculate_similarity_score(other_fingerprint.WIN)
@@ -78,7 +121,6 @@ class Fingerprint:
         u1_score = self.U1.calculate_similarity_score(other_fingerprint.U1)
         ie_score = self.IE.calculate_similarity_score(other_fingerprint.IE)
 
-        # Do something with the individual scores, e.g., sum them up
         total_score = (
             seq_score + ops_score + win_score + ecn_score +
             t1_score + t2_score + t3_score + t4_score +
