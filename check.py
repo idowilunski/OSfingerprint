@@ -40,6 +40,15 @@ class Check:
         self._send_timestamp = None
         self._packet_ack_number = RandNum(0, 5000)
 
+    def get_sent_packet(self):
+        """
+        Get the sent packet.
+
+        Returns:
+        The sent packet.
+        """
+        return self._packet
+
     def get_response_packet(self):
         """
         Get the response packet received after sending the check.

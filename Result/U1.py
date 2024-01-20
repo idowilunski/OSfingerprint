@@ -136,7 +136,7 @@ class U1:
             self.t = [[int(t_range[0], 16), int(t_range[1], 16)]]
         else:
             # Handle a single value
-            self.t = int(t_value, 16)
+            self.t = int(t_value, 16) if t_value != '' else ''
 
         # Convert hexadecimal string to integer
         tg_value = tests.get('TG', '')
@@ -153,7 +153,7 @@ class U1:
             self.tg = [[int(t_range[0], 16), int(t_range[1], 16)]]
         else:
             # Handle a single value
-            self.tg = int(tg_value, 16)
+            self.tg = int(tg_value, 16) if tg_value != '' else ''
 
         ipl_value = tests.get('IPL', '')
 
@@ -169,7 +169,7 @@ class U1:
             self.ipl = [[int(t_range[0], 16), int(t_range[1], 16)]]
         else:
             # Handle a single value
-            self.ipl = int(ipl_value, 16)
+            self.ipl = int(ipl_value, 16) if ipl_value != '' else ''
 
         self.un = tests.get('UN', '')
         self.ripl = tests.get('RIPL', '')
