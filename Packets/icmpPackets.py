@@ -1,4 +1,3 @@
-from scapy.all import *
 from check import Check
 from scapy.layers.inet import IP, ICMP
 
@@ -14,8 +13,8 @@ class IcmpPacket1(Check):
         # The first one has the IP DF bit set, a type-of-service (TOS) byte value of zero,
         # a code of nine (even though it should be zero), the sequence number 295,
         # a random IP ID and ICMP request identifier, and 120 bytes of 0x00 for the data payload.
-        self._packet = IP(dst=self._target_ip, flags="DF", tos=0, id=1234, ttl=0xFF) / ICMP(type=8, code=9,
-                                                                                  seq=295) / b'\x00' * 120
+        self._packet = IP(dst=self._target_ip, flags="DF", tos=0, id=1234, ttl=0xFF) / \
+                       ICMP(type=8, code=9, seq=295) / ( b'\x00' * 120)
 
 
 class IcmpPacket2(Check):
@@ -30,4 +29,5 @@ class IcmpPacket2(Check):
         # The second ping query is similar, except a TOS of four (IP_TOS_RELIABILITY) is used,
         # the code is zero, 150 bytes of data is sent,
         # and the ICMP request ID and sequence numbers are incremented by one from the previous query values.
-        self._packet = IP(dst=self._target_ip, tos=ip_tos_reliability, id=1235) / ICMP(type=8, code=0, seq=296) / b'\x00' * 150
+        self._packet = IP(dst=self._target_ip, tos=ip_tos_reliability, id=1235) / \
+                       ICMP(type=8, code=0, seq=296) / ( b'\x00' * 150)

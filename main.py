@@ -40,8 +40,8 @@ if __name__ == '__main__':
     # TODO - go over each port and detect / get it from commandline
 
 #    ip_addr = "45.33.32.156"
-#    open_port = 80
-#    close_port = 150
+    #open_port = 150
+    #close_port = 150
     udp_sender = PacketSenders.UdpSender.UdpSender(ip_addr, close_port)
     ecn_sender = PacketSenders.EcnSender.EcnSender(ip_addr, open_port)
     icmp_sender = PacketSenders.IcmpSender.IcmpSender(ip_addr, open_port)

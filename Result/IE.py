@@ -195,8 +195,8 @@ class IE:
         # Both of the response DF bits are not set. - 'N'
         if df_value_0 == 'N' and df_value_1 == 'N':
             return 'N'
-        df_probe_value0 = checks_list[0].get_send_packet()[ICMP].type
-        df_probe_value1 = checks_list[1].get_send_packet()[ICMP].type
+        df_probe_value0 = checks_list[0].get_sent_packet()[ICMP].type
+        df_probe_value1 = checks_list[1].get_sent_packet()[ICMP].type
         # Both of the response DF bits are set. - 'Y'
         if df_value_0 == 'Y' and df_value_1 == 'Y':
             return 'Y'
