@@ -1,7 +1,7 @@
-import PacketSenders.EcnSender, PacketSenders.EchoSender, PacketSenders.UdpSender, PacketSenders.probesSender, \
+import PacketSenders.EcnSender, PacketSenders.IcmpSender, PacketSenders.UdpSender, PacketSenders.probesSender, \
     PacketSenders.TcpClosePortSender, PacketSenders.TcpOpenPortSender
 from PortScanner import perform_port_scan
-from databaseParser import *
+from DatabaseParser import *
 from Fingerprint import Fingerprint
 import shutil
 import os
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 #    close_port = 150
     udp_sender = PacketSenders.UdpSender.UdpSender(ip_addr, close_port)
     ecn_sender = PacketSenders.EcnSender.EcnSender(ip_addr, open_port)
-    icmp_sender = PacketSenders.EchoSender.EchoSender(ip_addr, open_port)
+    icmp_sender = PacketSenders.IcmpSender.IcmpSender(ip_addr, open_port)
     probe_sender = PacketSenders.probesSender.ProbesSender(ip_addr, open_port)
     tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender(ip_addr, open_port)
     tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender(ip_addr, close_port)

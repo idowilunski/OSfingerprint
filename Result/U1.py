@@ -1,11 +1,40 @@
 import logging
-
-from scapy.layers.inet import IP, UDP, ICMP
+from scapy.layers.inet import UDP, ICMP
 from CommonTests import *
 
 
-# U1 probe is expected to receive in response an ICMP "port unreachable" message
 class U1:
+    """
+    Represents the U1 probe, designed to receive an ICMP "port unreachable" message in response.
+
+    This class includes methods for calculating similarity scores, initializing attributes from response packets or
+    database records, and specific calculations related to the U1 probe.
+
+    Attributes:
+        r (str): Responsiveness result, 'Y' if responsive, 'N' if non-responsive.
+        df (str): Don't Fragment (DF) bit value.
+        t (int or list): Time-to-Live (TTL) value or a list of TTL tuples.
+        tg (int or list): TTL guess value or a list of TTL guess tuples.
+        ipl (int or list): IP total length (IPL) value or a list of IPL tuples.
+        un (bytes): Unused port unreachable field value.
+        ripl (int): Returned probe IP length (RIPL) value.
+        rid (int or str): Returned probe IP ID (RID) value or 'G' for a static ID.
+        ripck (str): Integrity of returned probe IP checksum (RIPCK) value ('G', 'Z', or 'I').
+        ruck (str): Integrity of returned probe UDP checksum (RUCK) value ('G' or actual checksum).
+        rud (str): Response UDP payload integrity (RUD) value ('G' or 'I').
+
+    Methods:
+        - calculate_similarity_score(other): Calculates a similarity score between two U1 instances based on attribute values.
+        - init_from_response(udp_sender): Initializes attributes from a ProbeSender instance containing U1 probe response.
+        - init_from_db(tests): Initializes attributes from a dictionary obtained from a database.
+        - calculate_rid(u1_check): Calculates the Returned probe IP ID (RID) value.
+        - calculate_ripck(u1_check): Calculates the Integrity of returned probe IP checksum (RIPCK) value.
+        - calculate_ripl(u1_check): Calculates the Returned probe IP length (RIPL) value.
+        - calculate_ruck(u1_check): Calculates the Integrity of returned probe UDP checksum (RUCK) value.
+        - calculate_rud(u1_check): Calculates the Response UDP payload integrity (RUD) value.
+        - calculate_ipl(u1_check): Calculates the IP total length (IPL) value.
+        - calculate_un(u1_check): Calculates the Unused port unreachable field value.
+    """
     def __init__(self):
         self.r = None
         self.df = None
@@ -20,10 +49,18 @@ class U1:
         self.rud = None
 
     def calculate_similarity_score(self, other):
-        score = 0
-        if self.r == 'N':
-            return 0
+        """
+        Calculate the similarity score between two U1 instances based on attribute values.
 
+        The similarity score is calculated by comparing each attribute and assigning weights accordingly.
+
+        Args:
+            other (U1): Another U1 instance to compare with.
+
+        Returns:
+            int: The similarity score, ranging from 0 to 550.
+        """
+        score = 0
         if self.r == other.r:
             score += 50
         if self.df == other.df:
@@ -40,28 +77,29 @@ class U1:
 
         if self.tg == other.t:
             score += 15
-        if self.ipl == other.ipl:
-            score += 100
-        if self.un == other.un:
-            score += 100
-        if self.ripl == other.ripl:
-            score += 100
-        if self.rid == other.rid:
-            score += 100
-        if self.ripck == other.ripck:
-            score += 100
-        if self.ruck == other.ruck:
-            score += 100
-        if self.rud == other.rud:
-            score += 100
+        attributes_to_compare = ['ipl', 'un', 'ripl', 'rid', 'ripck', 'ruck', 'rud']
+
+        for attribute in attributes_to_compare:
+            if getattr(self, attribute) == getattr(other, attribute):
+                score += 100
+
         return score
 
     def init_from_response(self, udp_sender):
+        """
+        Initializes the attributes of the U1 class using information from a ProbeSender instance.
+
+        Args:
+            udp_sender (ProbeSender): The ProbeSender instance containing U1 probe response.
+
+        Returns:
+            None
+        """
         u1_check = udp_sender.get_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(u1_check)
         self.df = CommonTests.calculate_dont_fragment(u1_check)
-        self.t = CommonTests.calculate_ttl_diff(udp_sender)
-        self.tg = CommonTests.calculate_ttl_guess(udp_sender)
+        self.t = CommonTests.calculate_ttl_diff(udp_sender.get_checks_list()[0])
+        self.tg = CommonTests.calculate_ttl_guess(udp_sender.get_checks_list()[0])
         self.ipl = self.calculate_ipl(u1_check)
         self.un = self.calculate_un(u1_check)
         self.ripl = self.calculate_ripl(u1_check)
@@ -71,16 +109,23 @@ class U1:
         self.rud = self.calculate_rud(u1_check)
 
     def init_from_db(self, tests: dict):
+        """
+        Initializes the attributes of the U1 class using information from a dictionary obtained from a database.
+
+        Args:
+            tests (dict): Dictionary containing information retrieved from a database.
+
+        Returns:
+            None
+        """
         # If responsiveness result doesn't exist, it means responsiveness = Y
         self.r = tests.get('R', 'Y')
-
-        if self.r == 'N':
-            return
-
         self.df = tests.get('DF', '')
 
         t_value = tests.get('T', '')
 
+        # This part handles the DB entry in case for t there are several optional values, or if value is a range
+        # For example, T=B|16-21
         if '|' in t_value:
             # Handle multiple tuples separated by "|"
             tuple_strings = t_value.split('|')
@@ -91,11 +136,13 @@ class U1:
             self.t = [[int(t_range[0], 16), int(t_range[1], 16)]]
         else:
             # Handle a single value
-            self.t = int(t_value, 16)
+            self.t = int(t_value, 16) if t_value != '' else ''
 
         # Convert hexadecimal string to integer
         tg_value = tests.get('TG', '')
 
+        # This part handles the DB entry in case for tg there are several optional values, or if value is a range
+        # For example, TG=B|16-21
         if '|' in tg_value:
             # Handle multiple tuples separated by "|"
             tuple_strings = tg_value.split('|')
@@ -106,10 +153,12 @@ class U1:
             self.tg = [[int(t_range[0], 16), int(t_range[1], 16)]]
         else:
             # Handle a single value
-            self.tg = int(tg_value, 16)
+            self.tg = int(tg_value, 16) if tg_value != '' else ''
 
         ipl_value = tests.get('IPL', '')
 
+        # This part handles the DB entry in case for ipl there are several optional values, or if value is a range
+        # For example, IPL=B|16-21
         if '|' in ipl_value:
             # Handle multiple tuples separated by "|"
             tuple_strings = ipl_value.split('|')
@@ -120,7 +169,7 @@ class U1:
             self.ipl = [[int(t_range[0], 16), int(t_range[1], 16)]]
         else:
             # Handle a single value
-            self.ipl = int(ipl_value, 16)
+            self.ipl = int(ipl_value, 16) if ipl_value != '' else ''
 
         self.un = tests.get('UN', '')
         self.ripl = tests.get('RIPL', '')
@@ -129,77 +178,139 @@ class U1:
         self.ruck = tests.get('RUCK', '')
         self.rud = tests.get('RUD', '')
 
-    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # Returned probe IP ID value (RID)
-    # The U1 probe has a static IP ID value of 0x1042. If that value is returned in the port unreachable message,
-    # the value G is stored for this test. Otherwise, the exact value returned is stored.
     @staticmethod
-    def calculate_rid(u1_check):
+    def calculate_rid(u1_check) -> str:
+        """
+        Calculates the Returned probe IP ID (RID) value.
+        Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+
+        Args:
+            u1_check (U1): The U1 instance containing the response packet.
+
+        Returns:
+            str: 'G' if the static ID is returned, otherwise the exact value returned.
+        """
+        # The U1 probe has a static IP ID value of 0x1042. If that value is returned in the port unreachable message,
+        # the value G is stored for this test. Otherwise, the exact value returned is stored.
         response_id = u1_check.get_response_ip_id()
-        # TODO remove magic numbers
-        if response_id == 0x1042:
+        STATIC_IP_ID_OF_PROBE = 0x1042
+        if response_id == STATIC_IP_ID_OF_PROBE:
             return 'G'
 
         return response_id
 
-    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # Integrity of returned probe IP checksum value (RIPCK)
-    # The IP checksum is one value that we don't expect to remain the same when returned in a port unreachable message
     @staticmethod
-    def calculate_ripck(u1_check):
+    def calculate_ripck(u1_check) -> str:
+        """
+        Calculates the Integrity of returned probe IP checksum (RIPCK) value.
+        Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+
+        The IP checksum is one value that we don't expect to remain the same when returned in a port unreachable message.
+
+        Args:
+            u1_check (U1): The U1 instance containing the response packet.
+
+        Returns:
+            str: 'G' for good if the checksum matches the enclosing IP packet,
+            'Z' if the returned value is zero, 'I' otherwise.
+        """
         request_chksm = u1_check.get_request_checksum()
         response_chksm = u1_check.get_response_checksum()
-        #  The checksum we receive should match the enclosing IP packet.
-        #  If it does, the value G (good) is stored for this test.
-        if request_chksm == response_chksm:
+
+        #  If the checksum we receive matches the enclosing IP packet - return 'G' (good).
+        if response_chksm == request_chksm:
             return 'G'
-        #  If the returned value is zero, then Z is stored.
+        #  If the checksum we receive is zero, return 'Z' (zero).
         if response_chksm == 0:
             return 'Z'
-        #  Otherwise the result is I (invalid).
+        #  Otherwise, return I (invalid).
         return 'I'
 
     @staticmethod
-    def calculate_ripl(u1_check):
+    def calculate_ripl(u1_check) -> int:
+        """
+        Calculates the Returned probe IP length (RIPL) value.
+
+        Args:
+            u1_check (U1): The U1 instance containing the response packet.
+
+        Returns:
+            int: The length of the returned IP packet.
+        """
         return u1_check.get_response_ip_len()
 
-    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # Integrity of returned probe UDP checksum (RUCK)
     @staticmethod
     def calculate_ruck(u1_check):
+        """
+        Calculates the Integrity of returned probe UDP checksum (RUCK) value.
+        Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+
+        Args:
+            u1_check (U1): The U1 instance containing the response packet.
+
+        Returns:
+            str: 'G' for good if the UDP header checksum matches the sent value, otherwise the actual returned checksum.
+        """
         request_chksm = u1_check.get_request_checksum()
         response_chksm = u1_check.get_response_checksum()
-        # The UDP header checksum value should be returned exactly as it was sent. If it is, G is recorded for this
-        # test. Otherwise, the value actually returned is recorded.
+
+        # If UDP header checksum is identcial to the sent checksum, return 'G' (good).
+        # Otherwise, return actual checksum.
         return 'G' if request_chksm == response_chksm else response_chksm
 
     @staticmethod
     def calculate_rud(u1_check):
+        """
+        Calculates the Response UDP payload integrity (RUD) value.
+
+        Args:
+            u1_check (U1): The U1 instance containing the response packet.
+
+        Returns:
+            str: 'G' for good if all payload bytes are 'C' or payload is truncated to zero length,
+            'I' if payload is invalid.
+        """
         response = u1_check.get_response_packet()
-        # Check the response
+        # verify packet validity
         if response and response.haslayer(UDP):
             payload = response[UDP].load
-            # G is recorded if all payload bytes are 'C' or payload is truncated to zero length
+            # if all payload bytes are 'C' or payload size is zero - return 'G'
             if not payload or all(byte == ord('C') for byte in payload):
                 return 'G'
 
-        # I is recorded if payload is invalid
+        # Payload is invalid, return 'I'
         return 'I'
 
-    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # Section - IP total length (IPL)
     @staticmethod
-    def calculate_ipl(u1_check):
-        # This test records the total length (in octets) of an IP packet
+    def calculate_ipl(u1_check) -> int:
+        """
+        Calculates the IP total length (IPL) value.
+        Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+
+        This test records the total length (in octets) of an IP packet.
+
+        Args:
+            u1_check (U1): The U1 instance containing the response packet.
+
+        Returns:
+            int: The total length of the IP packet.
+        """
         return len(u1_check.get_response_packet())
 
-    # Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # Section - Unused port unreachable field nonzero (UN)
     @staticmethod
     def calculate_un(u1_check):
+        """
+        Calculates the Unused port unreachable field value.
+        Documentation reference: https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+        Section - Unused port unreachable field nonzero (UN)
+
+        Args:
+            u1_check (U1): The U1 instance containing the response packet.
+
+        Returns:
+            bytes: The value of the last four bytes in the ICMP port unreachable header.
+        """
         # An ICMP port unreachable message header is eight bytes long, but only the first four are used.
-        # RFC 792 states that the last four bytes must be zero.
-        # A few implementations (mostly ethernet switches and some specialized embedded devices) set it anyway.
-        # The value of those last four bytes is recorded in this field.
+        # Last four bytes should be zero but some devices set it anyway, return them.
         raw_icmp_header = bytes(u1_check.get_response_packet()[ICMP])
         return raw_icmp_header[-4:]

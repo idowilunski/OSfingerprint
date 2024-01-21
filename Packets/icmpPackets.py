@@ -1,10 +1,8 @@
 from scapy.all import *
 from check import Check
-from scapy.layers.inet import IP, TCP, ICMP
+from scapy.layers.inet import IP, ICMP
 
 
-# TODO - these classes also override the analyze reponse since it verifies it's TCP, consider making inheritance
-#  difference (parent, icmp,tcp)
 class IcmpPacket1(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)

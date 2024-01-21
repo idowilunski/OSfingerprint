@@ -2,40 +2,69 @@ import binascii
 
 
 class CommonTests:
-    # TCP miscellaneous quirks (Q)
-    # Implemented according to matching nmap documentation : https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+    """
+        Class containing common tests and calculations for our network fingerprints tests, used in several classes.
+    """
+
     @staticmethod
-    def calculate_quirks(t1_check):
-        # The Q string must always be generated in alphabetical order. If no quirks are present,
-        # the Q test is empty but still shown.
+    def calculate_quirks(check):
+        """
+                Calculate TCP miscellaneous quirks (Q) based on the response of the input check.
+                Implemented according to matching nmap documentation :
+                https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+
+                Parameters:
+                - check: An instance of Check representing the check's response.
+
+                Returns:
+                A string representing the calculated quirks (Q). Generated in alphabetical order,
+                if no quirks are present - empty string (but still shown).
+        """
         q_result = ""
-        #  The first is that the reserved field in the TCP header (right after the header length) is nonzero.
-        #  This is particularly likely to happen in response to the ECN test as that one sets a reserved bit
-        #  in the probe.
-        #  If this is seen in a packet, an “R” is recorded in the Q string.
-        if t1_check.is_response_reserved_bit_set():
+        #  Add "R" if reserved field is set in the TCP header
+        #  (likely to happen in response to the ECN test as that one sets a reserved bit in the probe).
+        if check.is_response_reserved_bit_set():
             q_result += "R"
-        # Check for nonzero urgent pointer field value when the URG flag is not set.
-        # This is also particularly likely to be seen in response to the ECN probe, which sets a non-zero urgent field.
-        # A “U” is appended to the Q string when this is seen.
-        if t1_check.is_response_urgent_bit_set():
+
+        # Add "U" if urgent pointer is nonzero when the URG flag is not set.
+        # (likely to be seen in response to the ECN test as that one sets a non-zero urgent field).
+        if check.is_response_urgent_bit_set():
             q_result += "U"
 
         return q_result
 
-    # According to the following documentation, under "TCP options (O, O1–O6)":
-    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    #  If there are no TCP options in a response, the test will exist but the value string will be empty.
-    #  If no probe was returned, the test is omitted.
     @staticmethod
     def calculate_o(check):
-        if not check.is_response_packet_empty():
-            return ''.join(
+        """
+        Calculate TCP options (O, O1-O6) based on the response of a check.
+        According to the following documentation, under "TCP options (O, O1–O6)":
+        https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+
+        Parameters:
+        - check: An instance of TCheck representing the response of a check.
+
+        Returns:
+        A string representing the calculated TCP options.
+        If there are no TCP options in a response, the test will exist but the value string will be empty.
+        If no probe was returned, the test is omitted.
+        """
+        if check.is_response_packet_empty():
+            return None
+
+        return ''.join(
                 [CommonTests.format_option(opt) for opt in check.get_received_tcp_options()])
-        return ''
 
     @staticmethod
     def format_option(option):
+        """
+            Format a single TCP option for inclusion in the calculated options string.
+
+            Parameters:
+            - option: A tuple representing the TCP option (type, value).
+
+            Returns:
+            A string representing the formatted TCP option.
+        """
         option_type, option_value = option
         if option_type == "EOL":
             return "L"
@@ -55,50 +84,98 @@ class CommonTests:
 
     @staticmethod
     def calculate_window_size(check):
+        """
+            Calculate the TCP window size based on the response of a check.
+
+            Parameters:
+            - check: An instance of Check representing the response of a check.
+
+            Returns:
+            The calculated TCP window size.
+        """
         return check.get_received_window_size()
 
     @staticmethod
-    # TODO add calc that if responsiveness is 'N' don't compare the rest...?
     def calculate_responsiveness(check):
-        if check.is_response_packet_empty():
-            return 'N'
-        return 'Y'
+        """
+        Calculate the responsiveness (Y/N) based on the response of a check.
+
+        Parameters:
+        - check: An instance of Check representing the response of a check.
+
+        Returns:
+        A string representing the calculated responsiveness (Y/N).
+        """
+        return 'Y' if not check.is_response_packet_empty() else 'N'
 
     @staticmethod
-    # TODO - I'm not sure when we encounter RST packets ? what's the probe sender here, the closed ports?
-    # Calculate te RD - TCP RST data checksum (RD)
-    # According to the following documentation, under "TCP RST data checksum (RD)" :
-    # https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
-    # RST segment could contain ASCII text that encoded and explained the cause of the RST.
-    # No standard has yet been established for such data.
-    # Do CRC32 checksum and set RD
     def calculate_rd(probe_sender):
+        """
+        Calculate the TCP RST data checksum (RD) based on the response of a probe sender.
+        According to the following NMAP documentation, under "TCP RST data checksum (RD)" :
+        https://nmap.org/book/osdetect-methods.html#osdetect-tbl-o
+        There's no standard for the ASCII text of the RST, it can contain an explanation of the cause
+
+        Parameters:
+        - probe_sender: An instance of a probe sender.
+
+        Returns:
+        The calculated TCP RST data checksum (RD).
+        """
         response_data = probe_sender.get_checks_list()[0].get_response_packet()
-        if len(response_data) == 0:
-            return 0
-        return binascii.crc32(response_data.original)
+        return binascii.crc32(response_data.original) if response_data else 0
 
     @staticmethod
     def calculate_dont_fragment(check):
+        """
+        Calculate the value of the Don't Fragment (DF) bit based on the response of a check.
+
+        Parameters:
+        - check: An instance of Check representing the response of a check.
+
+        Returns:
+        The value of the Don't Fragment (DF) bit.
+        """
         return check.get_dont_fragment_bit_value()
 
-    # The T, and CD values are for the response to the first probe only, since they are highly unlikely to differ.
     @staticmethod
-    def calculate_ttl_diff(sender):
-        return 0XFF - sender.get_checks_list()[0].get_response_ttl()
+    def calculate_ttl_diff(check):
+        """
+        Calculate the Time-to-Live (TTL) difference based on the response of a check.
+
+        Parameters:
+        - check: An instance of Check representing the response of a check.
+
+        Returns:
+        The calculated TTL difference.
+        """
+        return 0XFF - check.get_response_ttl()
 
     @staticmethod
-    def calculate_ttl_guess(sender):
-        checks_list = sender.get_checks_list()
-        ttl = 0XFF - checks_list[0].get_response_ttl()
-        return CommonTests.round_up_to_nearest(ttl)
+    def calculate_ttl_guess(check):
+        """
+        Calculate the guessed TTL value based on the response of a check.
+
+        Parameters:
+        - check: An instance of Check representing the response of a check.
+
+        Returns:
+        The calculated guessed TTL value.
+        """
+        return CommonTests.round_up_to_nearest(0XFF - check.get_response_ttl())
 
     @staticmethod
     def round_up_to_nearest(value):
-        # List of possible values
+        """
+        Round up a value to the nearest possible value from a predefined list from nmap documentation.
+
+        Parameters:
+        - value: The value to round up.
+
+        Returns:
+        The rounded-up value.
+        """
         possible_values = [32, 64, 128, 255]
 
         # Find the next highest value
-        next_highest_value = min(possible_values, key=lambda x: (x - value) if x >= value else float('inf'))
-
-        return next_highest_value
+        return min(possible_values, key=lambda x: (x - value) if x >= value else float('inf'))

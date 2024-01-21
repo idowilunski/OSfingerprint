@@ -1,14 +1,38 @@
 import logging
 import math
-
 from CommonTests import *
-from math import sqrt, log2
 
-# runs the sequence (SEQ) check -
-# According to the following documentation: https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-# The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
-# This function runs all the tests on the 6 TCP probes sent to the open port and parses the results
 class Sequence:
+    """
+    Represents the sequence (SEQ) check according to the documentation:
+    https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+    The SEQ test sends six TCP SYN packets to an open port of the target machine and collects SYN/ACK packets back
+
+    Attributes:
+        seq_rates (list): List to store rates of ISN (Initial Sequence Number) counter increases per second.
+        diff1 (list): Differences list for GCD calculation.
+        sp: Sequence Predictability result.
+        gcd: Greatest Common Divisor (GCD) result.
+        isr: ISN counter rate result.
+        ti: IP ID sequence generation algorithm result for TCP.
+        rd: Router Advertisement (RD) result.
+        ci: IP ID sequence generation algorithm result for closed port TCP probes.
+        ii: IP ID sequence generation algorithm result for ICMP responses.
+        ss: Shared IP ID sequence Boolean result.
+        ts: TCP timestamp option algorithm result.
+
+    Methods:
+        calculate_similarity_score(self, other) -> int: Calculates the similarity score between two Sequence instances.
+        init_from_response(self, probe_sender, close_ports_sender, icmp_sender): Initializes attributes from responses.
+        init_from_db(self, tests: dict): Initializes attributes from a dictionary obtained from a database.
+        calculate_ts(probe_sender): Calculates the TCP timestamp option algorithm (TS).
+        calculate_ss(probe_sender, icmp_sender): Calculates the Shared IP ID sequence Boolean (SS).
+        find_gcd_of_list(num_list): Finds the Greatest Common Divisor (GCD) of a list of numbers.
+        calculate_sp(self, probe_sender): Calculates the Sequence Predictability (SP).
+        calculate_gcd(self, probe_sender): Calculates the Greatest Common Divisor (GCD) from the 32-bit ISN.
+        calculate_ti_ci_ii(probe_sender, min_responses_num): Calculates the TI/CI/II results.
+        calculate_isr(self, probe_sender): Calculates the ISN counter rate (ISR).
+    """
     def __init__(self):
         self.seq_rates = []
         self.diff1 = []  # Differences list, diff1 is the name in the nmap documentation reference
@@ -23,6 +47,15 @@ class Sequence:
         self.ts = None
 
     def calculate_similarity_score(self, other) -> int:
+        """
+        Calculates the similarity score between two Sequence instances.
+
+        Args:
+            other (Sequence): Another Sequence instance to compare.
+
+        Returns:
+            int: The similarity score between the two instances.
+        """
         score = 0
         if self.sp == other.sp:
             score += 25
@@ -43,6 +76,17 @@ class Sequence:
         return score
 
     def init_from_response(self, probe_sender, close_ports_sender, icmp_sender):
+        """
+        Initializes Sequence attributes from Senders instances.
+
+        Args:
+            probe_sender (TSender): TSender instance containing T probe responses.
+            close_ports_sender (TSender): TSender instance containing T5, T6, and T7 responses.
+            icmp_sender (TSender): ICMP Sender instance containing ICMP responses.
+
+        Returns:
+            None
+        """
         self.sp = self.calculate_sp(probe_sender)
         self.gcd = self.calculate_gcd(probe_sender)
         self.isr = self.calculate_isr(probe_sender)
@@ -54,6 +98,15 @@ class Sequence:
         self.ts = self.calculate_ts(probe_sender)
 
     def init_from_db(self, tests: dict):
+        """
+        Initializes Sequence attributes from a dictionary obtained from the NMAP database.
+
+        Args:
+            tests (dict): Dictionary containing information retrieved from the NMAP database.
+
+        Returns:
+            None
+        """
         self.sp = tests.get('SP', None)
         self.gcd = tests.get('GCD', None)
         self.isr = tests.get('ISR', None)
@@ -65,20 +118,24 @@ class Sequence:
         self.ts = tests.get('TS', None)
 
     @staticmethod
-    # Calculate the TS - TCP timestamp option algorithm (TS) (TS)
-    # According to the following documentation, under "TCP timestamp option algorithm (TS)" :
-    # https://nmap.org/book/osdetect-methods.html#osdetect-p    robes-seq
     def calculate_ts(probe_sender):
-        timestamp_increments_per_sec = []
-        # This one looks at the TCP timestamp option (if any) in responses to the SEQ probes.
-        # It examines the TSval (first four bytes of the option) rather than the echoed TSecr (last four bytes) value.
+        """
+        Calculates the TCP timestamp option algorithm (TS).
+        According to the following documentation, under "TCP timestamp option algorithm (TS)" :
+        https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 
+        Args:
+            probe_sender (TSender): TSender instance containing T probe responses.
+
+        Returns:
+            int or str: Result of the TCP timestamp option algorithm.
+        """
+        timestamp_increments_per_sec = []
         for i in range(len(probe_sender.get_checks_list()) - 1):
+            # Verify both timestamp were recorded upon send
             first_timestamp = probe_sender.get_checks_list()[i].get_send_time()
-            if not first_timestamp:
-                raise
             second_timestamp = probe_sender.get_checks_list()[i + 1].get_send_time()
-            if not second_timestamp:
+            if not first_timestamp or not second_timestamp:
                 raise
 
             # Since we're going by order, second send time is always after the first
@@ -96,7 +153,6 @@ class Sequence:
             if first_tsval == 0 or second_tsval == 0:
                 return 0
 
-            # TODO - this is code duplication from isr calc, consider adding timestamp sending diff list in "self"
             time_difference = (second_timestamp - first_timestamp).total_seconds()
             tsval_difference = (second_tsval - first_tsval)
 
@@ -123,18 +179,20 @@ class Sequence:
         return round(binary_log)
 
     @staticmethod
-    # Calculate the SS - Shared IP ID sequence Boolean (SS)
-    # According to the following documentation, under "Shared IP ID sequence Boolean (SS)" :
-    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
     def calculate_ss(probe_sender, icmp_sender):
-        # This Boolean value records whether the target shares its IP ID sequence between the TCP and ICMP protocols.
-        # This test is only included if II is RI, BI, or I and TI is the same. If SS is included,
-        # the result is S if the sequence is shared and O (other) if it is not.
-        # That determination is made by the following algorithm:
-        # Let avg be the final TCP sequence response IP ID minus the first TCP sequence response IP ID,
-        # divided by the difference in probe numbers.
-        # TODO add UT for avg: If probe #1 returns an IP ID of 10,000 and probe #6 returns 20,000,
-        #  avg would be (20,000 − 10,000) / (6 − 1), which equals 2,000.
+        """
+        Calculates the Shared IP ID sequence Boolean (SS).
+        According to the following documentation, under "Shared IP ID sequence Boolean (SS)" :
+        https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+
+        Args:
+            probe_sender (TSender): TSender instance containing T probe responses.
+            icmp_sender (TSender): TSender instance containing ICMP responses.
+
+        Returns:
+            str: Result of the Shared IP ID sequence Boolean
+            (whether the target shares its IP ID sequence between the TCP and ICMP protocols).
+        """
         probes_checks = probe_sender.get_checks_list()
         icmp_checks = icmp_sender.get_checks_list()
 
@@ -148,6 +206,15 @@ class Sequence:
 
     @staticmethod
     def find_gcd_of_list(num_list):
+        """
+        Finds the Greatest Common Divisor (GCD) of a list of numbers.
+
+        Args:
+            num_list (list): List of numbers.
+
+        Returns:
+            int or None: Resulting GCD or None if the list is empty.
+        """
         if not num_list:
             return None  # Handle empty list case
 
@@ -158,19 +225,24 @@ class Sequence:
 
         return result_gcd
 
-    # Calculate SP (sequence predictability)
-    # # According to the following documentation, under "TCP ISN sequence predictability index (SP)":
-    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    # estimates how difficult it would be to predict the next ISN from the
-    # known sequence of six probe responses
     def calculate_sp(self, probe_sender):
+        """
+        Calculates the Sequence Predictability (SP).
+        Estimates how difficult it would be to predict the next ISN from the known sequence of six probe responses
+        According to the following documentation, under "TCP ISN sequence predictability index (SP)":
+        https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+
+        Args:
+            probe_sender (TSender): TSender instance containing T probe responses.
+
+        Returns:
+            int or None: Result of the Sequence Predictability.
+        """
         count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
 
         # This test is only performed if at least four responses were seen.
         if count_non_empty_responses < 4:
             return None
-
-        # TODO remove magic numbers
 
         #  If the previously computed GCD value is greater than nine,
         #  the elements of the previously computed seq_rates array are divided by that value.
@@ -194,23 +266,25 @@ class Sequence:
                 # Multiply by eight, round to the nearest integer, and store as SP
                 return round(log_std_dev * 8)
 
-    # Calculate the GCD (the greatest common divisor) from the 32-bit ISN
-    # According to the following documentation, under "TCP ISN greatest common divisor (GCD)":
-    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    # This test attempts to determine the smallest number by which the target host increments these values.
     def calculate_gcd(self, probe_sender):
-        # TODO - make sure we've received here a non-empty response, and only if so, add it in the calculation?
-        for i in range(len(probe_sender.get_checks_list()) - 1):
-            first_isn = probe_sender.get_checks_list()[i].get_response_sequence_number()
-            if not first_isn:
-                raise
-            second_isn = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
-            if not second_isn:
-                raise
+        """
+        Calculates the Greatest Common Divisor (GCD) from the 32-bit ISN.
+        According to the following documentation, under "TCP ISN greatest common divisor (GCD)":
+        https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+        Attempts to determine the smallest number by which the target host increments these values.
 
-            # If an ISN is lower than the previous one, Nmap looks at both the number of values it would have to
-            # subtract from the first value to obtain the second, and the number of values it would have to count up
-            # (including wrapping the 32-bit counter back to zero). The smaller of those two values is stored in diff1.
+        Args:
+            probe_sender (TSender): TSender instance containing T probe responses.
+
+        Returns:
+            int or None: Resulting GCD or None if there are no valid differences.
+        """
+        for i in range(len(probe_sender.get_checks_list()) - 1):
+            # Verify both ISNs are present
+            first_isn = probe_sender.get_checks_list()[i].get_response_sequence_number()
+            second_isn = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
+            if not first_isn or not second_isn:
+                raise
 
             # Calculate the absolute difference
             absolute_difference = abs(first_isn - second_isn)
@@ -221,30 +295,27 @@ class Sequence:
             # Choose the smaller of the two differences
             final_difference = min(absolute_difference, wrapped_around_difference)
 
-            print(f"Appending diff between {first_isn} and {second_isn}: {final_difference}")
             self.diff1.append(final_difference)
 
         # Note: before python 3.9 usage of list in gcd function won't be supported, make sure you've installed the
-        # environment from the requirements.txt
-        # TODO make it work somehow either with 3.7 or download 3.9
+        # correct python env
         if len(self.diff1) > 0:
             return Sequence.find_gcd_of_list(self.diff1)
 
-        # TODO add UT that does the following:
-        #  So the difference between 0x20000 followed by 0x15000 is 0xB000.
-        #  The difference between 0xFFFFFF00 and 0xC000 is 0xC0FF.
-        #  This test value then records
-        #  the greatest common divisor of all those elements. This GCD is also used for calculating the SP result.
-
     @staticmethod
-    # Calculate the TI/CI/II results
-    # According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
-    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    # TODO - Note that difference values assume that the counter can wrap.
-    #  So the difference between an IP ID of 65,100 followed by a value of 700 is 1,136.
-    #  The difference between 2,000 followed by 1,100 is 64,636. Here are the calculation details:
-    #  we still didn't treat this case in our code
     def calculate_ti_ci_ii(probe_sender, min_responses_num):
+        """
+        Calculates the TI/CI/II results.
+        According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
+        https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+
+        Args:
+            probe_sender (TSender): TSender instance containing T probe responses.
+            min_responses_num (int): Minimum number of responses required for the test.
+
+        Returns:
+            str or None: Result of the TI/CI/II test or None if not enough responses are available.
+        """
         count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
 
         #  at least three responses must be received for the test to be included for TI,
@@ -259,13 +330,11 @@ class Sequence:
         max_difference = 0
 
         for i in range(len(probe_sender.get_checks_list()) - 1):
-            # TODO fix this to be the difference between ISN of the resposnes and not something else
             isn_first = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
             isn_second = probe_sender.get_checks_list()[i].get_response_sequence_number()
             difference = abs(isn_first - isn_second)
             max_difference = max(max_difference, difference)
 
-        # TODO - make sure for ii it can't be returned.
         if max_difference >= 20000:
             return 'RD' # Random
 
@@ -286,8 +355,6 @@ class Sequence:
             # If the difference is evenly divisible by 256, it must be at least 256,000 to cause this RI result.
             elif difference % 256 == 0 and difference >= 256000:
                 return 'RI'
-
-            # TODO - how do we verify if documentation means consecutive differences here or not?
 
         # If all of the differences are divisible by 256 and no greater than 5,120, the test is set to BI
         # (broken increment).
@@ -311,14 +378,19 @@ class Sequence:
         # If none of the previous steps identify the generation algorithm, the test is omitted from the fingerprint.
         return None
 
-    # TODO - CI is from the responses to the three TCP probes sent to a closed port: T5, T6, and T7.
-    #  II comes from the ICMP responses to the two IE ping probes
-
-    # Calculate ISR (ISN counter rate)
-    # # According to the following documentation, under "TCP ISN counter rate (ISR)":
-    # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-    # This value reports the average rate of increase for the returned TCP initial sequence number.
     def calculate_isr(self, probe_sender):
+        """
+        Calculates the ISN counter rate (ISR).
+        According to the following documentation, under "TCP ISN counter rate (ISR)":
+        https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
+        This value reports the average rate of increase for the returned TCP initial sequence number.
+
+        Args:
+            probe_sender (TSender): TSender instance containing T probe responses.
+
+        Returns:
+            None
+        """
         for i in range(len(probe_sender.get_checks_list()) - 1):
             first_timestamp = probe_sender.get_checks_list()[i].get_send_time()
             if not first_timestamp:
