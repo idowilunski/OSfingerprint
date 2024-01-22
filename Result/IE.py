@@ -166,6 +166,8 @@ class IE:
             return 'Z'
         sent_type0 = icmp_checks_list[0].get_sent_packet()[ICMP].type
         sent_type1 = icmp_checks_list[1].get_sent_packet()[ICMP].type
+        if icmp_checks_list[0].get_response_packet() is None or icmp_checks_list[1].get_response_packet() is None:
+            return '0'
         response_type0 = icmp_checks_list[0].get_response_packet()[ICMP].type
         response_type1 = icmp_checks_list[1].get_response_packet()[ICMP].type
 
