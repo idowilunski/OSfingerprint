@@ -164,8 +164,8 @@ class IE:
         icmp_checks_list = icmp_sender.get_checks_list()
         if icmp_checks_list[0].is_icmp_response_code_zero() and icmp_checks_list[1].is_icmp_response_code_zero():
             return 'Z'
-        sent_type0 = icmp_checks_list[0].get_send_packet()[ICMP].type
-        sent_type1 = icmp_checks_list[1].get_send_packet()[ICMP].type
+        sent_type0 = icmp_checks_list[0].get_sent_packet()[ICMP].type
+        sent_type1 = icmp_checks_list[1].get_sent_packet()[ICMP].type
         response_type0 = icmp_checks_list[0].get_response_packet()[ICMP].type
         response_type1 = icmp_checks_list[1].get_response_packet()[ICMP].type
 

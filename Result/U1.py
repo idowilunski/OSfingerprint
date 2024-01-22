@@ -295,7 +295,10 @@ class U1:
         Returns:
             int: The total length of the IP packet.
         """
-        return len(u1_check.get_response_packet())
+        response = u1_check.get_response_packet()
+        if response is None:
+            return 0
+        return len(response)
 
     @staticmethod
     def calculate_un(u1_check):
@@ -312,5 +315,7 @@ class U1:
         """
         # An ICMP port unreachable message header is eight bytes long, but only the first four are used.
         # Last four bytes should be zero but some devices set it anyway, return them.
+        if u1_check.get_response_packet() is None:
+            return ""
         raw_icmp_header = bytes(u1_check.get_response_packet()[ICMP])
         return raw_icmp_header[-4:]

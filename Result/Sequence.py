@@ -34,6 +34,7 @@ class Sequence:
         calculate_isr(self, probe_sender): Calculates the ISN counter rate (ISR).
     """
     def __init__(self):
+        self.logger = logging.getLogger(__name__)
         self.seq_rates = []
         self.diff1 = []  # Differences list, diff1 is the name in the nmap documentation reference
         self.sp = None
@@ -284,7 +285,7 @@ class Sequence:
             first_isn = probe_sender.get_checks_list()[i].get_response_sequence_number()
             second_isn = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
             if not first_isn or not second_isn:
-                raise
+                self.logger.error("..")
 
             # Calculate the absolute difference
             absolute_difference = abs(first_isn - second_isn)
@@ -302,8 +303,7 @@ class Sequence:
         if len(self.diff1) > 0:
             return Sequence.find_gcd_of_list(self.diff1)
 
-    @staticmethod
-    def calculate_ti_ci_ii(probe_sender, min_responses_num):
+    def calculate_ti_ci_ii(self, probe_sender, min_responses_num):
         """
         Calculates the TI/CI/II results.
         According to the following documentation, under "IP ID sequence generation algorithm (TI, CI, II)" :
@@ -321,7 +321,7 @@ class Sequence:
         #  at least three responses must be received for the test to be included for TI,
         # at least 2 for CI, and 2 for II
         if count_non_empty_responses < min_responses_num:
-            raise f"Not enough responses were received: {count_non_empty_responses}"
+            self.logger.error(f"Not enough responses were received: {count_non_empty_responses}")
 
         all_zero_ids = all(check.get_ip_id() != 0 for check in probe_sender.get_checks_list())
         if all_zero_ids:

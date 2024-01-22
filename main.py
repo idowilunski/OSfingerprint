@@ -32,7 +32,7 @@ if __name__ == '__main__':
     ip_addr = sys.argv[1]
     open_port, close_port = perform_port_scan(ip_addr)
 
-    db_path = find_nmap_directory() + "\\nmap-os-db"
+    db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
     parser = DatabaseParser(db_path)
 
     list_of_entries = parser.read_database_and_get_all_entries()

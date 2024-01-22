@@ -220,7 +220,7 @@ class Check:
         Returns:
         int: The TSval if present in the TCP options, 0 otherwise or if packet is invalid.
         """
-        if not self._response_packet.haslayer(TCP):
+        if not self._response_packet or not self._response_packet.haslayer(TCP):
             self.logger.error("This function was incorrectly called on an invalid TCP packet")
             return 0
 
