@@ -7,7 +7,7 @@ class IResultLine(abc.ABC):
 
     Methods:
         calculate_similarity_score(other): Calculates a similarity score between two instances
-        init_from_response(packet_sender): Initializes the class attributes according to responses from NMAP tests
+        init_from_response(check_manager): Initializes the class attributes according to responses from NMAP tests
         init_from_db(tests): Initializes the class attributes using values from a dictionary obtained from
         the NMAP database.
     """
@@ -25,12 +25,12 @@ class IResultLine(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def init_from_response(self, packet_sender):
+    def init_from_response(self, check_manager):
         """
-        Initialize the class attributes from a PacketSender instance.
+        Initialize the class attributes from a CheckManager instance.
 
         Args:
-            packet_sender (PacketSender): An instance of PacketSender containing response packet of NMAP tests.
+            check_manager (CheckManager): An instance of CheckManager containing response packet of NMAP tests.
         """
         pass
 

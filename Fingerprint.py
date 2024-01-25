@@ -42,26 +42,26 @@ class Fingerprint:
         self.U1 = U1ResultLine()
         self.IE = IEResultLine()
 
-    def init_from_response(self, packet_sender):
+    def init_from_response(self, check_manager):
         """
         Initialize the Fingerprint instance from response data.
 
         Parameters:
-        - packet_sender: Contains response data for all tests.
+        - check_manager: Contains response data for all tests.
         """
-        self.SEQ.init_from_response(packet_sender)
-        self.OPS.init_from_response(packet_sender)
-        self.WIN.init_from_response(packet_sender)
-        self.ECN.init_from_response(packet_sender)
-        self.T1.init_from_response(packet_sender.get_probe_checks_list()[0])
-        self.T2.init_from_response(packet_sender.get_open_port_checks_list()[0])
-        self.T3.init_from_response(packet_sender.get_open_port_checks_list()[1])
-        self.T4.init_from_response(packet_sender.get_open_port_checks_list()[2])
-        self.T5.init_from_response(packet_sender.get_close_port_checks_list()[0])
-        self.T6.init_from_response(packet_sender.get_close_port_checks_list()[1])
-        self.T7.init_from_response(packet_sender.get_close_port_checks_list()[2])
-        self.U1.init_from_response(packet_sender)
-        self.IE.init_from_response(packet_sender)
+        self.SEQ.init_from_response(check_manager)
+        self.OPS.init_from_response(check_manager)
+        self.WIN.init_from_response(check_manager)
+        self.ECN.init_from_response(check_manager)
+        self.T1.init_from_response(check_manager.get_probe_checks_list()[0])
+        self.T2.init_from_response(check_manager.get_open_port_checks_list()[0])
+        self.T3.init_from_response(check_manager.get_open_port_checks_list()[1])
+        self.T4.init_from_response(check_manager.get_open_port_checks_list()[2])
+        self.T5.init_from_response(check_manager.get_close_port_checks_list()[0])
+        self.T6.init_from_response(check_manager.get_close_port_checks_list()[1])
+        self.T7.init_from_response(check_manager.get_close_port_checks_list()[2])
+        self.U1.init_from_response(check_manager)
+        self.IE.init_from_response(check_manager)
 
     def init_from_db(self, tests: dict):
         """

@@ -69,14 +69,14 @@ class EcnResultLine(IResultLine):
             score += 20
         return score
 
-    def init_from_response(self, packet_sender):
+    def init_from_response(self, check_manager):
         """
         Initializes the Ecn object attributes based on the response from the ECN sender.
 
         Parameters:
-            packet_sender (PacketSender): The sender object containing responses to all tests.
+            check_manager (CheckManager): The sender object containing responses to all tests.
         """
-        ecn_check = packet_sender.get_ecn_checks_list()[0]
+        ecn_check = check_manager.get_ecn_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(ecn_check)
 
         # If responsiveness test returned "no", no bother calculating, all values will be empty

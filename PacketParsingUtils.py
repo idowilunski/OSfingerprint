@@ -1,7 +1,6 @@
 from scapy.all import *
 from scapy.layers.inet import IP, TCP, ICMP, in4_chksum
 import logging
-from TcpFlags import TCPFlags
 
 logger = logging.getLogger(__name__)
 
@@ -107,10 +106,6 @@ def get_packet_sequence_number(packet)-> int:
     """
     if not verify_packet_valid(packet, should_verify_tcp=True):
         return 0
-
-    if (TCPFlags.SYN | TCPFlags.ACK) != packet[TCP].flags:
-        logger.debug("This function was incorrectly called on a TCP packet returned to a non-open port")
-        # Continue with the function
 
     return packet[TCP].seq  # ISN - Initial sequence number
 

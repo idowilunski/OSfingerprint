@@ -58,14 +58,14 @@ class WindowSizeResultLine(IResultLine):
                 score += 15
         return score
 
-    def init_from_response(self, packet_sender):
+    def init_from_response(self, check_manager):
         """
         Initialize the class attributes from a ProbeSender instance.
 
         Args:
-            packet_sender (PacketSender): An instance of PacketSender containing response packets with window size values.
+            check_manager (CheckManager): An instance of CheckManager containing response packets with window size values.
         """
-        checks_list = packet_sender.get_probe_checks_list()
+        checks_list = check_manager.get_probe_checks_list()
         self.w1 = PacketParsingUtils.get_received_window_size(checks_list[0].get_response_packet())
         self.w2 = PacketParsingUtils.get_received_window_size(checks_list[1].get_response_packet())
         self.w3 = PacketParsingUtils.get_received_window_size(checks_list[2].get_response_packet())

@@ -1,10 +1,10 @@
-from PortScanner import perform_port_scan
+from PortScanner import PortScanner
 from DatabaseParser import *
 from Fingerprint import Fingerprint
 import shutil
 import os
 import sys
-from PacketSender import PacketSender
+from CheckManager import CheckManager
 
 
 def print_usage():
@@ -29,7 +29,8 @@ if __name__ == '__main__':
         print_usage()
 
     ip_addr = sys.argv[1]
-    open_port, close_port = perform_port_scan(ip_addr)
+    port_scanner = PortScanner()
+    open_port, close_port = port_scanner.perform_port_scan(ip_addr)
 
     db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
     parser = DatabaseParser(db_path)
@@ -41,11 +42,11 @@ if __name__ == '__main__':
 #    ip_addr = "45.33.32.156"
     #open_port = 150
     #close_port = 150
-    packetSender = PacketSender(ip_addr, open_port, close_port)
-    packetSender.send_packets()
+    check_manager = CheckManager(ip_addr, open_port, close_port)
+    check_manager.send_packets()
 
     response_fingerprint = Fingerprint()
-    response_fingerprint.init_from_response(packetSender)
+    response_fingerprint.init_from_response(check_manager)
 
 # port 19575 is also open and 19576 and 19577
     max_score = -1  # Set an initial value lower than any possible score

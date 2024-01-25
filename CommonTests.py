@@ -105,7 +105,7 @@ class CommonTests:
         There's no standard for the ASCII text of the RST, it can contain an explanation of the cause
 
         Parameters:
-        - packet_sender: An instance of a packet sender containing all responses to checks.
+        - check_manager: An instance of a packet sender containing all responses to checks.
 
         Returns:
         The calculated TCP RST data checksum (RD).

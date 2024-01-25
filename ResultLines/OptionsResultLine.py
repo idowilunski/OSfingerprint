@@ -43,14 +43,14 @@ class OptionsResultLine(IResultLine):
                 score += 20
         return score
 
-    def init_from_response(self, packet_sender):
+    def init_from_response(self, check_manager):
         """
         Initializes options from a sequence of probe responses.
 
         Args:
-            packet_sender (PacketSender): A PacketSender instance containing responses to all checks.
+            check_manager (CheckManager): A CheckManager instance containing responses to all checks.
         """
-        checks_list = packet_sender.get_probe_checks_list()
+        checks_list = check_manager.get_probe_checks_list()
         self.o1 = CommonTests.calculate_o(checks_list[0])
         self.o2 = CommonTests.calculate_o(checks_list[1])
         self.o3 = CommonTests.calculate_o(checks_list[2])

@@ -61,17 +61,17 @@ class IEResultLine(IResultLine):
             score += 15
         return score
 
-    def init_from_response(self, packet_sender):
+    def init_from_response(self, check_manager):
         """
         Initializes IE attributes from ICMP Echo probe responses.
 
         Args:
-            icmp_sender (ICMPSender): An ICMPSender instance containing ICMP Echo probe responses.
+            check_manager (CheckManager): A CheckManager instance containing ICMP Echo probe responses.
         """
-        icmp_check = packet_sender.get_icmp_checks_list()[0]
+        icmp_check = check_manager.get_icmp_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(icmp_check)
-        self.dfi = self.calculate_dont_fragment_icmp(packet_sender)
-        self.cd = self.calculate_cd(packet_sender)
+        self.dfi = self.calculate_dont_fragment_icmp(check_manager)
+        self.cd = self.calculate_cd(check_manager)
         self.t = CommonTests.calculate_ttl_diff(icmp_check)
         self.tg = CommonTests.calculate_ttl_guess(icmp_check)
 
@@ -152,19 +152,19 @@ class IEResultLine(IResultLine):
                 self.tg = int(tg_value, 16) if tg_value != '' else ''
 
     @staticmethod
-    def calculate_cd(packet_sender):
+    def calculate_cd(check_manager):
         """
         Calculates the comparison of ICMP Echo response code values from two probes (Z, S, or O).
 
         Args:
-            packet_sender (PacketSender): An PacketSender instance containing responses to all tests.
+            check_manager (CheckManager): A CheckManager instance containing responses to all tests.
 
         Returns:
             str: The CD value (Z, S, or O).
         """
         # IF both code values are zero, return 'Z'
 
-        icmp_checks_list = packet_sender.get_icmp_checks_list()
+        icmp_checks_list = check_manager.get_icmp_checks_list()
         response_type0 = PacketParsingUtils.get_packet_type(icmp_checks_list[0].get_response_packet())
         response_type1 = PacketParsingUtils.get_packet_type(icmp_checks_list[1].get_response_packet())
 
@@ -186,17 +186,17 @@ class IEResultLine(IResultLine):
         return 'O'
 
     @staticmethod
-    def calculate_dont_fragment_icmp(packet_sender):
+    def calculate_dont_fragment_icmp(check_manager):
         """
         Calculates the behavior of the Don't Fragment bit in ICMP echo request probes (N, Y, S or O).
 
         Args:
-            packet_sender (PacketSender): An PacketSender instance containing responses to all checks.
+            check_manager (CheckManager): A CheckManager instance containing responses to all checks.
 
         Returns:
             str: The DFI value (N, Y, S, or O).
         """
-        checks_list = packet_sender.get_icmp_checks_list()
+        checks_list = check_manager.get_icmp_checks_list()
         df_value_0 = PacketParsingUtils.get_dont_fragment_bit_value(checks_list[0].get_response_packet())
         df_value_1 = PacketParsingUtils.get_dont_fragment_bit_value(checks_list[1].get_response_packet())
         # Both of the response DF bits are not set. - 'N'

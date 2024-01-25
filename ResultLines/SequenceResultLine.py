@@ -26,15 +26,15 @@ class SequenceResultLine(IResultLine):
 
     Methods:
         calculate_similarity_score(self, other) -> int: Calculates the similarity score between two Sequence instances.
-        init_from_response(self, packet_sender): Initializes attributes from responses.
+        init_from_response(self, check_manager): Initializes attributes from responses.
         init_from_db(self, tests: dict): Initializes attributes from a dictionary obtained from a database.
-        calculate_ts(packet_sender): Calculates the TCP timestamp option algorithm (TS).
-        calculate_ss(packet_sender): Calculates the Shared IP ID sequence Boolean (SS).
+        calculate_ts(check_manager): Calculates the TCP timestamp option algorithm (TS).
+        calculate_ss(check_manager): Calculates the Shared IP ID sequence Boolean (SS).
         find_gcd_of_list(num_list): Finds the Greatest Common Divisor (GCD) of a list of numbers.
-        calculate_sp(self, packet_sender): Calculates the Sequence Predictability (SP).
-        calculate_gcd(self, packet_sender): Calculates the Greatest Common Divisor (GCD) from the 32-bit ISN.
-        calculate_ti_ci_ii(packet_sender, min_responses_num): Calculates the TI/CI/II results.
-        calculate_isr(self, packet_sender): Calculates the ISN counter rate (ISR).
+        calculate_sp(self, check_manager): Calculates the Sequence Predictability (SP).
+        calculate_gcd(self, check_manager): Calculates the Greatest Common Divisor (GCD) from the 32-bit ISN.
+        calculate_ti_ci_ii(check_manager, min_responses_num): Calculates the TI/CI/II results.
+        calculate_isr(self, check_manager): Calculates the ISN counter rate (ISR).
     """
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -79,25 +79,25 @@ class SequenceResultLine(IResultLine):
             score += 100
         return score
 
-    def init_from_response(self, packet_sender):
+    def init_from_response(self, check_manager):
         """
         Initializes Sequence attributes from Senders instances.
 
         Args:
-            packet_sender (TSender): instance containing responses to the checks.
+            check_manager (CheckManager): instance containing responses to the checks.
 
         Returns:
             None
         """
-        self.sp = self.calculate_sp(packet_sender)
-        self.gcd = self.calculate_gcd(packet_sender)
-        self.isr = self.calculate_isr(packet_sender)
-        self.ti = self.calculate_ti_ci_ii(packet_sender.get_probe_checks_list(), 3)
-        self.rd = CommonTests.calculate_rd(packet_sender.get_probe_checks_list()[0])
-        self.ci = self.calculate_ti_ci_ii(packet_sender.get_close_port_checks_list(), 2)
-        self.ii = self.calculate_ti_ci_ii(packet_sender.get_icmp_checks_list(), 2)
-        self.ss = self.calculate_ss(packet_sender)
-        self.ts = self.calculate_ts(packet_sender)
+        self.sp = self.calculate_sp(check_manager)
+        self.gcd = self.calculate_gcd(check_manager)
+        self.isr = self.calculate_isr(check_manager)
+        self.ti = self.calculate_ti_ci_ii(check_manager.get_probe_checks_list(), 3)
+        self.rd = CommonTests.calculate_rd(check_manager.get_probe_checks_list()[0])
+        self.ci = self.calculate_ti_ci_ii(check_manager.get_close_port_checks_list(), 2)
+        self.ii = self.calculate_ti_ci_ii(check_manager.get_icmp_checks_list(), 2)
+        self.ss = self.calculate_ss(check_manager)
+        self.ts = self.calculate_ts(check_manager)
 
     def init_from_db(self, tests: dict):
         """
@@ -120,23 +120,23 @@ class SequenceResultLine(IResultLine):
         self.ts = tests.get('TS', None)
 
     @staticmethod
-    def calculate_ts(packet_sender):
+    def calculate_ts(check_manager):
         """
         Calculates the TCP timestamp option algorithm (TS).
         According to the following documentation, under "TCP timestamp option algorithm (TS)" :
         https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 
         Args:
-            packet_sender (TSender): TSender instance containing responses to all checks.
+            check_manager : CheckManager instance containing responses to all checks.
 
         Returns:
             int or str: ResultLines of the TCP timestamp option algorithm.
         """
         timestamp_increments_per_sec = []
-        for i in range(len(packet_sender.get_probe_checks_list()) - 1):
+        for i in range(len(check_manager.get_probe_checks_list()) - 1):
             # Verify both timestamp were recorded upon send
-            first_timestamp = packet_sender.get_probe_checks_list()[i].get_send_time()
-            second_timestamp = packet_sender.get_probe_checks_list()[i + 1].get_send_time()
+            first_timestamp = check_manager.get_probe_checks_list()[i].get_send_time()
+            second_timestamp = check_manager.get_probe_checks_list()[i + 1].get_send_time()
             if not first_timestamp or not second_timestamp:
                 raise
 
@@ -144,8 +144,8 @@ class SequenceResultLine(IResultLine):
             if not second_timestamp > first_timestamp:
                 raise
 
-            first_tsval = PacketParsingUtils.get_packet_tsval(packet_sender.get_probe_checks_list()[i].get_response_packet())
-            second_tsval = PacketParsingUtils.get_packet_tsval(packet_sender.get_probe_checks_list()[i + 1].get_response_packet())
+            first_tsval = PacketParsingUtils.get_packet_tsval(check_manager.get_probe_checks_list()[i].get_response_packet())
+            second_tsval = PacketParsingUtils.get_packet_tsval(check_manager.get_probe_checks_list()[i + 1].get_response_packet())
 
             # If any of the responses have no timestamp option, TS is set to U (unsupported).
             if not first_tsval or not second_tsval:
@@ -181,21 +181,21 @@ class SequenceResultLine(IResultLine):
         return round(binary_log)
 
     @staticmethod
-    def calculate_ss(packet_sender):
+    def calculate_ss(check_manager):
         """
         Calculates the Shared IP ID sequence Boolean (SS).
         According to the following documentation, under "Shared IP ID sequence Boolean (SS)" :
         https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 
         Args:
-            packet_sender: TSender instance containing responses to all checks.
+            check_manager: CheckManager instance containing responses to all checks.
 
         Returns:
             str: ResultLines of the Shared IP ID sequence Boolean
             (whether the target shares its IP ID sequence between the TCP and ICMP protocols).
         """
-        probes_checks = packet_sender.get_probe_checks_list()
-        icmp_checks = packet_sender.get_icmp_checks_list()
+        probes_checks = check_manager.get_probe_checks_list()
+        icmp_checks = check_manager.get_icmp_checks_list()
 
         avg = (PacketParsingUtils.get_packet_ip_id(probes_checks[-1].get_response_packet())
                - PacketParsingUtils.get_packet_ip_id(probes_checks[0].get_response_packet())) / (6-1)
@@ -228,7 +228,7 @@ class SequenceResultLine(IResultLine):
 
         return result_gcd
 
-    def calculate_sp(self, packet_sender):
+    def calculate_sp(self, check_manager):
         """
         Calculates the Sequence Predictability (SP).
         Estimates how difficult it would be to predict the next ISN from the known sequence of six probe responses
@@ -236,12 +236,12 @@ class SequenceResultLine(IResultLine):
         https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 
         Args:
-            packet_sender (TSender): TSender instance containing T all responses to checks.
+            check_manager: CheckManager instance containing T all responses to checks.
 
         Returns:
             int or None: ResultLines of the Sequence Predictability.
         """
-        count_non_empty_responses = sum(check.get_response_packet() is not None for check in packet_sender.get_probe_checks_list())
+        count_non_empty_responses = sum(check.get_response_packet() is not None for check in check_manager.get_probe_checks_list())
 
         # This test is only performed if at least four responses were seen.
         if count_non_empty_responses < 4:
@@ -269,7 +269,7 @@ class SequenceResultLine(IResultLine):
                 # Multiply by eight, round to the nearest integer, and store as SP
                 return round(log_std_dev * 8)
 
-    def calculate_gcd(self, packet_sender):
+    def calculate_gcd(self, check_manager):
         """
         Calculates the Greatest Common Divisor (GCD) from the 32-bit ISN.
         According to the following documentation, under "TCP ISN greatest common divisor (GCD)":
@@ -277,15 +277,15 @@ class SequenceResultLine(IResultLine):
         Attempts to determine the smallest number by which the target host increments these values.
 
         Args:
-            packet_sender (TSender): TSender instance containing all responses to checks.
+            check_manager: CheckManager instance containing all responses to checks.
 
         Returns:
             int or None: Resulting GCD or None if there are no valid differences.
         """
-        for i in range(len(packet_sender.get_probe_checks_list()) - 1):
+        for i in range(len(check_manager.get_probe_checks_list()) - 1):
             # Verify both ISNs are present
-            first_isn = PacketParsingUtils.get_packet_sequence_number(packet_sender.get_probe_checks_list()[i].get_response_packet())
-            second_isn = PacketParsingUtils.get_packet_sequence_number(packet_sender.get_probe_checks_list()[i+1].get_response_packet())
+            first_isn = PacketParsingUtils.get_packet_sequence_number(check_manager.get_probe_checks_list()[i].get_response_packet())
+            second_isn = PacketParsingUtils.get_packet_sequence_number(check_manager.get_probe_checks_list()[i+1].get_response_packet())
             if not first_isn or not second_isn:
                 self.logger.error("First or second ISN is empty")
 
@@ -380,7 +380,7 @@ class SequenceResultLine(IResultLine):
         # If none of the previous steps identify the generation algorithm, the test is omitted from the fingerprint.
         return None
 
-    def calculate_isr(self, packet_sender):
+    def calculate_isr(self, check_manager):
         """
         Calculates the ISN counter rate (ISR).
         According to the following documentation, under "TCP ISN counter rate (ISR)":
@@ -388,16 +388,16 @@ class SequenceResultLine(IResultLine):
         This value reports the average rate of increase for the returned TCP initial sequence number.
 
         Args:
-            packet_sender (TSender): TSender instance containing all responses to checks.
+            check_manager: CheckManager instance containing all responses to checks.
 
         Returns:
             None
         """
-        for i in range(len(packet_sender.get_probe_checks_list()) - 1):
-            first_timestamp = packet_sender.get_probe_checks_list()[i].get_send_time()
+        for i in range(len(check_manager.get_probe_checks_list()) - 1):
+            first_timestamp = check_manager.get_probe_checks_list()[i].get_send_time()
             if not first_timestamp:
                 raise
-            second_timestamp = packet_sender.get_probe_checks_list()[i + 1].get_send_time()
+            second_timestamp = check_manager.get_probe_checks_list()[i + 1].get_send_time()
             if not second_timestamp:
                 raise
 

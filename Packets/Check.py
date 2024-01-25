@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from scapy.all import *
-from TcpFlags import TCPFlags
 from scapy.layers.inet import IP, TCP, ICMP, UDP, RandNum, in4_chksum
 from datetime import datetime
 
