@@ -29,7 +29,7 @@ class Check:
         """
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        self._packet = None
+        self._sent_packet = None
         self._response_packet = None
         self._target_ip = target_ip
         self._target_port = target_port
@@ -44,7 +44,7 @@ class Check:
         Returns:
         The sent packet.
         """
-        return self._packet
+        return self._sent_packet
 
     def get_response_packet(self):
         """
@@ -95,7 +95,7 @@ class Check:
         """
         try:
             self._send_timestamp = datetime.now()
-            self._response_packet = sr1(self._packet, verbose=0, timeout=10)
+            self._response_packet = sr1(self._sent_packet, verbose=0, timeout=10)
             self.logger.info("sent a packet")
         except Exception as e:
             self.logger.error(f"Error sending request: {e}")

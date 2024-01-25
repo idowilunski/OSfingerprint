@@ -1,11 +1,11 @@
 import logging
 import math
-
+from ResultLines.IResultLine import *
 import PacketParsingUtils
 from CommonTests import *
 
 
-class Sequence:
+class Sequence(IResultLine):
     """
     Represents the sequence (SEQ) check according to the documentation:
     https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
@@ -130,7 +130,7 @@ class Sequence:
             packet_sender (TSender): TSender instance containing responses to all checks.
 
         Returns:
-            int or str: Result of the TCP timestamp option algorithm.
+            int or str: ResultLines of the TCP timestamp option algorithm.
         """
         timestamp_increments_per_sec = []
         for i in range(len(packet_sender.get_probe_checks_list()) - 1):
@@ -191,7 +191,7 @@ class Sequence:
             packet_sender: TSender instance containing responses to all checks.
 
         Returns:
-            str: Result of the Shared IP ID sequence Boolean
+            str: ResultLines of the Shared IP ID sequence Boolean
             (whether the target shares its IP ID sequence between the TCP and ICMP protocols).
         """
         probes_checks = packet_sender.get_probe_checks_list()
@@ -239,7 +239,7 @@ class Sequence:
             packet_sender (TSender): TSender instance containing T all responses to checks.
 
         Returns:
-            int or None: Result of the Sequence Predictability.
+            int or None: ResultLines of the Sequence Predictability.
         """
         count_non_empty_responses = sum(check.get_response_packet() is not None for check in packet_sender.get_probe_checks_list())
 
@@ -316,7 +316,7 @@ class Sequence:
             min_responses_num (int): Minimum number of responses required for the test.
 
         Returns:
-            str or None: Result of the TI/CI/II test or None if not enough responses are available.
+            str or None: ResultLines of the TI/CI/II test or None if not enough responses are available.
         """
         count_non_empty_responses = sum(check.get_response_packet() is not None for check in checks_list)
 

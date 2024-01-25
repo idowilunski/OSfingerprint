@@ -1,5 +1,4 @@
-import logging
-from check import Check
+from Packets.Check import Check
 from scapy.layers.inet import IP, TCP
 
 
@@ -10,7 +9,7 @@ class TcpPacket5(Check):
         super().__init__(target_ip, target_port)
 
         # T5 sends a TCP SYN packet without IP DF and a window field of 31337 to a closed port.
-        self._packet =  IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S", window=31337,
+        self._sent_packet =  IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S", window=31337,
                                                       options=[
                                                           ("WScale", 10),
                                                           ("NOP", ''),
@@ -25,7 +24,7 @@ class TcpPacket6(Check):
         super().__init__(target_ip, target_port)
 
         # T6 sends a TCP ACK packet with IP DF and a window field of 32768 to a closed port.
-        self._packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=32768,
+        self._sent_packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=32768,
                                                                  options=[
                                                                      ("WScale", 10),
                                                                      ("NOP", ''),
@@ -42,7 +41,7 @@ class TcpPacket7(Check):
         # T7 sends a TCP packet with the FIN, PSH, and URG flags set and a window field of 65535 to a closed port.
         # The IP DF bit is not set.
         # The exception is that T7 uses a Window scale value of 15 rather than 10
-        self._packet =  IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="FPU", window=65535,
+        self._sent_packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="FPU", window=65535,
                                              # Note 03030F insteaf of 03030A - changes the window scale
                                                       options=[
                                                           ("WScale", 15),

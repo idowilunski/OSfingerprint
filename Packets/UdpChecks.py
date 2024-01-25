@@ -1,4 +1,4 @@
-from check import Check
+from Packets.Check import Check
 from scapy.layers.inet import IP, UDP
 
 
@@ -14,4 +14,4 @@ class UdpProbe(Check):
         # Nmap expects to receive an ICMP port unreachable message in return.
         data_field = b'\x43' * 300
         ip_identification = 0x1042
-        self._packet = IP(dst=self._target_ip, id=ip_identification) / UDP(dport=self._target_port) / data_field
+        self._sent_packet = IP(dst=self._target_ip, id=ip_identification) / UDP(dport=self._target_port) / data_field

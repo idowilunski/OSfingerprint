@@ -1,5 +1,4 @@
-from scapy.all import *
-from check import Check
+from Packets.Check import Check
 from scapy.layers.inet import IP, TCP
 
 
@@ -18,7 +17,7 @@ class ProbePacket6(Check):
         ]
         window_size = 512
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+        self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
                                                      seq=self._packet_seq_number, ack=self._packet_ack_number,
                                                      options=options)
 
@@ -40,7 +39,7 @@ class ProbePacket5(Check):
         ]
         window_size = 16
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+        self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
                                                      seq=self._packet_seq_number, ack=self._packet_ack_number,
                                                      options=options)
 
@@ -61,7 +60,7 @@ class ProbePacket4(Check):
         ]
         window_size = 4
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+        self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
                                                      seq=self._packet_seq_number, ack=self._packet_ack_number,
                                                      options=options)
 
@@ -84,7 +83,7 @@ class ProbePacket3(Check):
         ]
         window_size = 4
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+        self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
                                                      seq=self._packet_seq_number, ack=self._packet_ack_number,
                                                      options=options)
 
@@ -106,7 +105,7 @@ class ProbePacket2(Check):
         ]
         window_size = 63
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+        self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
                                                      seq=self._packet_seq_number, ack=self._packet_ack_number,
                                                      options=options)
 
@@ -128,6 +127,6 @@ class ProbePacket1(Check):
         ]
         window_size = 1
 
-        self._packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
+        self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
                                                      seq=self._packet_seq_number, ack=self._packet_ack_number,
                                                      options=options)

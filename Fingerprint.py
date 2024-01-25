@@ -1,10 +1,10 @@
-from Result.Sequence import Sequence
-from Result.Ecn import Ecn
-from Result.Options import Options
-from Result.WindowSize import WindowSize
-from Result.TCheck import TCheck
-from Result.U1 import U1
-from Result.IE import IE
+from ResultLines.Sequence import Sequence
+from ResultLines.Ecn import Ecn
+from ResultLines.Options import Options
+from ResultLines.WindowSize import WindowSize
+from ResultLines.TCheck import TCheck
+from ResultLines.U1 import U1
+from ResultLines.IE import IE
 
 
 class Fingerprint:

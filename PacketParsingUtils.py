@@ -1,13 +1,29 @@
-from abc import abstractmethod
 from scapy.all import *
-from TcpFlags import TCPFlags
-from scapy.layers.inet import IP, TCP, ICMP, UDP, RandNum, in4_chksum
-from datetime import datetime
+from scapy.layers.inet import IP, TCP, ICMP, in4_chksum
 import logging
-
 from TcpFlags import TCPFlags
 
 logger = logging.getLogger(__name__)
+
+
+def verify_packet_valid(packet, should_verify_ip=False, should_verify_tcp=False, should_verify_icmp=False):
+    if not packet:
+        logger.error("This function was incorrectly called on an empty packet")
+        return False
+
+    if should_verify_ip and not packet.haslayer(IP):
+        logger.error("This function was incorrectly called on a non IP packet")
+        return False
+
+    if should_verify_icmp and not packet.haslayer(ICMP):
+        logger.error("This function was incorrectly called on a non ICMP packet")
+        return False
+
+    if should_verify_tcp and not packet.haslayer(TCP):
+        logger.error("This function was incorrectly called on an invalid TCP packet")
+        return False
+
+    return True
 
 
 def get_packet_ip_len(packet) -> int:
@@ -20,12 +36,7 @@ def get_packet_ip_len(packet) -> int:
     Returns:
     int: The length of the IP layer, or 0 if packet is invalid.
     """
-    if not packet:
-        logger.debug("This function was called on an empty packet")
-        return 0
-
-    if not packet.haslayer(IP):
-        logger.debug("This function was called on a non IP packet")
+    if not verify_packet_valid(packet, should_verify_ip=True):
         return 0
 
     return packet[IP].len
@@ -41,12 +52,7 @@ def get_packet_ip_id(packet) -> int:
     Returns:
     int: The identification field value, or 0 if packet is invalid.
     """
-    if not packet:
-        logger.error("This function was incorrectly called on an empty packet")
-        return 0
-
-    if not packet.haslayer(IP):
-        logger.error("This function was incorrectly called on a non IP packet")
+    if not verify_packet_valid(packet, should_verify_ip=True):
         return 0
 
     return packet[IP].id
@@ -62,8 +68,8 @@ def get_packet_tsval(packet) -> int:
     Returns:
     int: The TSval if present in the TCP options, 0 otherwise or if packet is invalid.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.error("This function was incorrectly called on an invalid TCP packet")
+
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return 0
 
     # Iterate over all options in the response packet, find "Timestamp" option if exists and return it
@@ -83,12 +89,7 @@ def get_packet_ack_number(packet) -> int:
         int: The Acknowledgment (ACK) number from the TCP header.
         Returns 0 if the packet is empty or packet is invalid.
     """
-    if not packet:
-        logger.error("This function was incorrectly called on an empty packet")
-        return 0
-
-    if not packet.haslayer(TCP):
-        logger.error("This function was incorrectly called on a non-TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return 0
 
     return packet[TCP].ack
@@ -104,8 +105,7 @@ def get_packet_sequence_number(packet)-> int:
     Returns:
         int: The Sequence Number from the TCP header. Returns 0 if the packet is empty or not a TCP packet.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.info("This function was incorrectly called on a non TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return 0
 
     if (TCPFlags.SYN | TCPFlags.ACK) != packet[TCP].flags:
@@ -125,8 +125,7 @@ def get_received_window_size(packet) -> int:
     Returns:
         int: The advertised window size from the TCP header. Returns 0 if packet is invalid.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.debug("This function was incorrectly called on a non-TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return 0
 
     return packet[TCP].window
@@ -143,8 +142,7 @@ def get_packet_tcp_options(packet):
         list: A list of tuples representing the TCP options.
         Returns an empty list if the packet is empty or not a TCP packet.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.debug("This function was incorrectly called on a non TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return []
 
     return packet[TCP].options
@@ -160,9 +158,9 @@ def get_packet_ttl(packet) -> int:
     Returns:
         int: The Time-to-Live (TTL) value from the IP header. Returns 0 if the packet is invalid.
     """
-    if not packet or not packet.haslayer('IP'):
-        logger.debug("This function was incorrectly called on a non IP packet")
+    if not verify_packet_valid(packet, should_verify_ip=True):
         return 0
+
     return packet[IP].ttl
 
 
@@ -204,8 +202,7 @@ def is_cwr_set(packet) -> bool:
     Returns:
     bool: True if the CWR flag is set, False otherwise or if packet is invalid.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.error("This function was incorrectly called on an invalid TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return False
 
     return bool(packet[TCP].flags & 0x80) # 0x80 is the CWR flag
@@ -221,8 +218,7 @@ def is_ece_set(packet) -> bool:
     Returns:
     bool: True if the ECE flag is set, False otherwise or if packet is invalid.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.error("This function was incorrectly called on an invalid TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return False
 
     return bool(packet[TCP].flags & 0x40) # 0x40 is the ECE flag
@@ -238,8 +234,7 @@ def is_reserved_bit_set(packet) -> bool:
     Returns:
     bool: True if the reserved bit is set, False otherwise or if packet is invalid.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.error("This function was incorrectly called on an invalid TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return False
 
     # Read the reserved field from the TCP packet
@@ -256,8 +251,7 @@ def is_urgent_bit_set(packet) -> bool:
     Returns:
     bool: True if the urgent bit is set, False otherwise or if packet is invalid.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.error("This function was incorrectly called on an invalid TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return False
 
     # Read the urgent field from the TCP packet
@@ -274,8 +268,7 @@ def get_tcp_flags(packet) -> str:
     Returns:
     str: The TCP flags as a string. Empty string if packet is invalid.
     """
-    if not packet or not packet.haslayer(TCP):
-        logger.error("This function was incorrectly called on an invalid TCP packet")
+    if not verify_packet_valid(packet, should_verify_tcp=True):
         return ""
 
     return packet[TCP].flags
@@ -291,12 +284,7 @@ def get_packet_type(packet) -> int:
     Returns:
     int: ICMP type, 0 if packet is invalid.
     """
-    if not packet:
-        logger.error("This function was incorrectly called on an empty packet")
-        return 0
-
-    if not packet.haslayer(ICMP):
-        logger.error("This function was incorrectly called on a non ICMP packet")
+    if not verify_packet_valid(packet, should_verify_icmp=True):
         return 0
 
     return packet[ICMP].type
@@ -312,11 +300,7 @@ def get_ip_checksum(packet) -> int:
     Returns:
     int: The calculated checksum value, or 0 if packet is invalid.
     """
-    if not packet:
-        logger.error("This function was incorrectly called on an empty packet")
-        return 0
-    if not packet.haslayer(IP):
-        logger.error("This function was incorrectly called on a non IP packet")
+    if not verify_packet_valid(packet, should_verify_ip=True):
         return 0
 
     return in4_chksum(socket.IPPROTO_IP, packet[IP], bytes(packet[IP]))

@@ -87,8 +87,6 @@ class Ecn:
         self.tg = CommonTests.calculate_ttl_guess(ecn_check)
         self.w = CommonTests.calculate_window_size(ecn_check)
         self.o = CommonTests.calculate_o(ecn_check)
-        if len(self.o) > 0:
-            print( ''.join(self.o))
         self.cc = self.calculate_congestion_notification(ecn_check)
         self.q = CommonTests.calculate_quirks(ecn_check)
 

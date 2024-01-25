@@ -1,5 +1,4 @@
-from scapy.all import *
-from check import Check
+from Packets.Check import Check
 from scapy.layers.inet import IP, TCP
 
 
@@ -24,7 +23,7 @@ class EcnPacket(Check):
         # sequence number is random, window size field is three
         window_size = 3
 
-        self._packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S",
+        self._sent_packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="S",
                                                      options=options,
                                                      window=window_size,
                                                      ack=0,

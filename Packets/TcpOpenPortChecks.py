@@ -1,4 +1,4 @@
-from check import Check
+from Packets.Check import Check
 from scapy.layers.inet import IP, TCP
 
 
@@ -11,7 +11,7 @@ class TcpPacket2(Check):
         # T2 sends a TCP null (no flags set) packet with the IP DF bit set and a window field of 128 to an open port.
         # Those 20 bytes correspond to window scale (10), NOP, MSS (265), Timestamp
         # (TSval: 0xFFFFFFFF; TSecr: 0), then SACK permitted.
-        self._packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, window=128,
+        self._sent_packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, window=128,
                                                                  options=[
                                                                      ("WScale", 10),
                                                                      ("NOP", ''),
@@ -27,7 +27,7 @@ class TcpPacket3(Check):
 
         # T3 sends a TCP packet with the SYN, FIN, URG,
         # and PSH flags set and a window field of 256 to an open port. The IP DF bit is not set.
-        self._packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="SFUP", window=256,
+        self._sent_packet = IP(dst=self._target_ip) / TCP(dport=self._target_port, flags="SFUP", window=256,
                                                      options=[
                                                          ("WScale", 10),
                                                          ("NOP", ''),
@@ -42,7 +42,7 @@ class TcpPacket4(Check):
         super().__init__(target_ip, target_port)
 
         # T4 sends a TCP ACK packet with IP DF and a window field of 1024 to an open port.
-        self._packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=1024,
+        self._sent_packet = IP(dst=self._target_ip, flags="DF") / TCP(dport=self._target_port, flags="A", window=1024,
                                                                  options=[
                                                                      ("WScale", 10),
                                                                      ("NOP", ''),
