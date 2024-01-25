@@ -1,9 +1,9 @@
 import logging
 
-from Packets.EcnChecks import EcnPacket
+from Packets.EcnChecks import EcnCheck1
 from Packets.TcpClosePortChecks import *
 from Packets.TcpOpenPortChecks import *
-from Packets.UdpChecks import UdpProbe
+from Packets.UdpChecks import *
 from Packets.icmpChecks import *
 from Packets.probeChecks import *
 
@@ -29,22 +29,22 @@ class CheckManager:
         """
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        self._ecn_checks_list = [EcnPacket(target_ip, target_open_port)]
-        self._icmp_checks_list = [IcmpPacket1(target_ip, target_open_port),
-                             IcmpPacket2(target_ip, target_open_port)]
-        self._probe_checks_list = [ProbePacket1(target_ip, target_open_port),
-                             ProbePacket2(target_ip, target_open_port),
-                             ProbePacket3(target_ip, target_open_port),
-                             ProbePacket4(target_ip, target_open_port),
-                             ProbePacket5(target_ip, target_open_port),
-                             ProbePacket6(target_ip, target_open_port)]
-        self._tcp_close_port_checks_list = [TcpPacket5(target_ip, target_close_port),
-                             TcpPacket6(target_ip, target_close_port),
-                             TcpPacket7(target_ip, target_close_port)]
-        self._tcp_open_port_checks_list = [TcpPacket2(target_ip, target_open_port),
-                             TcpPacket3(target_ip, target_open_port),
-                             TcpPacket4(target_ip, target_open_port)]
-        self._udp_checks_list = [UdpProbe(target_ip, target_close_port)]
+        self._ecn_checks_list = [EcnCheck1(target_ip, target_open_port)]
+        self._icmp_checks_list = [IcmpCheck1(target_ip, target_open_port),
+                             IcmpCheck2(target_ip, target_open_port)]
+        self._probe_checks_list = [ProbeCheck1(target_ip, target_open_port),
+                             ProbeCheck2(target_ip, target_open_port),
+                             ProbeCheck3(target_ip, target_open_port),
+                             ProbeCheck4(target_ip, target_open_port),
+                             ProbeCheck5(target_ip, target_open_port),
+                             ProbeCheck6(target_ip, target_open_port)]
+        self._tcp_close_port_checks_list = [TcpCheck5(target_ip, target_close_port),
+                             TcpCheck6(target_ip, target_close_port),
+                             TcpCheck7(target_ip, target_close_port)]
+        self._tcp_open_port_checks_list = [TcpCheck2(target_ip, target_open_port),
+                             TcpCheck3(target_ip, target_open_port),
+                             TcpCheck4(target_ip, target_open_port)]
+        self._udp_checks_list = [UdpCheck1(target_ip, target_close_port)]
 
     def get_udp_checks_list(self):
         return self._udp_checks_list

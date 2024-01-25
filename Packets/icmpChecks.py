@@ -2,7 +2,7 @@ from Packets.Check import Check
 from scapy.layers.inet import IP, ICMP
 
 
-class IcmpPacket1(Check):
+class IcmpCheck1(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
         # Prepare the first echo packet according to the following documentation:
@@ -15,7 +15,7 @@ class IcmpPacket1(Check):
                        ICMP(type=8, code=9, seq=295) / ( b'\x00' * 120)
 
 
-class IcmpPacket2(Check):
+class IcmpCheck2(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 

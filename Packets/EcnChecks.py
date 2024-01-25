@@ -5,7 +5,7 @@ from scapy.layers.inet import IP, TCP
 # Sends an ECN packet according to the following documentation:
 # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
 # Under : "TCP explicit congestion notification (ECN)"
-class EcnPacket(Check):
+class EcnCheck1(Check):
     def __init__(self, target_ip, target_open_port):
         super().__init__(target_ip, target_open_port)
 

@@ -4,7 +4,7 @@ from scapy.layers.inet import IP, TCP
 
 # Prepares T5-T7 packets according to the following documentation, under "TCP (T2–T7)":
 # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-class TcpPacket5(Check):
+class TcpCheck5(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -19,7 +19,7 @@ class TcpPacket5(Check):
                                                       ])
 
 
-class TcpPacket6(Check):
+class TcpCheck6(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -34,7 +34,7 @@ class TcpPacket6(Check):
                                                                  ])
 
 
-class TcpPacket7(Check):
+class TcpCheck7(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 

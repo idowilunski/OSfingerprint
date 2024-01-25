@@ -25,6 +25,19 @@ def verify_packet_valid(packet, should_verify_ip=False, should_verify_tcp=False,
     return True
 
 
+def get_sequence_number(packet) -> int:
+    """
+    Get the Sequence Number from the packet.
+
+    Returns:
+        int: The Sequence Number from the probe packet.
+    """
+    if not verify_packet_valid(packet, should_verify_tcp=True):
+        return 0
+
+    return packet[TCP].seq
+
+
 def get_packet_ip_len(packet) -> int:
     """
     Get the length of the IP layer in the input packet

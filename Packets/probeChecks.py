@@ -1,8 +1,10 @@
+from scapy.volatile import RandNum
+
 from Packets.Check import Check
 from scapy.layers.inet import IP, TCP
 
 
-class ProbePacket6(Check):
+class ProbeCheck6(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -18,11 +20,12 @@ class ProbePacket6(Check):
         window_size = 512
 
         self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
-                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     seq=RandNum(0, 5000),
+                                                     ack=RandNum(0, 5000),
                                                      options=options)
 
 
-class ProbePacket5(Check):
+class ProbeCheck5(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -40,11 +43,12 @@ class ProbePacket5(Check):
         window_size = 16
 
         self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
-                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     seq=RandNum(0, 5000),
+                                                     ack=RandNum(0, 5000),
                                                      options=options)
 
 
-class ProbePacket4(Check):
+class ProbeCheck4(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -61,11 +65,12 @@ class ProbePacket4(Check):
         window_size = 4
 
         self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
-                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     seq=RandNum(0, 5000),
+                                                     ack=RandNum(0, 5000),
                                                      options=options)
 
 
-class ProbePacket3(Check):
+class ProbeCheck3(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -84,11 +89,12 @@ class ProbePacket3(Check):
         window_size = 4
 
         self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
-                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     seq=RandNum(0, 5000),
+                                                     ack=RandNum(0, 5000),
                                                      options=options)
 
 
-class ProbePacket2(Check):
+class ProbeCheck2(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -106,11 +112,12 @@ class ProbePacket2(Check):
         window_size = 63
 
         self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
-                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     seq=RandNum(0, 5000),
+                                                     ack=RandNum(0, 5000),
                                                      options=options)
 
 
-class ProbePacket1(Check):
+class ProbeCheck1(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
@@ -128,5 +135,6 @@ class ProbePacket1(Check):
         window_size = 1
 
         self._sent_packet = IP(dst=self._target_ip) / TCP(window=window_size, dport=self._target_port, flags="S",
-                                                     seq=self._packet_seq_number, ack=self._packet_ack_number,
+                                                     seq=RandNum(0, 5000),
+                                                     ack=RandNum(0, 5000),
                                                      options=options)

@@ -145,8 +145,9 @@ class TCheckResultLine(IResultLine):
             str: Acknowledgment number result ('Z', 'S', 'S+', or 'O'), how the acknowledgment number in the
             response compared to the sequence number in the respective probe.
         """
-        response_ack_num = PacketParsingUtils.get_packet_ack_number(t_check.get_response_packet())
-        probe_seq_num = t_check.get_probe_sequence_number()
+        response_packet = t_check.get_response_packet()
+        response_ack_num = PacketParsingUtils.get_packet_ack_number(response_packet)
+        probe_seq_num = PacketParsingUtils.get_sequence_number(response_packet)
 
         # Acknowledgment number is zero.
         if response_ack_num == 0:
@@ -173,7 +174,7 @@ class TCheckResultLine(IResultLine):
             str: Sequence number result ('Z', 'A', 'A+', or 'O'), , how the acknowledgment number in the
             probe compared to the sequence number in the respective response.
         """
-        probe_ack_num = t_check.get_probe_ack_number()
+        probe_ack_num = PacketParsingUtils.get_packet_ack_number(t_check.get_sent_packet())
         response_seq_num = PacketParsingUtils.get_packet_sequence_number(t_check.get_response_packet())
 
         # Sequence number is zero.

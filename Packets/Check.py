@@ -32,9 +32,7 @@ class Check:
         self._response_packet = None
         self._target_ip = target_ip
         self._target_port = target_port
-        self._packet_seq_number = RandNum(0, 5000)
         self._send_timestamp = None
-        self._packet_ack_number = RandNum(0, 5000)
 
     def get_sent_packet(self):
         """
@@ -53,24 +51,6 @@ class Check:
         The response packet.
         """
         return self._response_packet
-
-    def get_probe_ack_number(self) -> int:
-        """
-        Get the Acknowledgment (ACK) number from the probe packet.
-
-        Returns:
-            int: The Acknowledgment (ACK) number from the probe packet.
-        """
-        return self._packet_ack_number
-
-    def get_probe_sequence_number(self) -> int:
-        """
-        Get the Sequence Number from the probe packet.
-
-        Returns:
-            int: The Sequence Number from the probe packet.
-        """
-        return self._packet_seq_number
 
     def get_send_time(self) -> datetime:
         """

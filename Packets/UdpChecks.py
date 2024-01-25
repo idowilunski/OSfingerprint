@@ -4,7 +4,7 @@ from scapy.layers.inet import IP, UDP
 
 # Prepares U1 packet according to the following documentation, under "UDP (U1)":
 # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
-class UdpProbe(Check):
+class UdpCheck1(Check):
     def __init__(self, target_ip, target_close_port):
         super().__init__(target_ip, target_close_port)
 
