@@ -13,7 +13,8 @@ class DatabaseParser:
     - db_path (str): Path to the database file.
     """
     def __init__(self, db_path):
-        self.db_path = db_path
+        self._list_of_entries = []
+        self.read_database(db_path)
 
     @staticmethod
     def parse_entry(entry):
@@ -69,16 +70,18 @@ class DatabaseParser:
 
         return result_dict
 
-    def read_database_and_get_all_entries(self):
+    def get_all_entries(self):
+        return self._list_of_entries
+
+    def read_database(self, db_path):
         """
         Read the database file and return a list of all entries.
 
         Returns:
         A list of dictionaries, each representing a parsed entry from the database.
         """
-        list_of_entries = []
         # Open and parse db file
-        with open(self.db_path, 'r', encoding='utf-8', errors='ignore') as file:
+        with open(db_path, 'r', encoding='utf-8', errors='ignore') as file:
             count = 0
             # Verify we've reached a new entry, as it's separate with an empty line from the next
             entries = file.read().split('\n\n')
@@ -88,9 +91,6 @@ class DatabaseParser:
                     count += 1
                     continue
                 entry_data = self.parse_entry(entry)
-                list_of_entries.append(entry_data)
-
-        # Return a list of dictionaries with all the parsed parameters
-        return list_of_entries
+                self._list_of_entries.append(entry_data)
 
 

@@ -32,36 +32,27 @@ if __name__ == '__main__':
     port_scanner = PortScanner()
     open_port, close_port = port_scanner.perform_port_scan(ip_addr)
 
-    db_path = "C:\\Program Files (x86)\\Nmap\\nmap-os-db"
-    parser = DatabaseParser(db_path)
 
-    list_of_entries = parser.read_database_and_get_all_entries()
-
-    # TODO - go over each port and detect / get it from commandline
-
-#    ip_addr = "45.33.32.156"
-    #open_port = 150
-    #close_port = 150
     check_manager = CheckManager(ip_addr, open_port, close_port)
     check_manager.send_packets()
 
     response_fingerprint = Fingerprint()
     response_fingerprint.init_from_response(check_manager)
 
-# port 19575 is also open and 19576 and 19577
     max_score = -1  # Set an initial value lower than any possible score
     best_result = None
 
-    for entry in list_of_entries:
-        curr_entry = Fingerprint()
-        curr_entry.init_from_db(entry)
+    db_parser = DatabaseParser("C:\\Program Files (x86)\\Nmap\\nmap-os-db")
+    for db_entry in db_parser.get_all_entries():
+        curr_fingerprint = Fingerprint()
+        curr_fingerprint.init_from_db(db_entry)
 
         # Calculate the similarity score
-        score = response_fingerprint.calculate_similarity_score(curr_entry)
+        score = response_fingerprint.calculate_similarity_score(curr_fingerprint)
 
         # Check if the current score is higher than the maximum
         if score > max_score:
             max_score = score
-            best_result = curr_entry
+            best_result = curr_fingerprint
 
     print(f"DONE! Max score is: {best_result.name}")

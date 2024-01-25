@@ -34,7 +34,7 @@ class Check:
         self._target_port = target_port
         self._send_timestamp = None
 
-    def get_sent_packet(self):
+    def get_sent_packet(self) -> Packet:
         """
         Get the sent packet.
 
@@ -43,7 +43,7 @@ class Check:
         """
         return self._sent_packet
 
-    def get_response_packet(self):
+    def get_response_packet(self) -> Packet:
         """
         Get the response packet received after sending the check.
 
