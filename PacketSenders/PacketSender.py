@@ -21,12 +21,6 @@ class PacketSender:
         self.logger = logging.getLogger(__name__)
         self._checks_list = None
 
-    def prepare_packets(self):
-        """
-         Prepares the packet checks before sending.
-         """
-        _ = [check.prepare_packet() for check in self._checks_list]
-
     def send_packets(self):
         """
         Sends packets to the target for conducting checks.

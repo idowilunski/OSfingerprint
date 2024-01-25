@@ -8,7 +8,6 @@ class UdpProbe(Check):
     def __init__(self, target_ip, target_close_port):
         super().__init__(target_ip, target_close_port)
 
-    def prepare_packet(self):
         # The character ‘C’ (0x43) is repeated 300 times for the data field.
         # The IP ID value is set to 0x1042 for operating systems which allow us to set this.
         # If the port is truly closed and there is no firewall in place,

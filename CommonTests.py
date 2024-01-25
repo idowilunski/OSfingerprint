@@ -107,7 +107,7 @@ class CommonTests:
         Returns:
         A string representing the calculated responsiveness (Y/N).
         """
-        return 'Y' if not check.is_response_packet_empty() else 'N'
+        return 'Y' if check.get_response_packet() is not None else 'N'
 
     @staticmethod
     def calculate_rd(probe_sender):

@@ -10,7 +10,6 @@ class EcnPacket(Check):
     def __init__(self, target_ip, target_open_port):
         super().__init__(target_ip, target_open_port)
 
-    def prepare_packet(self):
         # TCP options are WScale (10), NOP, MSS (1460), SACK permitted, NOP, NOP. The probe is sent to an open port.
         options = [
             (254, b'\x01\x01'),  # ECN CWR and ECE flags

@@ -7,10 +7,7 @@ from datetime import datetime
 
 class Check:
     """
-        Abstract base class representing the interface for a check in NMAP OS-detection.
-
-        Inheriting classes are expected to implement the 'prepare_packet', 'send_packet',
-        and 'analyze_response' methods.
+        Base class representing the API for a check in NMAP OS-detection.
 
         Attributes:
         - target_ip (str): The target IP address to perform OS-detection on.
@@ -58,15 +55,6 @@ class Check:
         """
         return self._response_packet
 
-    def is_response_packet_empty(self) -> bool:
-        """
-        Check if the response packet is empty.
-
-        Returns:
-            bool: True if the response packet is empty, False otherwise.
-        """
-        return not self._response_packet
-
     def get_probe_ack_number(self) -> int:
         """
         Get the Acknowledgment (ACK) number from the probe packet.
@@ -112,16 +100,4 @@ class Check:
         except Exception as e:
             self.logger.error(f"Error sending request: {e}")
             raise
-
-    @abstractmethod
-    def prepare_packet(self):
-        """
-        Abstract method to be implemented by subclasses for preparing a network packet.
-
-        This method should define the necessary steps to construct and format a network packet.
-
-        Raises:
-            NotImplementedError: If the method is not implemented in the subclass.
-        """
-        pass
 

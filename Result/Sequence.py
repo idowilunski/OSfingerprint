@@ -243,7 +243,7 @@ class Sequence:
         Returns:
             int or None: Result of the Sequence Predictability.
         """
-        count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
+        count_non_empty_responses = sum(check.get_response_packet() is not None for check in probe_sender.get_checks_list())
 
         # This test is only performed if at least four responses were seen.
         if count_non_empty_responses < 4:
@@ -320,7 +320,7 @@ class Sequence:
         Returns:
             str or None: Result of the TI/CI/II test or None if not enough responses are available.
         """
-        count_non_empty_responses = sum(not check.is_response_packet_empty() for check in probe_sender.get_checks_list())
+        count_non_empty_responses = sum(check.get_response_packet() is not None for check in probe_sender.get_checks_list())
 
         #  at least three responses must be received for the test to be included for TI,
         # at least 2 for CI, and 2 for II

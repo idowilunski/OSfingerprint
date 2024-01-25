@@ -49,13 +49,6 @@ if __name__ == '__main__':
     tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender(ip_addr, open_port)
     tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender(ip_addr, close_port)
 
-    udp_sender.prepare_packets()
-    ecn_sender.prepare_packets()
-    icmp_sender.prepare_packets()
-    probe_sender.prepare_packets()
-    tcp_open_port_sender.prepare_packets()
-    tcp_close_port_sender.prepare_packets()
-
     udp_sender.send_packets()
     ecn_sender.send_packets()
     icmp_sender.send_packets()

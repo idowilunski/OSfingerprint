@@ -7,7 +7,6 @@ class ProbePacket6(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
-    def prepare_packet(self):
         # Construct a SYN packet for target IP and port according to the following NMAP documentation:
         # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
         # Reference: Packet 6: MSS (265), SACK permitted, Timestamp (TSval: 0xFFFFFFFF; TSecr: 0). The window field
@@ -28,7 +27,6 @@ class ProbePacket5(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
-    def prepare_packet(self):
         # Construct a SYN packet for target IP and port according to the following NMAP documentation:
         # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
         # Reference: Packet 5: MSS (536), SACK permitted, Timestamp (TSval: 0xFFFFFFFF; TSecr: 0),
@@ -51,7 +49,6 @@ class ProbePacket4(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
-    def prepare_packet(self):
         # Construct a SYN packet for target IP and port according to the following NMAP documentation:
         # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
         # Reference: Packet 4:  SACK permitted, Timestamp (TSval: 0xFFFFFFFF; TSecr: 0),
@@ -73,7 +70,6 @@ class ProbePacket3(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
-    def prepare_packet(self):
         # Construct a SYN packet for target IP and port according to the following NMAP documentation:
         # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
         # Reference: Packet 3:   Timestamp (TSval: 0xFFFFFFFF; TSecr: 0), NOP,
@@ -97,7 +93,6 @@ class ProbePacket2(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
-    def prepare_packet(self):
         # Construct a SYN packet for target IP and port according to the following NMAP documentation:
         # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
         # Reference: Packet 2:  MSS (1400), window scale (0), SACK permitted,
@@ -120,7 +115,6 @@ class ProbePacket1(Check):
     def __init__(self, target_ip, target_port):
         super().__init__(target_ip, target_port)
 
-    def prepare_packet(self):
         # Construct a SYN packet for target IP and port according to the following NMAP documentation:
         # https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
         # Reference: Packet 1: window scale (10), NOP, MSS (1460), timestamp (TSval: 0xFFFFFFFF; TSecr: 0),
