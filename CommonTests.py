@@ -84,19 +84,6 @@ class CommonTests:
             return f"Unknown Option - Type: {option_type}, Value: {option_value}"
 
     @staticmethod
-    def calculate_window_size(check):
-        """
-            Calculate the TCP window size based on the response of a check.
-
-            Parameters:
-            - check: An instance of Check representing the response of a check.
-
-            Returns:
-            The calculated TCP window size.
-        """
-        return PacketParsingUtils.get_received_window_size(check.get_response_packet())
-
-    @staticmethod
     def calculate_responsiveness(check):
         """
         Calculate the responsiveness (Y/N) based on the response of a check.
@@ -125,19 +112,6 @@ class CommonTests:
         """
         response_data = check.get_response_packet()
         return binascii.crc32(response_data.original) if response_data else 0
-
-    @staticmethod
-    def calculate_dont_fragment(check):
-        """
-        Calculate the value of the Don't Fragment (DF) bit based on the response of a check.
-
-        Parameters:
-        - check: An instance of Check representing the response of a check.
-
-        Returns:
-        The value of the Don't Fragment (DF) bit.
-        """
-        return PacketParsingUtils.get_dont_fragment_bit_value(check.get_response_packet())
 
     @staticmethod
     def calculate_ttl_diff(check):

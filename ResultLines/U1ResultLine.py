@@ -101,7 +101,7 @@ class U1ResultLine(IResultLine):
         """
         u1_check = packet_sender.get_udp_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(u1_check)
-        self.df = CommonTests.calculate_dont_fragment(u1_check)
+        self.df = PacketParsingUtils.get_dont_fragment_bit_value(u1_check.get_response_packet())
         self.t = CommonTests.calculate_ttl_diff(u1_check)
         self.tg = CommonTests.calculate_ttl_guess(u1_check)
         self.ipl = self.calculate_ipl(u1_check)

@@ -24,7 +24,6 @@ class TCheckResultLine(IResultLine):
         calculate_similarity_score(self, other): Calculates the similarity score between two TCheck instances.
         init_from_response(self, t_sender, check): Initializes attributes from a TSender and a check instance.
         init_from_db(self, tests: dict): Initializes attributes from a dictionary obtained from a database.
-        calculate_tcp_flags(t_check): Calculates the TCP flags from a TCheck instance.
         calculate_ack_number(t_check): Calculates the acknowledgment number result.
         calculate_sequence_number(t_check): Calculates the sequence number result.
     """
@@ -78,12 +77,11 @@ class TCheckResultLine(IResultLine):
                 score += 20
         return score
 
-    def init_from_response(self, t_sender, check):
+    def init_from_response(self, check):
         """
         Initializes TCheck attributes from a TSender and a check instance.
 
         Args:
-            t_sender (TSender): The TSender instance containing the T probe response.
             check (Check): The check instance containing relevant information.
 
         Returns:
@@ -95,13 +93,13 @@ class TCheckResultLine(IResultLine):
         if self.r == 'N':
             return
 
-        self.df = CommonTests.calculate_dont_fragment(check)
+        self.df = PacketParsingUtils.get_dont_fragment_bit_value(check.get_response_packet())
         self.t = CommonTests.calculate_ttl_diff(check)
         self.tg = CommonTests.calculate_ttl_guess(check)
-        self.w = CommonTests.calculate_window_size(check)
+        self.w = PacketParsingUtils.get_received_window_size(check.get_response_packet())
         self.s = self.calculate_sequence_number(check)
         self.a = self.calculate_ack_number(check)
-        self.f = self.calculate_tcp_flags(check)
+        self.f = PacketParsingUtils.get_tcp_flags(check.get_response_packet())
         self.o = CommonTests.calculate_o(check)
         self.rd = CommonTests.calculate_rd(check)
         self.q = CommonTests.calculate_quirks(check)
@@ -132,19 +130,6 @@ class TCheckResultLine(IResultLine):
         self.o = tests.get('O', '')
         self.rd = tests.get('RD', '')
         self.q = tests.get('Q', '')
-
-    @staticmethod
-    def calculate_tcp_flags(t_check):
-        """
-        Calculates the TCP flags from a TCheck instance.
-
-        Args:
-            t_check (TCheck): The TCheck instance containing the response packet.
-
-        Returns:
-            list: List of TCP flags.
-        """
-        return list(PacketParsingUtils.get_tcp_flags(t_check.get_response_packet()))
 
     @staticmethod
     def calculate_ack_number(t_check):

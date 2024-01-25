@@ -258,7 +258,7 @@ def is_urgent_bit_set(packet) -> bool:
     return bool(packet[TCP].urgptr)
 
 
-def get_tcp_flags(packet) -> str:
+def get_tcp_flags(packet) -> list:
     """
     Get the TCP flags present in the input packet.
 
@@ -269,9 +269,9 @@ def get_tcp_flags(packet) -> str:
     str: The TCP flags as a string. Empty string if packet is invalid.
     """
     if not verify_packet_valid(packet, should_verify_tcp=True):
-        return ""
+        return list()
 
-    return packet[TCP].flags
+    return list(packet[TCP].flags)
 
 
 def get_packet_type(packet) -> int:

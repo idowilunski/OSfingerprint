@@ -83,10 +83,10 @@ class EcnResultLine(IResultLine):
         if self.r == 'N':
             return
 
-        self.df = CommonTests.calculate_dont_fragment(ecn_check)
+        self.df = PacketParsingUtils.get_dont_fragment_bit_value(ecn_check.get_response_packet())
         self.t = CommonTests.calculate_ttl_diff(ecn_check)
         self.tg = CommonTests.calculate_ttl_guess(ecn_check)
-        self.w = CommonTests.calculate_window_size(ecn_check)
+        self.w = PacketParsingUtils.get_received_window_size(ecn_check.get_response_packet())
         self.o = CommonTests.calculate_o(ecn_check)
         self.cc = self.calculate_congestion_notification(ecn_check)
         self.q = CommonTests.calculate_quirks(ecn_check)
