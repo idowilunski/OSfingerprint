@@ -42,32 +42,26 @@ class Fingerprint:
         self.U1 = U1()
         self.IE = IE()
 
-    def init_from_response(self, ecn_sender, open_ports_sender, udp_sender, icmp_sender, probe_sender,
-                           close_ports_sender):
+    def init_from_response(self, packet_sender):
         """
                 Initialize the Fingerprint instance from response data.
 
                 Parameters:
-                - ecn_sender: Contains response data for ECN test.
-                - open_ports_sender: Contains response data for open ports test.
-                - udp_sender: Contains response data for UDP test.
-                - icmp_sender: Contains response data for ICMP test.
-                - probe_sender: Contains response data for the probe test.
-                - close_ports_sender: Contains response data for closed ports test.
+                - packet_sender: Contains response data for all tests.
         """
-        self.SEQ.init_from_response(probe_sender, close_ports_sender, icmp_sender)
-        self.OPS.init_from_response(probe_sender)
-        self.WIN.init_from_response(probe_sender)
-        self.ECN.init_from_response(ecn_sender)
-        self.T1.init_from_response(probe_sender, probe_sender.get_checks_list()[0])
-        self.T2.init_from_response(open_ports_sender, open_ports_sender.get_checks_list()[0])
-        self.T3.init_from_response(open_ports_sender, open_ports_sender.get_checks_list()[1])
-        self.T4.init_from_response(open_ports_sender, open_ports_sender.get_checks_list()[2])
-        self.T5.init_from_response(close_ports_sender, close_ports_sender.get_checks_list()[0])
-        self.T6.init_from_response(close_ports_sender, close_ports_sender.get_checks_list()[1])
-        self.T7.init_from_response(close_ports_sender, close_ports_sender.get_checks_list()[2])
-        self.U1.init_from_response(udp_sender)
-        self.IE.init_from_response(icmp_sender)
+        self.SEQ.init_from_response(packet_sender)
+        self.OPS.init_from_response(packet_sender)
+        self.WIN.init_from_response(packet_sender)
+        self.ECN.init_from_response(packet_sender)
+        self.T1.init_from_response(packet_sender, packet_sender.get_probe_checks_list()[0])
+        self.T2.init_from_response(packet_sender, packet_sender.get_open_port_checks_list()[0])
+        self.T3.init_from_response(packet_sender, packet_sender.get_open_port_checks_list()[1])
+        self.T4.init_from_response(packet_sender, packet_sender.get_open_port_checks_list()[2])
+        self.T5.init_from_response(packet_sender, packet_sender.get_close_port_checks_list()[0])
+        self.T6.init_from_response(packet_sender, packet_sender.get_close_port_checks_list()[1])
+        self.T7.init_from_response(packet_sender, packet_sender.get_close_port_checks_list()[2])
+        self.U1.init_from_response(packet_sender)
+        self.IE.init_from_response(packet_sender)
 
     def init_from_db(self, tests: dict):
         """

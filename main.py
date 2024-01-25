@@ -1,11 +1,10 @@
-import PacketSenders.EcnSender, PacketSenders.IcmpSender, PacketSenders.UdpSender, PacketSenders.probesSender, \
-    PacketSenders.TcpClosePortSender, PacketSenders.TcpOpenPortSender
 from PortScanner import perform_port_scan
 from DatabaseParser import *
 from Fingerprint import Fingerprint
 import shutil
 import os
 import sys
+from PacketSender import PacketSender
 
 
 def print_usage():
@@ -42,24 +41,11 @@ if __name__ == '__main__':
 #    ip_addr = "45.33.32.156"
     #open_port = 150
     #close_port = 150
-    udp_sender = PacketSenders.UdpSender.UdpSender(ip_addr, close_port)
-    ecn_sender = PacketSenders.EcnSender.EcnSender(ip_addr, open_port)
-    icmp_sender = PacketSenders.IcmpSender.IcmpSender(ip_addr, open_port)
-    probe_sender = PacketSenders.probesSender.ProbesSender(ip_addr, open_port)
-    tcp_open_port_sender = PacketSenders.TcpOpenPortSender.TcpOpenPortSender(ip_addr, open_port)
-    tcp_close_port_sender = PacketSenders.TcpClosePortSender.TcpClosePortSender(ip_addr, close_port)
-
-    udp_sender.send_packets()
-    ecn_sender.send_packets()
-    icmp_sender.send_packets()
-    probe_sender.send_packets()
-    tcp_open_port_sender.send_packets()
-    tcp_close_port_sender.send_packets()
+    packetSender = PacketSender(ip_addr, open_port, close_port)
+    packetSender.send_packets()
 
     response_fingerprint = Fingerprint()
-    response_fingerprint.init_from_response(ecn_sender, tcp_open_port_sender,
-                                            udp_sender, icmp_sender, probe_sender,
-                                            tcp_close_port_sender)
+    response_fingerprint.init_from_response(packetSender)
 
 # port 19575 is also open and 19576 and 19577
     max_score = -1  # Set an initial value lower than any possible score

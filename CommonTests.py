@@ -110,7 +110,7 @@ class CommonTests:
         return 'Y' if check.get_response_packet() is not None else 'N'
 
     @staticmethod
-    def calculate_rd(probe_sender):
+    def calculate_rd(check):
         """
         Calculate the TCP RST data checksum (RD) based on the response of a probe sender.
         According to the following NMAP documentation, under "TCP RST data checksum (RD)" :
@@ -118,12 +118,12 @@ class CommonTests:
         There's no standard for the ASCII text of the RST, it can contain an explanation of the cause
 
         Parameters:
-        - probe_sender: An instance of a probe sender.
+        - packet_sender: An instance of a packet sender containing all responses to checks.
 
         Returns:
         The calculated TCP RST data checksum (RD).
         """
-        response_data = probe_sender.get_checks_list()[0].get_response_packet()
+        response_data = check.get_response_packet()
         return binascii.crc32(response_data.original) if response_data else 0
 
     @staticmethod

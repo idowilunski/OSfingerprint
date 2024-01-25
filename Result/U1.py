@@ -88,21 +88,21 @@ class U1:
 
         return score
 
-    def init_from_response(self, udp_sender):
+    def init_from_response(self, packet_sender):
         """
         Initializes the attributes of the U1 class using information from a ProbeSender instance.
 
         Args:
-            udp_sender (ProbeSender): The ProbeSender instance containing U1 probe response.
+            packet_sender (PacketSender): The PacketSender instance containing all responses to checks.
 
         Returns:
             None
         """
-        u1_check = udp_sender.get_checks_list()[0]
+        u1_check = packet_sender.get_udp_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(u1_check)
         self.df = CommonTests.calculate_dont_fragment(u1_check)
-        self.t = CommonTests.calculate_ttl_diff(udp_sender.get_checks_list()[0])
-        self.tg = CommonTests.calculate_ttl_guess(udp_sender.get_checks_list()[0])
+        self.t = CommonTests.calculate_ttl_diff(u1_check)
+        self.tg = CommonTests.calculate_ttl_guess(u1_check)
         self.ipl = self.calculate_ipl(u1_check)
         self.un = self.calculate_un(u1_check)
         self.ripl = self.calculate_ripl(u1_check)

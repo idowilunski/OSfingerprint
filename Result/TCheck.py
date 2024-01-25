@@ -95,14 +95,14 @@ class TCheck:
             return
 
         self.df = CommonTests.calculate_dont_fragment(check)
-        self.t = CommonTests.calculate_ttl_diff(t_sender.get_checks_list()[0])
-        self.tg = CommonTests.calculate_ttl_guess(t_sender.get_checks_list()[0])
+        self.t = CommonTests.calculate_ttl_diff(check) #t_sender.get_checks_list()[0])
+        self.tg = CommonTests.calculate_ttl_guess(check) #t_sender.get_checks_list()[0])
         self.w = CommonTests.calculate_window_size(check)
         self.s = self.calculate_sequence_number(check)
         self.a = self.calculate_ack_number(check)
         self.f = self.calculate_tcp_flags(check)
         self.o = CommonTests.calculate_o(check)
-        self.rd = CommonTests.calculate_rd(t_sender)
+        self.rd = CommonTests.calculate_rd(check) #(t_sender.get_checks_list()[0])
         self.q = CommonTests.calculate_quirks(check)
 
     def init_from_db(self, tests: dict):

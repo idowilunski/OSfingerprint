@@ -68,14 +68,14 @@ class Ecn:
             score += 20
         return score
 
-    def init_from_response(self, ecn_sender):
+    def init_from_response(self, packet_sender):
         """
         Initializes the Ecn object attributes based on the response from the ECN sender.
 
         Parameters:
-            ecn_sender (Sender): The sender object for the ECN test.
+            packet_sender (PacketSender): The sender object containing responses to all tests.
         """
-        ecn_check = ecn_sender.get_checks_list()[0]
+        ecn_check = packet_sender.get_ecn_checks_list()[0]
         self.r = CommonTests.calculate_responsiveness(ecn_check)
 
         # If responsiveness test returned "no", no bother calculating, all values will be empty
@@ -83,8 +83,8 @@ class Ecn:
             return
 
         self.df = CommonTests.calculate_dont_fragment(ecn_check)
-        self.t = CommonTests.calculate_ttl_diff(ecn_sender.get_checks_list()[0])
-        self.tg = CommonTests.calculate_ttl_guess(ecn_sender.get_checks_list()[0])
+        self.t = CommonTests.calculate_ttl_diff(ecn_check)
+        self.tg = CommonTests.calculate_ttl_guess(ecn_check)
         self.w = CommonTests.calculate_window_size(ecn_check)
         self.o = CommonTests.calculate_o(ecn_check)
         if len(self.o) > 0:
