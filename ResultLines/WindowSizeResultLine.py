@@ -3,7 +3,7 @@ from ResultLines.IResultLine import *
 import PacketParsingUtils
 
 
-class WindowSize(IResultLine):
+class WindowSizeResultLine(IResultLine):
     """
     Represents a class for handling and comparing TCP window size values.
 

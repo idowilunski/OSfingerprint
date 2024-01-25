@@ -12,7 +12,7 @@ class IResultLine(abc.ABC):
         the NMAP database.
     """
     @abc.abstractmethod
-    def calculate_similarity_score(self, other):
+    def calculate_similarity_score(self, other) -> int:
         """
         Calculate the similarity score between two instances.
 
@@ -25,7 +25,7 @@ class IResultLine(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def init_from_response(self, packet_sender) -> int:
+    def init_from_response(self, packet_sender):
         """
         Initialize the class attributes from a PacketSender instance.
 

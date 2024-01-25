@@ -5,7 +5,7 @@ import PacketParsingUtils
 from CommonTests import *
 
 
-class Sequence(IResultLine):
+class SequenceResultLine(IResultLine):
     """
     Represents the sequence (SEQ) check according to the documentation:
     https://nmap.org/book/osdetect-methods.html#osdetect-probes-seq
@@ -303,7 +303,7 @@ class Sequence(IResultLine):
         # Note: before python 3.9 usage of list in gcd function won't be supported, make sure you've installed the
         # correct python env
         if len(self.diff1) > 0:
-            return Sequence.find_gcd_of_list(self.diff1)
+            return self.find_gcd_of_list(self.diff1)
 
     def calculate_ti_ci_ii(self, checks_list, min_responses_num):
         """

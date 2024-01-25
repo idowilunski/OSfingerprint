@@ -2,7 +2,7 @@ from CommonTests import *
 from ResultLines.IResultLine import *
 
 
-class Options(IResultLine):
+class OptionsResultLine(IResultLine):
     """
     Represents options obtained from a sequence of probes and provides methods for initialization
     and calculating similarity scores based on these options.

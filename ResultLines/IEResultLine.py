@@ -1,7 +1,9 @@
 from CommonTests import *
 from scapy.layers.inet import ICMP
+from ResultLines.IResultLine import *
 
-class IE:
+
+class IEResultLine(IResultLine):
     """
     Represents information extracted from ICMP Echo probes (IE probes) and provides methods for initialization
     and calculating similarity scores based on these probe results.

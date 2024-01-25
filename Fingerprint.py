@@ -1,10 +1,10 @@
-from ResultLines.Sequence import Sequence
-from ResultLines.Ecn import Ecn
-from ResultLines.Options import Options
-from ResultLines.WindowSize import WindowSize
-from ResultLines.TCheck import TCheck
-from ResultLines.U1 import U1
-from ResultLines.IE import IE
+from ResultLines.SequenceResultLine import SequenceResultLine
+from ResultLines.EcnResultLine import EcnResultLine
+from ResultLines.OptionsResultLine import OptionsResultLine
+from ResultLines.WindowSizeResultLine import WindowSizeResultLine
+from ResultLines.TCheckResultLine import TCheckResultLine
+from ResultLines.U1ResultLine import U1ResultLine
+from ResultLines.IEResultLine import IEResultLine
 
 
 class Fingerprint:
@@ -26,28 +26,28 @@ class Fingerprint:
         """
             Initialize an instance of the Fingerprint class with default values.
         """
-        self.SEQ = Sequence()
+        self.SEQ = SequenceResultLine()
         self.name = "N/A"
         self.CPE = "N/A"
-        self.OPS = Options()
-        self.WIN = WindowSize()
-        self.ECN = Ecn()
-        self.T1 = TCheck()
-        self.T2 = TCheck()
-        self.T3 = TCheck()
-        self.T4 = TCheck()
-        self.T5 = TCheck()
-        self.T6 = TCheck()
-        self.T7 = TCheck()
-        self.U1 = U1()
-        self.IE = IE()
+        self.OPS = OptionsResultLine()
+        self.WIN = WindowSizeResultLine()
+        self.ECN = EcnResultLine()
+        self.T1 = TCheckResultLine()
+        self.T2 = TCheckResultLine()
+        self.T3 = TCheckResultLine()
+        self.T4 = TCheckResultLine()
+        self.T5 = TCheckResultLine()
+        self.T6 = TCheckResultLine()
+        self.T7 = TCheckResultLine()
+        self.U1 = U1ResultLine()
+        self.IE = IEResultLine()
 
     def init_from_response(self, packet_sender):
         """
-                Initialize the Fingerprint instance from response data.
+        Initialize the Fingerprint instance from response data.
 
-                Parameters:
-                - packet_sender: Contains response data for all tests.
+        Parameters:
+        - packet_sender: Contains response data for all tests.
         """
         self.SEQ.init_from_response(packet_sender)
         self.OPS.init_from_response(packet_sender)
@@ -93,13 +93,13 @@ class Fingerprint:
 
     def calculate_similarity_score(self, other_fingerprint):
         """
-            Calculate the similarity score between two Fingerprint instances.
+        Calculate the similarity score between two Fingerprint instances.
 
-            Parameters:
-            - other_fingerprint (Fingerprint): The other Fingerprint instance to compare with.
+        Parameters:
+        - other_fingerprint (Fingerprint): The other Fingerprint instance to compare with.
 
-            Returns:
-            The total similarity score between the two fingerprints.
+        Returns:
+        The total similarity score between the two fingerprints.
         """
         seq_score = self.SEQ.calculate_similarity_score(other_fingerprint.SEQ)
         ops_score = self.OPS.calculate_similarity_score(other_fingerprint.OPS)

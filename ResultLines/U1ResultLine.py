@@ -7,7 +7,7 @@ from PacketParsingUtils import *
 from ResultLines.IResultLine import *
 
 
-class U1(IResultLine):
+class U1ResultLine(IResultLine):
     """
     Represents the U1 probe, designed to receive an ICMP "port unreachable" message in response.
 

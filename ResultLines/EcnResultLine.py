@@ -1,8 +1,9 @@
 import CommonTests
 from CommonTests import *
+from ResultLines.IResultLine import *
 
 
-class Ecn:
+class EcnResultLine(IResultLine):
     """
     Represents an ECN (Explicit Congestion Notification) test object.
 
@@ -42,7 +43,7 @@ class Ecn:
         """
         score = 0
 
-        if not isinstance(other, Ecn):
+        if not isinstance(other, EcnResultLine):
             return score
 
         if self.r == 'N':

@@ -3,7 +3,7 @@ from CommonTests import *
 from ResultLines.IResultLine import *
 
 
-class TCheck(IResultLine):
+class TCheckResultLine(IResultLine):
     """
     Represents a test check for the T (TCP) type of OS detection probes.
 
