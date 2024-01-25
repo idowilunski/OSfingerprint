@@ -217,8 +217,8 @@ class U1:
             str: 'G' for good if the checksum matches the enclosing IP packet,
             'Z' if the returned value is zero, 'I' otherwise.
         """
-        request_chksm = u1_check.get_request_checksum()
-        response_chksm = u1_check.get_response_checksum()
+        request_chksm = PacketParsingUtils.get_ip_checksum(u1_check.get_sent_packet())
+        response_chksm = PacketParsingUtils.get_ip_checksum(u1_check.get_response_packet())
 
         #  If the checksum we receive matches the enclosing IP packet - return 'G' (good).
         if response_chksm == request_chksm:
@@ -254,8 +254,8 @@ class U1:
         Returns:
             str: 'G' for good if the UDP header checksum matches the sent value, otherwise the actual returned checksum.
         """
-        request_chksm = u1_check.get_request_checksum()
-        response_chksm = u1_check.get_response_checksum()
+        request_chksm = PacketParsingUtils.get_ip_checksum(u1_check.get_sent_packet())
+        response_chksm = PacketParsingUtils.get_ip_checksum(u1_check.get_response_packet())
 
         # If UDP header checksum is identcial to the sent checksum, return 'G' (good).
         # Otherwise, return actual checksum.

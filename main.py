@@ -63,13 +63,6 @@ if __name__ == '__main__':
     tcp_open_port_sender.send_packets()
     tcp_close_port_sender.send_packets()
 
-    udp_sender.parse_response_packets()
-    ecn_sender.parse_response_packets()
-    icmp_sender.parse_response_packets()
-    probe_sender.parse_response_packets()
-    tcp_open_port_sender.parse_response_packets()
-    tcp_close_port_sender.parse_response_packets()
-
     response_fingerprint = Fingerprint()
     response_fingerprint.init_from_response(ecn_sender, tcp_open_port_sender,
                                             udp_sender, icmp_sender, probe_sender,

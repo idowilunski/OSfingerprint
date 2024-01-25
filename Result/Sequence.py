@@ -286,10 +286,10 @@ class Sequence:
         """
         for i in range(len(probe_sender.get_checks_list()) - 1):
             # Verify both ISNs are present
-            first_isn = probe_sender.get_checks_list()[i].get_response_sequence_number()
-            second_isn = probe_sender.get_checks_list()[i + 1].get_response_sequence_number()
+            first_isn = PacketParsingUtils.get_packet_sequence_number(probe_sender.get_checks_list()[i].get_response_packet())
+            second_isn = PacketParsingUtils.get_packet_sequence_number(probe_sender.get_checks_list()[i+1].get_response_packet())
             if not first_isn or not second_isn:
-                self.logger.error("..")
+                self.logger.error("First or second ISN is empty")
 
             # Calculate the absolute difference
             absolute_difference = abs(first_isn - second_isn)

@@ -161,13 +161,15 @@ class IE:
             str: The CD value (Z, S, or O).
         """
         # IF both code values are zero, return 'Z'
+
         icmp_checks_list = icmp_sender.get_checks_list()
-        if icmp_checks_list[0].is_icmp_response_code_zero() and icmp_checks_list[1].is_icmp_response_code_zero():
+        response_type0 = PacketParsingUtils.get_packet_type(icmp_checks_list[0].get_response_packet())
+        response_type1 = PacketParsingUtils.get_packet_type(icmp_checks_list[1].get_response_packet())
+
+        if response_type0 == 0 and response_type1 == 0:
             return 'Z'
-        sent_type0 = icmp_checks_list[0].get_sent_packet()[ICMP].type
-        sent_type1 = icmp_checks_list[1].get_sent_packet()[ICMP].type
-        response_type0 = icmp_checks_list[0].get_response_packet()[ICMP].type
-        response_type1 = icmp_checks_list[1].get_response_packet()[ICMP].type
+        sent_type0 = PacketParsingUtils.get_packet_type(icmp_checks_list[0].get_sent_packet())
+        sent_type1 = PacketParsingUtils.get_packet_type(icmp_checks_list[1].get_sent_packet())
 
         # Both code values are the same as in the corresponding probe - return 'S'
         if sent_type0 == response_type0 and sent_type1 == response_type1:
@@ -190,8 +192,8 @@ class IE:
             str: The DFI value (N, Y, S, or O).
         """
         checks_list = icmp_sender.get_checks_list()
-        df_value_0 = checks_list[0].get_dont_fragment_bit_value()
-        df_value_1 = checks_list[1].get_dont_fragment_bit_value()
+        df_value_0 = PacketParsingUtils.get_dont_fragment_bit_value(checks_list[0].get_response_packet())
+        df_value_1 = PacketParsingUtils.get_dont_fragment_bit_value(checks_list[1].get_response_packet())
         # Both of the response DF bits are not set. - 'N'
         if df_value_0 == 'N' and df_value_1 == 'N':
             return 'N'

@@ -1,5 +1,7 @@
 import binascii
 
+import PacketParsingUtils
+
 
 class CommonTests:
     """
@@ -21,14 +23,15 @@ class CommonTests:
                 if no quirks are present - empty string (but still shown).
         """
         q_result = ""
+        response_packet = check.get_response_packet()
         #  Add "R" if reserved field is set in the TCP header
         #  (likely to happen in response to the ECN test as that one sets a reserved bit in the probe).
-        if check.is_response_reserved_bit_set():
+        if PacketParsingUtils.is_reserved_bit_set(response_packet):
             q_result += "R"
 
         # Add "U" if urgent pointer is nonzero when the URG flag is not set.
         # (likely to be seen in response to the ECN test as that one sets a non-zero urgent field).
-        if check.is_response_urgent_bit_set():
+        if PacketParsingUtils.is_urgent_bit_set(response_packet):
             q_result += "U"
 
         return q_result
@@ -48,11 +51,9 @@ class CommonTests:
         If there are no TCP options in a response, the test will exist but the value string will be empty.
         If no probe was returned, the test is omitted.
         """
-        if check.is_response_packet_empty():
-            return None
-
         return ''.join(
-                [CommonTests.format_option(opt) for opt in check.get_received_tcp_options()])
+                [CommonTests.format_option(opt) for opt in
+                 PacketParsingUtils.get_packet_tcp_options(check.get_response_packet())])
 
     @staticmethod
     def format_option(option):
@@ -93,7 +94,7 @@ class CommonTests:
             Returns:
             The calculated TCP window size.
         """
-        return check.get_received_window_size()
+        return PacketParsingUtils.get_received_window_size(check.get_response_packet())
 
     @staticmethod
     def calculate_responsiveness(check):
@@ -136,7 +137,7 @@ class CommonTests:
         Returns:
         The value of the Don't Fragment (DF) bit.
         """
-        return check.get_dont_fragment_bit_value()
+        return PacketParsingUtils.get_dont_fragment_bit_value(check.get_response_packet())
 
     @staticmethod
     def calculate_ttl_diff(check):
@@ -149,7 +150,7 @@ class CommonTests:
         Returns:
         The calculated TTL difference.
         """
-        return 0XFF - check.get_response_ttl()
+        return 0XFF - PacketParsingUtils.get_packet_ttl(check.get_response_packet())
 
     @staticmethod
     def calculate_ttl_guess(check):
@@ -162,7 +163,7 @@ class CommonTests:
         Returns:
         The calculated guessed TTL value.
         """
-        return CommonTests.round_up_to_nearest(0XFF - check.get_response_ttl())
+        return CommonTests.round_up_to_nearest(0XFF - PacketParsingUtils.get_packet_ttl(check.get_response_packet()))
 
     @staticmethod
     def round_up_to_nearest(value):

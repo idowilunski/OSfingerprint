@@ -143,7 +143,7 @@ class TCheck:
         Returns:
             list: List of TCP flags.
         """
-        return list(t_check.get_tcp_flags())
+        return list(PacketParsingUtils.get_tcp_flags(t_check.get_response_packet()))
 
     @staticmethod
     def calculate_ack_number(t_check):
@@ -188,7 +188,7 @@ class TCheck:
             probe compared to the sequence number in the respective response.
         """
         probe_ack_num = t_check.get_probe_ack_number()
-        response_seq_num = t_check.get_response_sequence_number()
+        response_seq_num = PacketParsingUtils.get_packet_sequence_number(t_check.get_response_packet())
 
         # Sequence number is zero.
         if response_seq_num == 0:

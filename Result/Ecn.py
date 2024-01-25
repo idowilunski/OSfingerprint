@@ -124,8 +124,8 @@ class Ecn:
         Returns:
             str: The calculated congestion notification result ('Y', 'N', 'S', or 'O').
         """
-        is_ece = ecn_packet.is_response_ece_set()
-        is_cwr = ecn_packet.is_response_cwr_set()
+        is_ece = PacketParsingUtils.is_ece_set(ecn_packet.get_response_packet())
+        is_cwr = PacketParsingUtils.is_cwr_set(ecn_packet.get_response_packet())
         # Only the ECE bit is set (not CWR). This host supports ECN.
         if is_ece and not is_cwr:
             return 'Y'

@@ -1,5 +1,7 @@
 import logging
 
+import PacketParsingUtils
+
 
 class WindowSize:
     """
@@ -64,12 +66,12 @@ class WindowSize:
             probe_sender (ProbeSender): An instance of ProbeSender containing response packets with window size values.
         """
         checks_list = probe_sender.get_checks_list()
-        self.w1 = checks_list[0].get_received_window_size()
-        self.w2 = checks_list[1].get_received_window_size()
-        self.w3 = checks_list[2].get_received_window_size()
-        self.w4 = checks_list[3].get_received_window_size()
-        self.w5 = checks_list[4].get_received_window_size()
-        self.w6 = checks_list[5].get_received_window_size()
+        self.w1 = PacketParsingUtils.get_received_window_size(checks_list[0].get_response_packet())
+        self.w2 = PacketParsingUtils.get_received_window_size(checks_list[1].get_response_packet())
+        self.w3 = PacketParsingUtils.get_received_window_size(checks_list[2].get_response_packet())
+        self.w4 = PacketParsingUtils.get_received_window_size(checks_list[3].get_response_packet())
+        self.w5 = PacketParsingUtils.get_received_window_size(checks_list[4].get_response_packet())
+        self.w6 = PacketParsingUtils.get_received_window_size(checks_list[5].get_response_packet())
 
     def init_from_db(self, tests: dict):
         """
