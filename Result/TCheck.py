@@ -1,3 +1,4 @@
+import PacketParsingUtils
 from CommonTests import *
 
 
@@ -158,7 +159,7 @@ class TCheck:
             str: Acknowledgment number result ('Z', 'S', 'S+', or 'O'), how the acknowledgment number in the
             response compared to the sequence number in the respective probe.
         """
-        response_ack_num = t_check.get_response_ack_number()
+        response_ack_num = PacketParsingUtils.get_packet_ack_number(t_check.get_response_packet())
         probe_seq_num = t_check.get_probe_sequence_number()
 
         # Acknowledgment number is zero.

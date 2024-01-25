@@ -1,6 +1,9 @@
 import logging
 from scapy.layers.inet import UDP, ICMP
+
+import PacketParsingUtils
 from CommonTests import *
+from PacketParsingUtils import *
 
 
 class U1:
@@ -192,7 +195,7 @@ class U1:
         """
         # The U1 probe has a static IP ID value of 0x1042. If that value is returned in the port unreachable message,
         # the value G is stored for this test. Otherwise, the exact value returned is stored.
-        response_id = u1_check.get_response_ip_id()
+        response_id = PacketParsingUtils.get_packet_ip_id(u1_check.get_response_packet())
         STATIC_IP_ID_OF_PROBE = 0x1042
         if response_id == STATIC_IP_ID_OF_PROBE:
             return 'G'
@@ -237,7 +240,7 @@ class U1:
         Returns:
             int: The length of the returned IP packet.
         """
-        return u1_check.get_response_ip_len()
+        return PacketParsingUtils.get_packet_ip_len(u1_check.get_response_packet())
 
     @staticmethod
     def calculate_ruck(u1_check):

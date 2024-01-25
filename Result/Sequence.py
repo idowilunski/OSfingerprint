@@ -1,5 +1,7 @@
 import logging
 import math
+
+import PacketParsingUtils
 from CommonTests import *
 
 class Sequence:
@@ -143,8 +145,8 @@ class Sequence:
             if not second_timestamp > first_timestamp:
                 raise
 
-            first_tsval = probe_sender.get_checks_list()[i].get_response_tsval()
-            second_tsval = probe_sender.get_checks_list()[i + 1].get_response_tsval()
+            first_tsval = PacketParsingUtils.get_packet_tsval(probe_sender.get_checks_list()[i].get_response_packet())
+            second_tsval = PacketParsingUtils.get_packet_tsval(probe_sender.get_checks_list()[i + 1].get_response_packet())
 
             # If any of the responses have no timestamp option, TS is set to U (unsupported).
             if not first_tsval or not second_tsval:
@@ -197,11 +199,13 @@ class Sequence:
         probes_checks = probe_sender.get_checks_list()
         icmp_checks = icmp_sender.get_checks_list()
 
-        avg = (probes_checks[-1].get_ip_id() - probes_checks[0].get_ip_id()) / (6-1)
+        avg = (PacketParsingUtils.get_packet_ip_id(probes_checks[-1].get_response_packet())
+               - PacketParsingUtils.get_packet_ip_id(probes_checks[0].get_response_packet())) / (6-1)
 
         # If the first ICMP echo response IP ID is less than the final TCP sequence response IP ID plus three times avg,
         # the SS result is S. Otherwise it is O.
-        if icmp_checks[0].get_ip_id() < (probes_checks[-1].get_ip_id() + (3 * avg)):
+        if PacketParsingUtils.get_packet_ip_id(icmp_checks[0].get_response_packet()) < \
+                (PacketParsingUtils.get_packet_ip_id(probes_checks[-1].get_response_packet()) + (3 * avg)):
             return 'S'
         return '0'
 
@@ -323,7 +327,7 @@ class Sequence:
         if count_non_empty_responses < min_responses_num:
             self.logger.error(f"Not enough responses were received: {count_non_empty_responses}")
 
-        all_zero_ids = all(check.get_ip_id() != 0 for check in probe_sender.get_checks_list())
+        all_zero_ids = all(PacketParsingUtils.get_packet_ip_id(check.get_response_packet()) != 0 for check in probe_sender.get_checks_list())
         if all_zero_ids:
             return 'Z'
 

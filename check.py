@@ -58,40 +58,6 @@ class Check:
         """
         return self._response_packet
 
-    def get_response_ip_len(self) -> int:
-        """
-        Get the length of the IP layer in the response packet.
-
-        Returns:
-        int: The length of the IP layer, or 0 if packet is invalid.
-        """
-        if not self._response_packet:
-            self.logger.error("This function was incorrectly called on an empty packet")
-            return 0
-
-        if not self._response_packet.haslayer(IP):
-            self.logger.error("This function was incorrectly called on a non IP packet")
-            return 0
-
-        return self._response_packet[IP].len
-
-    def get_response_ip_id(self) -> int:
-        """
-        Get the identification field value of the IP layer in the response packet.
-
-        Returns:
-        int: The identification field value, or 0 if packet is invalid.
-        """
-        if not self._response_packet:
-            self.logger.error("This function was incorrectly called on an empty packet")
-            return 0
-
-        if not self._response_packet.haslayer(IP):
-            self.logger.error("This function was incorrectly called on a non IP packet")
-            return 0
-
-        return self._response_packet[IP].id
-
     def get_response_checksum(self) -> int:
         """
         Get the checksum value of the IP layer in the response packet.
@@ -200,7 +166,7 @@ class Check:
 
         return bool(self._response_packet[TCP].flags & 0x40) # 0x40 is the ECE flag
 
-    def is_response_cwr_set(self):
+    def is_response_cwr_set(self) -> bool:
         """
         Check if the Congestion Window Reduced (CWR) flag is set in the TCP flags of the response packet.
 
@@ -213,22 +179,6 @@ class Check:
 
         return bool(self._response_packet[TCP].flags & 0x80) # 0x80 is the CWR flag
 
-    def get_response_tsval(self):
-        """
-        Get the Timestamp Value (TSval) from the TCP options in the response packet.
-
-        Returns:
-        int: The TSval if present in the TCP options, 0 otherwise or if packet is invalid.
-        """
-        if not self._response_packet or not self._response_packet.haslayer(TCP):
-            self.logger.error("This function was incorrectly called on an invalid TCP packet")
-            return 0
-
-        # Iterate over all options in the response packet, find "Timestamp" option if exists and return it
-        timestamp_option = next(
-            (option[1][0] for option in self._response_packet[TCP].options if option[0] == "Timestamp"), None)
-        return timestamp_option if timestamp_option is not None else 0
-
     def is_response_packet_empty(self) -> bool:
         """
         Check if the response packet is empty.
@@ -238,7 +188,7 @@ class Check:
         """
         return not self._response_packet
 
-    def get_dont_fragment_bit_value(self):
+    def get_dont_fragment_bit_value(self) -> str:
         """
         Get the value of the Don't Fragment (DF) bit in the IP header or ICMP type for the response packet.
 
@@ -262,43 +212,7 @@ class Check:
         self.logger.error("This function was incorrectly called on a non-IP, non-ICMP packet")
         return 'N'
 
-    def get_ip_id(self):
-        """
-        Get the Identification (ID) field from the IP header of the response packet.
-
-        Returns:
-            int: The Identification (ID) field value from the IP header.
-            Returns 0 if the packet is empty or packet is invalid.
-        """
-        if not self._response_packet:
-            self.logger.error("This function was incorrectly called on an empty packet")
-            return 0
-
-        if not self._response_packet.haslayer(IP):
-            self.logger.error("This function was incorrectly called on a non-IP packet")
-            return 0
-
-        return self._response_packet[IP].id
-
-    def get_response_ack_number(self):
-        """
-        Get the Acknowledgment (ACK) number from the TCP header of the response packet.
-
-        Returns:
-            int: The Acknowledgment (ACK) number from the TCP header.
-            Returns 0 if the packet is empty or packet is invalid.
-        """
-        if not self._response_packet:
-            self.logger.error("This function was incorrectly called on an empty packet")
-            return 0
-
-        if not self._response_packet.haslayer(TCP):
-            self.logger.error("This function was incorrectly called on a non-TCP packet")
-            return 0
-
-        return self._response_packet[TCP].ack
-
-    def get_probe_ack_number(self):
+    def get_probe_ack_number(self) -> int:
         """
         Get the Acknowledgment (ACK) number from the probe packet.
 
@@ -307,7 +221,7 @@ class Check:
         """
         return self._packet_ack_number
 
-    def get_probe_sequence_number(self):
+    def get_probe_sequence_number(self) -> int:
         """
         Get the Sequence Number from the probe packet.
 
@@ -316,7 +230,7 @@ class Check:
         """
         return self._packet_seq_number
 
-    def get_response_sequence_number(self):
+    def get_response_sequence_number(self)-> int:
         """
         Get the Sequence Number from the TCP header of the response packet.
 
@@ -333,7 +247,7 @@ class Check:
 
         return self._response_packet[TCP].seq  # ISN - Initial sequence number
 
-    def get_received_window_size(self):
+    def get_received_window_size(self) -> int:
         """
         Get the advertised window size from the TCP header of the response packet.
 
@@ -359,7 +273,7 @@ class Check:
 
         return self._response_packet[TCP].options
 
-    def get_response_ttl(self):
+    def get_response_ttl(self) -> int:
         """
         Get the Time-to-Live (TTL) value from the IP header of the response packet.
 
@@ -371,13 +285,13 @@ class Check:
             return 0
         return self._response_packet[IP].ttl
 
-    """
-    Get the timestamp representing the send time of the network packet.
+    def get_send_time(self) -> datetime:
+        """
+        Get the timestamp representing the send time of the network packet.
 
-    Returns:
-        int: The timestamp indicating the time when the packet was sent.
-    """
-    def get_send_time(self):
+        Returns:
+            datetime: The timestamp indicating the time when the packet was sent.
+        """
         return self._send_timestamp
 
     def send_packet(self):
