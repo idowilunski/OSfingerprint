@@ -168,8 +168,11 @@ class IE:
 
         if response_type0 == 0 and response_type1 == 0:
             return 'Z'
+
         sent_type0 = PacketParsingUtils.get_packet_type(icmp_checks_list[0].get_sent_packet())
         sent_type1 = PacketParsingUtils.get_packet_type(icmp_checks_list[1].get_sent_packet())
+        if icmp_checks_list[0].get_response_packet() is None or icmp_checks_list[1].get_response_packet() is None:
+            return '0'
 
         # Both code values are the same as in the corresponding probe - return 'S'
         if sent_type0 == response_type0 and sent_type1 == response_type1:
