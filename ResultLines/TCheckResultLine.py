@@ -1,5 +1,5 @@
 import PacketParsingUtils
-from CommonTests import *
+from TestsCalculations import *
 from ResultLines.IResultLine import *
 
 
@@ -87,22 +87,22 @@ class TCheckResultLine(IResultLine):
         Returns:
             None
         """
-        self.r = CommonTests.calculate_responsiveness(check)
+        self.r = TestsCalculations.calculate_responsiveness(check)
 
         # If responsiveness test returned "no", no bother calculating, all values will be empty
         if self.r == 'N':
             return
 
         self.df = PacketParsingUtils.get_dont_fragment_bit_value(check.get_response_packet())
-        self.t = CommonTests.calculate_ttl_diff(check)
-        self.tg = CommonTests.calculate_ttl_guess(check)
+        self.t = TestsCalculations.calculate_ttl_diff(check)
+        self.tg = TestsCalculations.calculate_ttl_guess(check)
         self.w = PacketParsingUtils.get_received_window_size(check.get_response_packet())
         self.s = self.calculate_sequence_number(check)
         self.a = self.calculate_ack_number(check)
         self.f = PacketParsingUtils.get_tcp_flags(check.get_response_packet())
-        self.o = CommonTests.calculate_o(check)
-        self.rd = CommonTests.calculate_rd(check)
-        self.q = CommonTests.calculate_quirks(check)
+        self.o = TestsCalculations.calculate_o(check)
+        self.rd = TestsCalculations.calculate_rd(check)
+        self.q = TestsCalculations.calculate_quirks(check)
 
     def init_from_db(self, tests: dict):
         """

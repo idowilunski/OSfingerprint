@@ -3,7 +3,7 @@ import binascii
 import PacketParsingUtils
 
 
-class CommonTests:
+class TestsCalculations:
     """
         Class containing common tests and calculations for our network fingerprints tests, used in several classes.
     """
@@ -52,7 +52,7 @@ class CommonTests:
         If no probe was returned, the test is omitted.
         """
         return ''.join(
-                [CommonTests.format_option(opt) for opt in
+                [TestsCalculations.format_option(opt) for opt in
                  PacketParsingUtils.get_packet_tcp_options(check.get_response_packet())])
 
     @staticmethod
@@ -137,7 +137,7 @@ class CommonTests:
         Returns:
         The calculated guessed TTL value.
         """
-        return CommonTests.round_up_to_nearest(0XFF - PacketParsingUtils.get_packet_ttl(check.get_response_packet()))
+        return TestsCalculations.round_up_to_nearest(0XFF - PacketParsingUtils.get_packet_ttl(check.get_response_packet()))
 
     @staticmethod
     def round_up_to_nearest(value):

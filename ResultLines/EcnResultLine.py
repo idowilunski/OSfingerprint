@@ -1,5 +1,5 @@
-import CommonTests
-from CommonTests import *
+import TestsCalculations
+from TestsCalculations import *
 from ResultLines.IResultLine import *
 
 
@@ -77,19 +77,19 @@ class EcnResultLine(IResultLine):
             check_manager (CheckManager): The sender object containing responses to all tests.
         """
         ecn_check = check_manager.get_ecn_checks_list()[0]
-        self.r = CommonTests.calculate_responsiveness(ecn_check)
+        self.r = TestsCalculations.calculate_responsiveness(ecn_check)
 
         # If responsiveness test returned "no", no bother calculating, all values will be empty
         if self.r == 'N':
             return
 
         self.df = PacketParsingUtils.get_dont_fragment_bit_value(ecn_check.get_response_packet())
-        self.t = CommonTests.calculate_ttl_diff(ecn_check)
-        self.tg = CommonTests.calculate_ttl_guess(ecn_check)
+        self.t = TestsCalculations.calculate_ttl_diff(ecn_check)
+        self.tg = TestsCalculations.calculate_ttl_guess(ecn_check)
         self.w = PacketParsingUtils.get_received_window_size(ecn_check.get_response_packet())
-        self.o = CommonTests.calculate_o(ecn_check)
+        self.o = TestsCalculations.calculate_o(ecn_check)
         self.cc = self.calculate_congestion_notification(ecn_check)
-        self.q = CommonTests.calculate_quirks(ecn_check)
+        self.q = TestsCalculations.calculate_quirks(ecn_check)
 
     def init_from_db(self, tests : dict):
         """

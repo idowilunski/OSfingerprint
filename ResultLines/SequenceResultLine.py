@@ -2,7 +2,7 @@ import logging
 import math
 from ResultLines.IResultLine import *
 import PacketParsingUtils
-from CommonTests import *
+from TestsCalculations import *
 
 
 class SequenceResultLine(IResultLine):
@@ -93,7 +93,7 @@ class SequenceResultLine(IResultLine):
         self.gcd = self.calculate_gcd(check_manager)
         self.isr = self.calculate_isr(check_manager)
         self.ti = self.calculate_ti_ci_ii(check_manager.get_probe_checks_list(), 3)
-        self.rd = CommonTests.calculate_rd(check_manager.get_probe_checks_list()[0])
+        self.rd = TestsCalculations.calculate_rd(check_manager.get_probe_checks_list()[0])
         self.ci = self.calculate_ti_ci_ii(check_manager.get_close_port_checks_list(), 2)
         self.ii = self.calculate_ti_ci_ii(check_manager.get_icmp_checks_list(), 2)
         self.ss = self.calculate_ss(check_manager)

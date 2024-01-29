@@ -32,7 +32,6 @@ if __name__ == '__main__':
     port_scanner = PortScanner()
     open_port, close_port = port_scanner.perform_port_scan(ip_addr)
 
-
     check_manager = CheckManager(ip_addr, open_port, close_port)
     check_manager.send_packets()
 

@@ -2,7 +2,7 @@ import logging
 from scapy.layers.inet import UDP, ICMP
 
 import PacketParsingUtils
-from CommonTests import *
+from TestsCalculations import *
 from PacketParsingUtils import *
 from ResultLines.IResultLine import *
 
@@ -33,7 +33,6 @@ class U1ResultLine(IResultLine):
         - init_from_db(tests): Initializes attributes from a dictionary obtained from a database.
         - calculate_rid(u1_check): Calculates the Returned probe IP ID (RID) value.
         - calculate_ripck(u1_check): Calculates the Integrity of returned probe IP checksum (RIPCK) value.
-        - calculate_ripl(u1_check): Calculates the Returned probe IP length (RIPL) value.
         - calculate_ruck(u1_check): Calculates the Integrity of returned probe UDP checksum (RUCK) value.
         - calculate_rud(u1_check): Calculates the Response UDP payload integrity (RUD) value.
         - calculate_ipl(u1_check): Calculates the IP total length (IPL) value.
@@ -100,13 +99,13 @@ class U1ResultLine(IResultLine):
             None
         """
         u1_check = check_manager.get_udp_checks_list()[0]
-        self.r = CommonTests.calculate_responsiveness(u1_check)
+        self.r = TestsCalculations.calculate_responsiveness(u1_check)
         self.df = PacketParsingUtils.get_dont_fragment_bit_value(u1_check.get_response_packet())
-        self.t = CommonTests.calculate_ttl_diff(u1_check)
-        self.tg = CommonTests.calculate_ttl_guess(u1_check)
+        self.t = TestsCalculations.calculate_ttl_diff(u1_check)
+        self.tg = TestsCalculations.calculate_ttl_guess(u1_check)
         self.ipl = self.calculate_ipl(u1_check)
         self.un = self.calculate_un(u1_check)
-        self.ripl = self.calculate_ripl(u1_check)
+        self.ripl = PacketParsingUtils.get_packet_ip_len(u1_check.get_response_packet())
         self.rid = self.calculate_rid(u1_check)
         self.ripck = self.calculate_ripck(u1_check)
         self.ruck = self.calculate_ruck(u1_check)
@@ -229,19 +228,6 @@ class U1ResultLine(IResultLine):
             return 'Z'
         #  Otherwise, return I (invalid).
         return 'I'
-
-    @staticmethod
-    def calculate_ripl(u1_check) -> int:
-        """
-        Calculates the Returned probe IP length (RIPL) value.
-
-        Args:
-            u1_check (U1): The U1 instance containing the response packet.
-
-        Returns:
-            int: The length of the returned IP packet.
-        """
-        return PacketParsingUtils.get_packet_ip_len(u1_check.get_response_packet())
 
     @staticmethod
     def calculate_ruck(u1_check):

@@ -1,4 +1,4 @@
-from CommonTests import *
+from TestsCalculations import *
 from scapy.layers.inet import ICMP
 from ResultLines.IResultLine import *
 
@@ -69,11 +69,11 @@ class IEResultLine(IResultLine):
             check_manager (CheckManager): A CheckManager instance containing ICMP Echo probe responses.
         """
         icmp_check = check_manager.get_icmp_checks_list()[0]
-        self.r = CommonTests.calculate_responsiveness(icmp_check)
+        self.r = TestsCalculations.calculate_responsiveness(icmp_check)
         self.dfi = self.calculate_dont_fragment_icmp(check_manager)
         self.cd = self.calculate_cd(check_manager)
-        self.t = CommonTests.calculate_ttl_diff(icmp_check)
-        self.tg = CommonTests.calculate_ttl_guess(icmp_check)
+        self.t = TestsCalculations.calculate_ttl_diff(icmp_check)
+        self.tg = TestsCalculations.calculate_ttl_guess(icmp_check)
 
     def init_from_db(self, tests : dict):
         """

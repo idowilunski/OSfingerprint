@@ -1,4 +1,4 @@
-from CommonTests import *
+from TestsCalculations import *
 from ResultLines.IResultLine import *
 
 
@@ -51,12 +51,12 @@ class OptionsResultLine(IResultLine):
             check_manager (CheckManager): A CheckManager instance containing responses to all checks.
         """
         checks_list = check_manager.get_probe_checks_list()
-        self.o1 = CommonTests.calculate_o(checks_list[0])
-        self.o2 = CommonTests.calculate_o(checks_list[1])
-        self.o3 = CommonTests.calculate_o(checks_list[2])
-        self.o4 = CommonTests.calculate_o(checks_list[3])
-        self.o5 = CommonTests.calculate_o(checks_list[4])
-        self.o6 = CommonTests.calculate_o(checks_list[5])
+        self.o1 = TestsCalculations.calculate_o(checks_list[0])
+        self.o2 = TestsCalculations.calculate_o(checks_list[1])
+        self.o3 = TestsCalculations.calculate_o(checks_list[2])
+        self.o4 = TestsCalculations.calculate_o(checks_list[3])
+        self.o5 = TestsCalculations.calculate_o(checks_list[4])
+        self.o6 = TestsCalculations.calculate_o(checks_list[5])
 
     def init_from_db(self, tests : dict):
         """
