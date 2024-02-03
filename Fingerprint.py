@@ -63,33 +63,33 @@ class Fingerprint:
         self.U1.init_from_response(check_manager)
         self.IE.init_from_response(check_manager)
 
-    def init_from_db(self, tests: dict):
+    def init_from_db(self, db_dict: dict):
         """
         Initialize the Fingerprint instance from a dictionary of test results, parsed earlier from NmapDB.
 
         Parameters:
-        - tests (dict): Dictionary containing test results.
+        - db_dict (dict): Dictionary containing test results.
         """
-        self.name = tests['Fingerprint']
+        self.name = db_dict['Fingerprint']
 
         try:
-            self.CPE = tests['CPE']
+            self.CPE = db_dict['CPE']
         except KeyError:
             pass
 
-        self.SEQ.init_from_db(tests.get('SEQ'))
-        self.OPS.init_from_db(tests.get('OPS'))
-        self.WIN.init_from_db(tests.get('WIN'))
-        self.ECN.init_from_db(tests.get('ECN'))
-        self.T1.init_from_db(tests.get('T1'))
-        self.T2.init_from_db(tests.get('T2'))
-        self.T3.init_from_db(tests.get('T3'))
-        self.T4.init_from_db(tests.get('T4'))
-        self.T5.init_from_db(tests.get('T5'))
-        self.T6.init_from_db(tests.get('T6'))
-        self.T7.init_from_db(tests.get('T7'))
-        self.U1.init_from_db(tests.get('U1'))
-        self.IE.init_from_db(tests.get('IE'))
+        self.SEQ.init_from_db(db_dict.get('SEQ'))
+        self.OPS.init_from_db(db_dict.get('OPS'))
+        self.WIN.init_from_db(db_dict.get('WIN'))
+        self.ECN.init_from_db(db_dict.get('ECN'))
+        self.T1.init_from_db(db_dict.get('T1'))
+        self.T2.init_from_db(db_dict.get('T2'))
+        self.T3.init_from_db(db_dict.get('T3'))
+        self.T4.init_from_db(db_dict.get('T4'))
+        self.T5.init_from_db(db_dict.get('T5'))
+        self.T6.init_from_db(db_dict.get('T6'))
+        self.T7.init_from_db(db_dict.get('T7'))
+        self.U1.init_from_db(db_dict.get('U1'))
+        self.IE.init_from_db(db_dict.get('IE'))
 
     def calculate_similarity_score(self, other_fingerprint):
         """

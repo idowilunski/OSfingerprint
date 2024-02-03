@@ -76,8 +76,8 @@ class PortScanner:
         self.open_ports, self.closed_ports = [], []
 
         start_port = 1
-        end_port = 1000
-        port_step = 50
+        end_port = 65535
+        port_step = 100
 
         threads = []
 

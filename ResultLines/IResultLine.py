@@ -3,7 +3,7 @@ import abc
 
 class IResultLine(abc.ABC):
     """
-    Interface for handling and comparing TCP window size values.
+    Interface for handling and comparing result line values.
 
     Methods:
         calculate_similarity_score(other): Calculates a similarity score between two instances
