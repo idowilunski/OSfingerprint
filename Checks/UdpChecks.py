@@ -1,4 +1,4 @@
-from Packets.Check import Check
+from Checks.Check import Check
 from scapy.layers.inet import IP, UDP
 
 

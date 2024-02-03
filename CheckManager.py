@@ -1,11 +1,11 @@
 import logging
 
-from Packets.EcnChecks import EcnCheck1
-from Packets.TcpClosePortChecks import *
-from Packets.TcpOpenPortChecks import *
-from Packets.UdpChecks import *
-from Packets.icmpChecks import *
-from Packets.probeChecks import *
+from Checks.EcnChecks import EcnCheck1
+from Checks.TcpClosePortChecks import *
+from Checks.TcpOpenPortChecks import *
+from Checks.UdpChecks import *
+from Checks.icmpChecks import *
+from Checks.probeChecks import *
 
 
 class CheckManager:
