@@ -41,7 +41,7 @@ if __name__ == '__main__':
     max_score = -1  # Set an initial value lower than any possible score
     best_result = None
 
-    db_parser = DatabaseParser("C:\\Program Files (x86)\\Nmap\\nmap-os-db")
+    db_parser = DatabaseParser(find_nmap_directory() + "\\nmap-os-db")
     for db_entry in db_parser.get_all_entries():
         curr_fingerprint = Fingerprint()
         curr_fingerprint.init_from_db(db_entry)
